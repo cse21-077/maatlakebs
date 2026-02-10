@@ -1,0 +1,8 @@
+{
+  "name": "Maatla Kebs Copy Trader",
+  "short_name": "MaatlaKebs",
+  "description": "Premium PWA for secure synthetic index copy trading management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

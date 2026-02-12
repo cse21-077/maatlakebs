@@ -66,6 +66,8 @@ const Card = ({ children, className = '' }: any) => (
 const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -78,19 +80,22 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      onLaunch();
+    // Android Chrome - show native install prompt
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('PWA installed');
+      }
+      setDeferredPrompt(null);
       return;
     }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('PWA installed');
+    // Desktop or iOS without prompt - just launch
+    if (!isMobile) {
+      onLaunch();
     }
-
-    setDeferredPrompt(null);
+    // On mobile without install prompt, do nothing (show instructions)
   };
 
   return (
@@ -121,13 +126,128 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
           Experience high-performance synthetic index trading with zero custody. Secure, elegant, and designed for your mobile lifestyle.
         </p>
 
-        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto animate-slide-up [animation-delay:200ms]">
-          <Button onClick={handleInstallClick} className="w-full md:w-auto text-lg px-10 py-4 relative overflow-hidden group">
-            <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
-            {isMobile ? 'Install App' : 'Launch App'}
-            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          </Button>
-        </div>
+        {/* Desktop or Android with install prompt - show button */}
+        {(!isMobile || deferredPrompt) && (
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto animate-slide-up [animation-delay:200ms]">
+            <Button onClick={handleInstallClick} className="w-full md:w-auto text-lg px-10 py-4 relative overflow-hidden group">
+              <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
+              {isMobile ? 'Install App' : 'Launch App'}
+              <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            </Button>
+          </div>
+        )}
+
+        {/* iOS - Show manual installation instructions */}
+        {isIOS && !deferredPrompt && (
+          <div className="w-full max-w-md space-y-6 animate-slide-up [animation-delay:200ms]">
+            <div className="bg-primary/10 border-2 border-primary/30 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                  <Smartphone size={24} className="text-primary" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-white text-lg">Install on iOS</h3>
+                  <p className="text-xs text-white/60">Add to Home Screen</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-left">
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">1</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Tap the Share button</p>
+                    <p className="text-xs text-white/50 mt-1">Look for the <span className="inline-flex items-center px-1.5 py-0.5 bg-white/10 rounded text-[10px] mx-1">⬆️ Share</span> icon in Safari</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">2</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Select "Add to Home Screen"</p>
+                    <p className="text-xs text-white/50 mt-1">Scroll down and tap <span className="inline-flex items-center px-1.5 py-0.5 bg-white/10 rounded text-[10px] mx-1">➕ Add to Home Screen</span></p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">3</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Tap "Add" to confirm</p>
+                    <p className="text-xs text-white/50 mt-1">The app will appear on your home screen</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mt-4">
+                <p className="text-xs text-yellow-200/80 flex items-start gap-2">
+                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>This app requires PWA installation. It will not work in the browser on mobile devices.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Android without install prompt - Show manual instructions */}
+        {isAndroid && !deferredPrompt && (
+          <div className="w-full max-w-md space-y-6 animate-slide-up [animation-delay:200ms]">
+            <div className="bg-primary/10 border-2 border-primary/30 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                  <Smartphone size={24} className="text-primary" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-white text-lg">Install on Android</h3>
+                  <p className="text-xs text-white/60">Add to Home Screen</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-left">
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">1</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Open menu</p>
+                    <p className="text-xs text-white/50 mt-1">Tap the <span className="inline-flex items-center px-1.5 py-0.5 bg-white/10 rounded text-[10px] mx-1">⋮ Menu</span> button (3 dots)</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">2</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Select "Add to Home screen"</p>
+                    <p className="text-xs text-white/50 mt-1">Or "Install app" if available</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 items-start">
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-primary">3</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white font-medium">Tap "Install" or "Add"</p>
+                    <p className="text-xs text-white/50 mt-1">The app will appear on your home screen</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 mt-4">
+                <p className="text-xs text-yellow-200/80 flex items-start gap-2">
+                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>This app requires PWA installation. It will not work in the browser on mobile devices.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-slide-up [animation-delay:300ms]">
           {[
@@ -142,12 +262,12 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
             </Card>
           ))}
         </div>
-      </main>
+      </main >
 
       <footer className="p-8 text-center text-white/30 text-sm">
         &copy; 2024 Maatla Kebs | Developed by Topo Rapula
       </footer>
-    </div>
+    </div >
   );
 };
 

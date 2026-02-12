@@ -114,9 +114,6 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
         <div className="absolute top-0 -left-20 w-72 h-72 bg-primary/20 blur-[120px] rounded-full -z-10 animate-pulse-slow" />
         <div className="absolute bottom-0 -right-20 w-72 h-72 bg-secondary/20 blur-[120px] rounded-full -z-10" />
 
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium text-accent mb-8 animate-slide-up">
-          <Zap size={16} /> Premium Copy Trading App
-        </div>
 
         <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text animate-slide-up leading-tight">
           Master the Markets with Maatla Kebs
@@ -253,7 +250,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
           {[
             { icon: ShieldCheck, title: "Zero Custody", desc: "You keep control. We only copy trades." },
             { icon: Zap, title: "Real-time Sync", desc: "Milliseconds latency on trade execution." },
-            { icon: Smartphone, title: "PWA Native", desc: "Install once, trade anywhere, anytime." }
+            { icon: Smartphone, title: "NATIVE APP", desc: "Install once, trade anywhere, anytime." }
           ].map((feat, i) => (
             <Card key={i} className="text-left border-white/5 bg-white/5">
               <feat.icon className="text-primary mb-4" size={32} />
@@ -265,7 +262,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
       </main >
 
       <footer className="p-8 text-center text-white/30 text-sm">
-        &copy; 2024 Maatla Kebs | Developed by Topo Rapula
+        &copy; 2026 Maatla Kebs | Developed by Topo Rapula
       </footer>
     </div >
   );

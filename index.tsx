@@ -412,13 +412,13 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )
     },
     {
-      title: "Trading Account",
+      title: <img src="/metalogo.png" alt="MetaTrader" className="h-12 object-contain mx-auto" />,
       content: (
         <div className="space-y-4">
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4">
-            <div className="flex items-start gap-3">
-              <img src="/metalogo.png" alt="MetaTrader" className="w-10 h-10 object-contain shrink-0" />
-              <div>
+            <div className="flex items-center gap-4">
+              <img src="/weltrade.png" alt="Weltrade" className="w-16 h-16 object-contain shrink-0" />
+              <div className="flex-1">
                 <p className="text-sm font-bold text-white mb-1">Weltrade Accounts Only</p>
                 <p className="text-xs text-white/60">Our copy trading service exclusively supports Weltrade broker accounts for optimal performance and reliability.</p>
               </div>

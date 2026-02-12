@@ -27,7 +27,7 @@ Your Maatla Kebs Copy Trading application is now a **fully-featured Progressive 
   - Shows "Launch App" when already installed
   - Visual feedback with green "Ready to install!" badge
 - Beautiful gradient hero section
-- Feature cards highlighting Zero Custody, Real-time Sync, and PWA Native
+- Feature cards highlighting Zero Custody, Real-time Sync, and NATIVE APP
 
 #### Splash Screen
 - Your logo with animated gradient background

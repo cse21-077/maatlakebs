@@ -17,7 +17,7 @@ When users visit your site in a regular browser:
    - Hero section with title
    - **"Install App"** button (if installable)
    - **"Launch App"** button (if not installable)
-   - Feature cards (Zero Custody, Real-time Sync, PWA Native)
+   - Feature cards (Zero Custody, Real-time Sync, NATIVE APP)
    - Footer
 
 ### **Install Button:**
@@ -175,7 +175,7 @@ When shown in browser:
 ✅ **Feature Cards**
 - Zero Custody
 - Real-time Sync
-- PWA Native
+- NATIVE APP
 
 ✅ **Footer**
 - Copyright

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { 
-  ShieldCheck, 
-  TrendingUp, 
-  Settings, 
-  LayoutDashboard, 
-  ChevronRight, 
-  Activity, 
+import {
+  ShieldCheck,
+  TrendingUp,
+  Settings,
+  LayoutDashboard,
+  ChevronRight,
+  Activity,
   AlertCircle,
   Smartphone,
   CheckCircle2,
@@ -41,11 +41,11 @@ const Button = ({ children, onClick, variant = 'primary', className = '', loadin
     ghost: `text-white/70 hover:text-white`,
     danger: `bg-red-500/10 text-red-500 border border-red-500/20`
   };
-  
+
   const isDisabled = loading || disabled;
 
   return (
-    <button 
+    <button
       onClick={onClick}
       disabled={isDisabled}
       className={`px-6 py-3 rounded-xl font-semibold transition-all active:scale-95 flex items-center justify-center gap-2 ${variants[variant as keyof typeof variants]} ${className} ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
@@ -63,60 +63,109 @@ const Card = ({ children, className = '' }: any) => (
   </div>
 );
 
-const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => (
-  <div className="min-h-screen bg-dark flex flex-col animate-fade-in overflow-x-hidden">
-    <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto w-full">
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-          <TrendingUp size={24} className="text-white" />
+const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      onLaunch();
+      return;
+    }
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('PWA installed');
+    }
+
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-dark flex flex-col animate-fade-in overflow-x-hidden">
+      <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Maatla Kebs Logo" className="w-12 h-12 object-contain" />
+          <span className="text-xl font-bold tracking-tight">Maatla Kebs</span>
         </div>
-        <span className="text-xl font-bold tracking-tight">Maatla Kebs</span>
-      </div>
-      <Button onClick={onLaunch} variant="outline" className="hidden md:flex">Launch App</Button>
-    </nav>
-
-    <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-4xl mx-auto relative">
-      <div className="absolute top-0 -left-20 w-72 h-72 bg-primary/20 blur-[120px] rounded-full -z-10 animate-pulse-slow" />
-      <div className="absolute bottom-0 -right-20 w-72 h-72 bg-secondary/20 blur-[120px] rounded-full -z-10" />
-      
-      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium text-accent mb-8 animate-slide-up">
-        <Zap size={16} /> Premium Copy Trading PWA
-      </div>
-      
-      <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text animate-slide-up leading-tight">
-        Master the Markets with Maatla Kebs
-      </h1>
-      
-      <p className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl animate-slide-up [animation-delay:100ms]">
-        Experience high-performance synthetic index trading with zero custody. Secure, elegant, and designed for your mobile lifestyle.
-      </p>
-      
-      <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto animate-slide-up [animation-delay:200ms]">
-        <Button onClick={onLaunch} className="w-full md:w-auto text-lg px-10 py-4">
-          Launch Dashboard <ChevronRight size={20} />
+        <Button onClick={handleInstallClick} variant="outline" className="hidden md:flex">
+          {showInstallPrompt ? 'Install App' : 'Launch App'}
         </Button>
-      </div>
+      </nav>
 
-      <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-slide-up [animation-delay:300ms]">
-        {[
-          { icon: ShieldCheck, title: "Zero Custody", desc: "You keep control. We only copy trades." },
-          { icon: Zap, title: "Real-time Sync", desc: "Milliseconds latency on trade execution." },
-          { icon: Smartphone, title: "PWA Native", desc: "Install once, trade anywhere, anytime." }
-        ].map((feat, i) => (
-          <Card key={i} className="text-left border-white/5 bg-white/5">
-            <feat.icon className="text-primary mb-4" size={32} />
-            <h3 className="text-lg font-bold mb-2">{feat.title}</h3>
-            <p className="text-white/50 text-sm leading-relaxed">{feat.desc}</p>
-          </Card>
-        ))}
-      </div>
-    </main>
+      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-4xl mx-auto relative">
+        <div className="absolute top-0 -left-20 w-72 h-72 bg-primary/20 blur-[120px] rounded-full -z-10 animate-pulse-slow" />
+        <div className="absolute bottom-0 -right-20 w-72 h-72 bg-secondary/20 blur-[120px] rounded-full -z-10" />
 
-    <footer className="p-8 text-center text-white/30 text-sm">
-      &copy; 2024 Maatla Kebs | Developed by Topo Rapula
-    </footer>
-  </div>
-);
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium text-accent mb-8 animate-slide-up">
+          <Zap size={16} /> Premium Copy Trading PWA
+        </div>
+
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text animate-slide-up leading-tight">
+          Master the Markets with Maatla Kebs
+        </h1>
+
+        <p className="text-lg md:text-xl text-white/60 mb-10 max-w-2xl animate-slide-up [animation-delay:100ms]">
+          Experience high-performance synthetic index trading with zero custody. Secure, elegant, and designed for your mobile lifestyle.
+        </p>
+
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto animate-slide-up [animation-delay:200ms]">
+          <Button onClick={handleInstallClick} className="w-full md:w-auto text-lg px-10 py-4 relative overflow-hidden group">
+            {showInstallPrompt ? (
+              <>
+                <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
+                Install PWA
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              </>
+            ) : (
+              <>
+                Launch Dashboard <ChevronRight size={20} />
+              </>
+            )}
+          </Button>
+          {showInstallPrompt && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm animate-fade-in">
+              <CheckCircle2 size={16} />
+              <span className="font-medium">Ready to install!</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-slide-up [animation-delay:300ms]">
+          {[
+            { icon: ShieldCheck, title: "Zero Custody", desc: "You keep control. We only copy trades." },
+            { icon: Zap, title: "Real-time Sync", desc: "Milliseconds latency on trade execution." },
+            { icon: Smartphone, title: "PWA Native", desc: "Install once, trade anywhere, anytime." }
+          ].map((feat, i) => (
+            <Card key={i} className="text-left border-white/5 bg-white/5">
+              <feat.icon className="text-primary mb-4" size={32} />
+              <h3 className="text-lg font-bold mb-2">{feat.title}</h3>
+              <p className="text-white/50 text-sm leading-relaxed">{feat.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </main>
+
+      <footer className="p-8 text-center text-white/30 text-sm">
+        &copy; 2024 Maatla Kebs | Developed by Topo Rapula
+      </footer>
+    </div>
+  );
+};
 
 const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   useEffect(() => {
@@ -127,12 +176,12 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   return (
     <div className="fixed inset-0 bg-dark z-[100] flex flex-col items-center justify-center p-8 overflow-hidden">
       <div className="relative">
-        <div className="w-24 h-24 bg-primary rounded-3xl flex items-center justify-center animate-pulse relative z-10">
-          <TrendingUp size={48} className="text-white" />
+        <div className="w-32 h-32 rounded-3xl flex items-center justify-center animate-pulse relative z-10 bg-gradient-to-br from-primary to-secondary p-2">
+          <img src="/logo.png" alt="Maatla Kebs" className="w-full h-full object-contain" />
         </div>
         <div className="absolute inset-0 bg-primary/40 blur-2xl animate-pulse scale-150" />
       </div>
-      
+
       <div className="mt-8 text-center animate-fade-in [animation-delay:500ms]">
         <h2 className="text-2xl font-bold tracking-widest uppercase">Maatla Kebs</h2>
         <p className="text-white/40 text-sm mt-2 tracking-widest">PREMIUM COPY TRADER</p>
@@ -177,14 +226,14 @@ const AuthScreen = ({ onLogin }: { onLogin: () => void }) => {
       <div className="max-w-md mx-auto w-full">
         <h2 className="text-3xl font-bold mb-2 text-white">Welcome Back</h2>
         <p className="text-white/50 mb-8">Login to manage your trading preferences.</p>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm text-white/60 ml-1 font-medium">Email Address</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={20} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 placeholder="name@example.com"
@@ -198,8 +247,8 @@ const AuthScreen = ({ onLogin }: { onLogin: () => void }) => {
             <label className="text-sm text-white/60 ml-1 font-medium">Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={20} />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                 placeholder="••••••••"
@@ -230,6 +279,29 @@ const AuthScreen = ({ onLogin }: { onLogin: () => void }) => {
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [step, setStep] = useState(0);
   const [mt5, setMt5] = useState({ login: '', server: '', password: '' });
+  const [serverError, setServerError] = useState('');
+
+  const validateWeltrade = (server: string) => {
+    const weltradeServers = [
+      'Weltrade-Live',
+      'Weltrade-Demo',
+      'WeltradeLive',
+      'WeltradeDemo',
+      'Weltrade-Server',
+      'WeltradeServer'
+    ];
+    
+    const isValid = weltradeServers.some(s => 
+      server.toLowerCase().includes(s.toLowerCase())
+    );
+    
+    if (server && !isValid) {
+      setServerError('⚠️ Only Weltrade broker accounts are supported');
+      return false;
+    }
+    setServerError('');
+    return true;
+  };
 
   const steps = [
     {
@@ -245,7 +317,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
           <div className="space-y-4 pt-4">
             <p className="text-white/70 font-medium">I understand that:</p>
             {[
-              "The PWA only copies trades to my MT5 account.",
+              "The PWA only copies trades to my Weltrade MT5 account.",
               "I am responsible for my own risk management settings.",
               "Maatla Kebs is not a financial advisor."
             ].map((text, i) => (
@@ -259,29 +331,72 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )
     },
     {
-      title: "MT5 Account Details",
+      title: "Weltrade MT5 Account",
       content: (
         <div className="space-y-4">
-          <input 
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary outline-none transition-all" 
-            placeholder="MT5 Login ID" 
-            value={mt5.login}
-            onChange={e => setMt5({...mt5, login: e.target.value})}
-          />
-          <input 
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary outline-none transition-all" 
-            placeholder="MT5 Server (e.g. Deriv-Server)" 
-            value={mt5.server}
-            onChange={e => setMt5({...mt5, server: e.target.value})}
-          />
-          <input 
-            type="password"
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary outline-none transition-all" 
-            placeholder="Investor / Trading Password" 
-            value={mt5.password}
-            onChange={e => setMt5({...mt5, password: e.target.value})}
-          />
-          <p className="text-xs text-white/40 mt-2 italic text-center">Credentials are encrypted and stored securely.</p>
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="text-sm font-bold text-white mb-1">Weltrade Accounts Only</p>
+                <p className="text-xs text-white/60">Our copy trading service exclusively supports Weltrade broker accounts for optimal performance and reliability.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-white/60 ml-1 font-medium">MT5 Login ID</label>
+            <input 
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+              placeholder="e.g., 12345678" 
+              type="number"
+              value={mt5.login}
+              onChange={e => setMt5({...mt5, login: e.target.value})}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-white/60 ml-1 font-medium">MT5 Server</label>
+            <input 
+              className={`w-full bg-white/5 border ${serverError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-primary'} rounded-xl py-4 px-4 text-white focus:ring-2 focus:ring-primary/20 outline-none transition-all`}
+              placeholder="Weltrade-Live or Weltrade-Demo" 
+              value={mt5.server}
+              onChange={e => {
+                setMt5({...mt5, server: e.target.value});
+                validateWeltrade(e.target.value);
+              }}
+              onBlur={e => validateWeltrade(e.target.value)}
+            />
+            {serverError && (
+              <p className="text-xs text-red-400 ml-1 flex items-center gap-1 animate-fade-in">
+                <AlertCircle size={12} />
+                {serverError}
+              </p>
+            )}
+            {mt5.server && !serverError && (
+              <p className="text-xs text-green-400 ml-1 flex items-center gap-1 animate-fade-in">
+                <CheckCircle size={12} />
+                ✓ Weltrade server verified
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-white/60 ml-1 font-medium">Investor / Trading Password</label>
+            <input 
+              type="password"
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
+              placeholder="••••••••" 
+              value={mt5.password}
+              onChange={e => setMt5({...mt5, password: e.target.value})}
+            />
+          </div>
+          
+          <div className="bg-white/5 rounded-xl p-3 mt-4">
+            <p className="text-xs text-white/40 text-center">
+              🔒 Credentials are encrypted end-to-end and stored securely
+            </p>
+          </div>
         </div>
       )
     }
@@ -291,6 +406,13 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
     if (step === 0) {
       setStep(1);
     } else {
+      if (!validateWeltrade(mt5.server)) {
+        return;
+      }
+      if (!mt5.login || !mt5.server || !mt5.password) {
+        alert('Please fill in all fields');
+        return;
+      }
       localStorage.setItem('mt5_login', mt5.login);
       localStorage.setItem('mt5_server', mt5.server);
       onComplete();
@@ -305,13 +427,14 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
             <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-500 ${i <= step ? 'bg-primary' : 'bg-white/10'}`} />
           ))}
         </div>
-        
+
         <h2 className="text-3xl font-bold mb-6 text-white">{steps[step].title}</h2>
         <div className="mb-10">{steps[step].content}</div>
-        
-        <Button 
-          className="w-full" 
+
+        <Button
+          className="w-full"
           onClick={handleNext}
+          disabled={step === 1 && !!serverError}
         >
           {step === 0 ? 'Accept & Continue' : 'Activate Trading'}
         </Button>
@@ -326,12 +449,15 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
     (localStorage.getItem('payment_status') as PaymentStatus) || 'UNPAID'
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('');
   const [aggressiveness, setAggressiveness] = useState(1.0);
   const [maxLot, setMaxLot] = useState(0.5);
   const [maxDD, setMaxDD] = useState(20);
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const mt5Login = localStorage.getItem('mt5_login') || '8372641';
-  const mt5Server = localStorage.getItem('mt5_server') || 'Deriv-Server';
+  const mt5Server = localStorage.getItem('mt5_server') || 'Weltrade-Live';
 
   const handleDisconnect = () => {
     if (confirm("Are you sure you want to disconnect? This will pause all copy trading immediately.")) {
@@ -339,18 +465,59 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
       localStorage.removeItem('mt5_login');
       localStorage.removeItem('mt5_server');
       localStorage.removeItem('payment_status');
+      localStorage.removeItem('uploaded_file');
       onDisconnect();
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image (JPG, PNG, WEBP) or PDF file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    setUploadedFile(file);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreview(''); // PDF doesn't need preview
+    }
+  };
+
   const handlePopUpload = () => {
+    if (!uploadedFile) {
+      fileInputRef.current?.click();
+      return;
+    }
+
     setIsUploading(true);
-    // Simulate system auto-confirmation and mentor hand-off
+    // Simulate upload with realistic delay
     setTimeout(() => {
       setIsUploading(false);
       setPaymentStatus('PENDING');
       localStorage.setItem('payment_status', 'PENDING');
-      alert('Proof of Payment received! System auto-confirmation in progress. Final mentor activation usually takes 1-2 hours.');
+      localStorage.setItem('uploaded_file', uploadedFile.name);
+      
+      // Show success message
+      const fileType = uploadedFile.type.startsWith('image/') ? 'Image' : 'PDF';
+      alert(`✅ ${fileType} uploaded successfully!\n\nFile: ${uploadedFile.name}\nSize: ${(uploadedFile.size / 1024).toFixed(2)} KB\n\nSystem auto-confirmation in progress. Final mentor activation usually takes 1-2 hours.`);
     }, 2000);
   };
 
@@ -369,10 +536,8 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
     <div className="min-h-screen bg-dark flex flex-col pb-24">
       {/* Header */}
       <header className="p-6 sticky top-0 z-50 bg-dark/80 backdrop-blur-md flex justify-between items-center border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <TrendingUp size={18} className="text-white" />
-          </div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Maatla Kebs" className="w-10 h-10 object-contain" />
           <span className="font-bold text-white">Maatla Kebs</span>
         </div>
         <div className="flex items-center gap-3">
@@ -395,8 +560,8 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
             {/* Status Card - Context Sensitive */}
             <Card className={`bg-gradient-to-br border-primary/20 p-8 ${paymentStatus === 'CONFIRMED' ? 'from-primary/30 to-secondary/30' : 'from-yellow-500/10 to-orange-500/10'}`}>
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30 relative">
-                  <Globe size={40} className={`text-primary ${paymentStatus === 'CONFIRMED' ? 'animate-[spin_10s_linear_infinite]' : ''}`} />
+                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30 relative p-3">
+                  <img src="/logo.png" alt="Maatla Kebs" className={`w-full h-full object-contain ${paymentStatus === 'CONFIRMED' ? 'animate-pulse' : ''}`} />
                   <div className={`absolute top-0 right-0 w-5 h-5 rounded-full border-4 border-dark ${paymentStatus === 'CONFIRMED' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
                 </div>
                 <div>
@@ -479,9 +644,9 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 mt-6">
-                  <Button 
-                    variant="danger" 
-                    className="w-full text-sm font-bold" 
+                  <Button
+                    variant="danger"
+                    className="w-full text-sm font-bold"
                     onClick={handleDisconnect}
                   >
                     <LogOutIcon size={18} /> Disconnect & Swap Account
@@ -514,17 +679,17 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
         {activeTab === 'SETTINGS' && (
           <div className="animate-slide-up space-y-6">
             <h2 className="text-2xl font-bold px-1 text-white">Risk Parameters</h2>
-            
+
             <Card className="space-y-6 border-primary/20">
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <label className="text-sm font-medium text-white">Aggressiveness</label>
                   <span className="text-primary font-bold">{aggressiveness}x</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="0.1" 
-                  max="2.0" 
+                <input
+                  type="range"
+                  min="0.1"
+                  max="2.0"
                   step="0.1"
                   value={aggressiveness}
                   onChange={(e) => setAggressiveness(parseFloat(e.target.value))}
@@ -541,10 +706,10 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                   <label className="text-sm font-medium text-white">Max Allocation (Lot)</label>
                   <span className="text-white font-bold">{maxLot}</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="0.1" 
-                  max="5.0" 
+                <input
+                  type="range"
+                  min="0.1"
+                  max="5.0"
                   step="0.1"
                   value={maxLot}
                   onChange={(e) => setMaxLot(parseFloat(e.target.value))}
@@ -557,10 +722,10 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                   <label className="text-sm font-medium text-white">Hard Drawdown Limit</label>
                   <span className="text-red-400 font-bold">{maxDD}%</span>
                 </div>
-                <input 
-                  type="range" 
-                  min="5" 
-                  max="50" 
+                <input
+                  type="range"
+                  min="5"
+                  max="50"
                   step="5"
                   value={maxDD}
                   onChange={(e) => setMaxDD(parseInt(e.target.value))}
@@ -592,7 +757,7 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
             <Card className="border-white/5 space-y-8">
               <div className="relative">
                 <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-white/5" />
-                
+
                 <div className="space-y-10 relative">
                   <div className="flex gap-4 items-center">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${paymentStatus !== 'UNPAID' ? 'bg-green-500 text-white' : 'bg-primary text-white'}`}>
@@ -645,21 +810,87 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                     </Button>
                   </div>
 
-                  <div className="border-2 border-dashed border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 bg-white/5">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                      <UploadCloud size={32} />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-bold">Upload Receipt</p>
-                      <p className="text-[10px] text-white/40 mt-1 uppercase tracking-widest font-bold">PNG, JPG or PDF</p>
-                    </div>
-                    <Button 
-                      loading={isUploading} 
-                      className="w-full mt-2" 
-                      onClick={handlePopUpload}
-                    >
-                      Browse Files
-                    </Button>
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+
+                  {/* File Upload Area */}
+                  <div 
+                    className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-4 transition-all ${
+                      uploadedFile 
+                        ? 'border-green-500/30 bg-green-500/5' 
+                        : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
+                    }`}
+                    onClick={() => !uploadedFile && fileInputRef.current?.click()}
+                  >
+                    {uploadedFile ? (
+                      <>
+                        {filePreview ? (
+                          <div className="w-full max-w-xs">
+                            <img 
+                              src={filePreview} 
+                              alt="Payment proof preview" 
+                              className="w-full h-48 object-contain rounded-lg border border-white/10"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
+                            <CheckCircle2 size={32} />
+                          </div>
+                        )}
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-green-400">✓ File Selected</p>
+                          <p className="text-xs text-white/60 mt-1">{uploadedFile.name}</p>
+                          <p className="text-[10px] text-white/40 mt-1">
+                            {(uploadedFile.size / 1024).toFixed(2)} KB • {uploadedFile.type.split('/')[1].toUpperCase()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 w-full">
+                          <Button
+                            variant="outline"
+                            className="flex-1 text-xs py-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUploadedFile(null);
+                              setFilePreview('');
+                              if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                          >
+                            Change File
+                          </Button>
+                          <Button
+                            loading={isUploading}
+                            className="flex-1 text-xs py-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePopUpload();
+                            }}
+                          >
+                            {isUploading ? 'Uploading...' : 'Submit'}
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                          <UploadCloud size={32} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-bold">Upload Proof of Payment</p>
+                          <p className="text-[10px] text-white/40 mt-1 uppercase tracking-widest font-bold">
+                            PNG, JPG, WEBP or PDF • Max 5MB
+                          </p>
+                        </div>
+                        <Button className="w-full mt-2">
+                          Browse Files
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -738,7 +969,7 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
 };
 
 const App = () => {
-  const [view, setView] = useState<View>('LANDING');
+  const [view, setView] = useState<View>('SPLASH'); // Start directly with splash for native app feel
 
   const handleLaunch = () => {
     setView('SPLASH');

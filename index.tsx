@@ -112,7 +112,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
         <div className="absolute bottom-0 -right-20 w-72 h-72 bg-secondary/20 blur-[120px] rounded-full -z-10" />
 
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium text-accent mb-8 animate-slide-up">
-          <Zap size={16} /> Premium Copy Trading PWA
+          <Zap size={16} /> Premium Copy Trading App
         </div>
 
         <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text animate-slide-up leading-tight">
@@ -128,7 +128,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
             {showInstallPrompt ? (
               <>
                 <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
-                Install PWA
+                Install App
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </>
             ) : (
@@ -290,11 +290,11 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       'Weltrade-Server',
       'WeltradeServer'
     ];
-    
-    const isValid = weltradeServers.some(s => 
+
+    const isValid = weltradeServers.some(s =>
       server.toLowerCase().includes(s.toLowerCase())
     );
-    
+
     if (server && !isValid) {
       setServerError('⚠️ Only Weltrade broker accounts are supported');
       return false;
@@ -346,23 +346,23 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
           <div className="space-y-2">
             <label className="text-sm text-white/60 ml-1 font-medium">MT5 Login ID</label>
-            <input 
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
-              placeholder="e.g., 12345678" 
+            <input
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              placeholder="e.g., 12345678"
               type="number"
               value={mt5.login}
-              onChange={e => setMt5({...mt5, login: e.target.value})}
+              onChange={e => setMt5({ ...mt5, login: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm text-white/60 ml-1 font-medium">MT5 Server</label>
-            <input 
+            <input
               className={`w-full bg-white/5 border ${serverError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-primary'} rounded-xl py-4 px-4 text-white focus:ring-2 focus:ring-primary/20 outline-none transition-all`}
-              placeholder="Weltrade-Live or Weltrade-Demo" 
+              placeholder="Weltrade-Live or Weltrade-Demo"
               value={mt5.server}
               onChange={e => {
-                setMt5({...mt5, server: e.target.value});
+                setMt5({ ...mt5, server: e.target.value });
                 validateWeltrade(e.target.value);
               }}
               onBlur={e => validateWeltrade(e.target.value)}
@@ -383,15 +383,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
           <div className="space-y-2">
             <label className="text-sm text-white/60 ml-1 font-medium">Investor / Trading Password</label>
-            <input 
+            <input
               type="password"
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" 
-              placeholder="••••••••" 
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              placeholder="••••••••"
               value={mt5.password}
-              onChange={e => setMt5({...mt5, password: e.target.value})}
+              onChange={e => setMt5({ ...mt5, password: e.target.value })}
             />
           </div>
-          
+
           <div className="bg-white/5 rounded-xl p-3 mt-4">
             <p className="text-xs text-white/40 text-center">
               🔒 Credentials are encrypted end-to-end and stored securely
@@ -514,7 +514,7 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
       setPaymentStatus('PENDING');
       localStorage.setItem('payment_status', 'PENDING');
       localStorage.setItem('uploaded_file', uploadedFile.name);
-      
+
       // Show success message
       const fileType = uploadedFile.type.startsWith('image/') ? 'Image' : 'PDF';
       alert(`✅ ${fileType} uploaded successfully!\n\nFile: ${uploadedFile.name}\nSize: ${(uploadedFile.size / 1024).toFixed(2)} KB\n\nSystem auto-confirmation in progress. Final mentor activation usually takes 1-2 hours.`);
@@ -820,21 +820,20 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                   />
 
                   {/* File Upload Area */}
-                  <div 
-                    className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-4 transition-all ${
-                      uploadedFile 
-                        ? 'border-green-500/30 bg-green-500/5' 
+                  <div
+                    className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-4 transition-all ${uploadedFile
+                        ? 'border-green-500/30 bg-green-500/5'
                         : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
-                    }`}
+                      }`}
                     onClick={() => !uploadedFile && fileInputRef.current?.click()}
                   >
                     {uploadedFile ? (
                       <>
                         {filePreview ? (
                           <div className="w-full max-w-xs">
-                            <img 
-                              src={filePreview} 
-                              alt="Payment proof preview" 
+                            <img
+                              src={filePreview}
+                              alt="Payment proof preview"
                               className="w-full h-48 object-contain rounded-lg border border-white/10"
                             />
                           </div>
@@ -969,7 +968,12 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
 };
 
 const App = () => {
-  const [view, setView] = useState<View>('SPLASH'); // Start directly with splash for native app feel
+  // Detect if running as installed PWA
+  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone ||
+    document.referrer.includes('android-app://');
+
+  const [view, setView] = useState<View>(isPWA ? 'SPLASH' : 'LANDING'); // Show landing in browser, skip in PWA
 
   const handleLaunch = () => {
     setView('SPLASH');

@@ -65,13 +65,12 @@ const Card = ({ children, className = '' }: any) => (
 
 const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowInstallPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -92,7 +91,6 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
     }
 
     setDeferredPrompt(null);
-    setShowInstallPrompt(false);
   };
 
   return (
@@ -103,7 +101,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
           <span className="text-xl font-bold tracking-tight">Maatla Kebs</span>
         </div>
         <Button onClick={handleInstallClick} variant="outline" className="hidden md:flex">
-          {showInstallPrompt ? 'Install App' : 'Launch App'}
+          {isMobile ? 'Install App' : 'Launch App'}
         </Button>
       </nav>
 
@@ -125,24 +123,10 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
 
         <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto animate-slide-up [animation-delay:200ms]">
           <Button onClick={handleInstallClick} className="w-full md:w-auto text-lg px-10 py-4 relative overflow-hidden group">
-            {showInstallPrompt ? (
-              <>
-                <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
-                Install App
-                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </>
-            ) : (
-              <>
-                Launch Dashboard <ChevronRight size={20} />
-              </>
-            )}
+            <Smartphone size={20} className="group-hover:scale-110 transition-transform" />
+            {isMobile ? 'Install App' : 'Launch App'}
+            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
           </Button>
-          {showInstallPrompt && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm animate-fade-in">
-              <CheckCircle2 size={16} />
-              <span className="font-medium">Ready to install!</span>
-            </div>
-          )}
         </div>
 
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 w-full animate-slide-up [animation-delay:300ms]">
@@ -822,8 +806,8 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
                   {/* File Upload Area */}
                   <div
                     className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-4 transition-all ${uploadedFile
-                        ? 'border-green-500/30 bg-green-500/5'
-                        : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
+                      ? 'border-green-500/30 bg-green-500/5'
+                      : 'border-white/10 bg-white/5 hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
                       }`}
                     onClick={() => !uploadedFile && fileInputRef.current?.click()}
                   >

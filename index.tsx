@@ -383,29 +383,6 @@ const AuthScreen = ({ onLogin }: { onLogin: () => void }) => {
 const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [step, setStep] = useState(0);
   const [mt5, setMt5] = useState({ login: '', server: '', password: '' });
-  const [serverError, setServerError] = useState('');
-
-  const validateWeltrade = (server: string) => {
-    const weltradeServers = [
-      'Weltrade-Live',
-      'Weltrade-Demo',
-      'WeltradeLive',
-      'WeltradeDemo',
-      'Weltrade-Server',
-      'WeltradeServer'
-    ];
-
-    const isValid = weltradeServers.some(s =>
-      server.toLowerCase().includes(s.toLowerCase())
-    );
-
-    if (server && !isValid) {
-      setServerError('⚠️ Only Weltrade broker accounts are supported');
-      return false;
-    }
-    setServerError('');
-    return true;
-  };
 
   const steps = [
     {
@@ -435,12 +412,12 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
       )
     },
     {
-      title: "Weltrade MT5 Account",
+      title: "Trading Account",
       content: (
         <div className="space-y-4">
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-4">
             <div className="flex items-start gap-3">
-              <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+              <img src="/metalogo.png" alt="MetaTrader" className="w-10 h-10 object-contain shrink-0" />
               <div>
                 <p className="text-sm font-bold text-white mb-1">Weltrade Accounts Only</p>
                 <p className="text-xs text-white/60">Our copy trading service exclusively supports Weltrade broker accounts for optimal performance and reliability.</p>
@@ -449,7 +426,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 ml-1 font-medium">MT5 Login ID</label>
+            <label className="text-sm text-white/60 ml-1 font-medium">Login ID</label>
             <input
               className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               placeholder="e.g., 12345678"
@@ -460,33 +437,34 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 ml-1 font-medium">MT5 Server</label>
-            <input
-              className={`w-full bg-white/5 border ${serverError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-primary'} rounded-xl py-4 px-4 text-white focus:ring-2 focus:ring-primary/20 outline-none transition-all`}
-              placeholder="Weltrade-Live or Weltrade-Demo"
+            <label className="text-sm text-white/60 ml-1 font-medium">Server</label>
+            <select
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none cursor-pointer"
               value={mt5.server}
               onChange={e => {
                 setMt5({ ...mt5, server: e.target.value });
-                validateWeltrade(e.target.value);
               }}
-              onBlur={e => validateWeltrade(e.target.value)}
-            />
-            {serverError && (
-              <p className="text-xs text-red-400 ml-1 flex items-center gap-1 animate-fade-in">
-                <AlertCircle size={12} />
-                {serverError}
-              </p>
-            )}
-            {mt5.server && !serverError && (
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 1rem center',
+                backgroundSize: '12px'
+              }}
+            >
+              <option value="" disabled>Select your Weltrade server</option>
+              <option value="Weltrade-Live">Weltrade-Live</option>
+              <option value="Weltrade-Demo">Weltrade-Demo</option>
+            </select>
+            {mt5.server && (
               <p className="text-xs text-green-400 ml-1 flex items-center gap-1 animate-fade-in">
                 <CheckCircle size={12} />
-                ✓ Weltrade server verified
+                ✓ Server selected
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 ml-1 font-medium">Investor / Trading Password</label>
+            <label className="text-sm text-white/60 ml-1 font-medium">Trading Password</label>
             <input
               type="password"
               className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
@@ -510,9 +488,6 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
     if (step === 0) {
       setStep(1);
     } else {
-      if (!validateWeltrade(mt5.server)) {
-        return;
-      }
       if (!mt5.login || !mt5.server || !mt5.password) {
         alert('Please fill in all fields');
         return;
@@ -538,7 +513,6 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
         <Button
           className="w-full"
           onClick={handleNext}
-          disabled={step === 1 && !!serverError}
         >
           {step === 0 ? 'Accept & Continue' : 'Activate Trading'}
         </Button>

@@ -102,7 +102,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
     <div className="min-h-screen bg-dark flex flex-col animate-fade-in overflow-x-hidden">
       <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto w-full">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Maatla Kebs Logo" className="w-12 h-12 object-contain" />
+          <img src="/MK Logo.png" alt="Maatla Kebs Logo" className="w-12 h-12 object-contain" />
           <span className="text-xl font-bold tracking-tight">Maatla Kebs</span>
         </div>
         <Button onClick={handleInstallClick} variant="outline" className="hidden md:flex">
@@ -281,7 +281,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
     <div className="fixed inset-0 bg-dark z-[100] flex flex-col items-center justify-center p-8 overflow-hidden">
       <div className="relative">
         <div className="w-32 h-32 rounded-3xl flex items-center justify-center animate-pulse relative z-10 bg-gradient-to-br from-primary to-secondary p-2">
-          <img src="/logo.png" alt="Maatla Kebs" className="w-full h-full object-contain" />
+          <img src="/MK Logo.png" alt="Maatla Kebs" className="w-full h-full object-contain" />
         </div>
         <div className="absolute inset-0 bg-primary/40 blur-2xl animate-pulse scale-150" />
       </div>
@@ -615,7 +615,7 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
       {/* Header */}
       <header className="p-6 sticky top-0 z-50 bg-dark/80 backdrop-blur-md flex justify-between items-center border-b border-white/5">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Maatla Kebs" className="w-10 h-10 object-contain" />
+          <img src="/MK Logo.png" alt="Maatla Kebs" className="w-10 h-10 object-contain" />
           <span className="font-bold text-white">Maatla Kebs</span>
         </div>
         <div className="flex items-center gap-3">
@@ -639,7 +639,7 @@ const MainApp = ({ onDisconnect }: { onDisconnect: () => void }) => {
             <Card className={`bg-gradient-to-br border-primary/20 p-8 ${paymentStatus === 'CONFIRMED' ? 'from-primary/30 to-secondary/30' : 'from-yellow-500/10 to-orange-500/10'}`}>
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30 relative p-3">
-                  <img src="/logo.png" alt="Maatla Kebs" className={`w-full h-full object-contain ${paymentStatus === 'CONFIRMED' ? 'animate-pulse' : ''}`} />
+                  <img src="/MK Logo.png" alt="Maatla Kebs" className={`w-full h-full object-contain ${paymentStatus === 'CONFIRMED' ? 'animate-pulse' : ''}`} />
                   <div className={`absolute top-0 right-0 w-5 h-5 rounded-full border-4 border-dark ${paymentStatus === 'CONFIRMED' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
                 </div>
                 <div>

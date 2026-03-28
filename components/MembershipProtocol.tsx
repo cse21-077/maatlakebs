@@ -102,20 +102,20 @@ export const MembershipProtocol = ({
     }
 
     return (
-        <div className="fixed inset-0 bg-[#0d0f14] z-[100] flex flex-col pt-safe animate-in slide-in-from-bottom duration-500">
+        <div className="fixed inset-0 bg-[#0d0f14] z-[100] flex flex-col pt-12 animate-in slide-in-from-bottom duration-500">
             {/* Header */}
-            <header className="px-8 h-24 flex items-center justify-between shrink-0 border-b border-white/5">
-                <button onClick={onBack} className="p-4 -ml-4 active:scale-95 transition-all text-white/40 hover:text-white">
+            <header className="px-8 h-24 flex items-center justify-between shrink-0 border-b border-white/5 bg-[#0d0f14]/80 backdrop-blur-xl sticky top-0 z-[110]">
+                <button onClick={onBack} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40 hover:bg-white/10 active:scale-90 transition-all shadow-xl">
                     <ChevronLeft size={24} />
                 </button>
                 <div className="text-center">
-                    <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1">Billing & Payment</h2>
-                    <p className="text-xl font-black text-white tracking-tighter">My Membership</p>
+                    <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1 leading-none">Billing & Payment</h2>
+                    <p className="text-xl font-black text-white tracking-tighter leading-none">My Membership</p>
                 </div>
                 <div className="w-12 h-12" /> {/* Spacer */}
             </header>
 
-            <main className="flex-1 overflow-y-auto px-8 py-10 space-y-12">
+            <main className="flex-1 overflow-y-auto px-8 py-10 space-y-12 pb-24">
                 {/* Status Card */}
                 <div className="bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
                     <div className="flex justify-between items-start relative z-10">

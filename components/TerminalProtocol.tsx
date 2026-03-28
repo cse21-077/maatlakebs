@@ -129,9 +129,9 @@ export const TerminalProtocol = ({
             </div>
         )}
 
-        <div className="absolute inset-0 bg-dark z-[300] flex flex-col pt-safe animate-slide-up overflow-y-auto pb-10">
-            <header className="p-8 flex items-center justify-between">
-                <button onClick={onBack} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40"><ChevronLeft size={24} /></button>
+        <div className="absolute inset-0 bg-[#0d0f14] z-[300] flex flex-col pt-12 animate-slide-up overflow-y-auto pb-24">
+            <header className="px-8 flex items-center justify-between sticky top-0 z-[310] bg-[#0d0f14]/80 backdrop-blur-xl shrink-0 pt-4 pb-4">
+                <button onClick={onBack} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40 hover:bg-white/10 active:scale-90 transition-all shadow-xl"><ChevronLeft size={24} /></button>
                 <div className="text-center">
                     <h2 className="text-xl font-black text-white uppercase tracking-tighter">Account Settings</h2>
                     <p className="text-[9px] text-white/30 font-black tracking-[0.2em] uppercase mt-1">MT5 Connection</p>
@@ -139,7 +139,7 @@ export const TerminalProtocol = ({
                 <div className="w-12" />
             </header>
 
-            <div className="p-8 space-y-10 max-w-md mx-auto w-full">
+            <div className="p-8 space-y-10 max-w-md mx-auto w-full pt-4">
                 {/* Global Inactive Overlay State */}
                 <div className="space-y-10 transition-all duration-700" style={{ opacity: pauseCopy ? 0.2 : 1, pointerEvents: pauseCopy ? 'none' : 'auto' }}>
                     <div className="bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-10 space-y-8 shadow-2xl relative overflow-hidden group">

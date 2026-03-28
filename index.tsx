@@ -55,7 +55,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
       </div>
 
       <nav className="p-8 flex justify-between items-center w-full relative z-10 h-24">
-        <div className="w-12 h-12 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center backdrop-blur-xl">
+        <div className="w-12 h-12 bg-[#1a1c22] rounded-2xl border border-white/10 flex items-center justify-center backdrop-blur-xl shadow-2xl">
           <img src="/MK Logo.png" alt="Logo" className="w-8 h-8 object-contain" />
         </div>
         <button onClick={handleInstallClick} className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">
@@ -111,21 +111,62 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
 
 // ── Splash Screen ─────────────────────────────────────────────────────────────
 const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
-  useEffect(() => { const t = setTimeout(onFinish, 2500); return () => clearTimeout(t); }, [onFinish]);
+  useEffect(() => {
+    // Technical Pre-load Node: Ensures all assets are cached before terminal handshake
+    const assets = ['/kebs.jpg', '/support.jpg', '/MK Logo.png', '/weltrade.png', '/metatrader.png'];
+    assets.forEach(src => { const img = new Image(); img.src = src; });
+
+    const t = setTimeout(onFinish, 3000); 
+    return () => clearTimeout(t); 
+  }, [onFinish]);
+
   return (
-    <div className="fixed inset-0 bg-dark z-[100] flex flex-col items-center justify-center p-8 overflow-hidden animate-fade-in">
-      <div className="relative">
-        <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center animate-pulse-slow relative z-10">
-          <img src="/MK Logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+    <div className="fixed inset-0 bg-dark z-[100] flex flex-col items-center justify-center overflow-hidden animate-fade-in relative">
+      {/* Background gradient for depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark/95 to-dark/90" />
+      
+      {/* Main content container - centered vertically */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full px-8">
+        {/* Logo */}
+        <div className="w-32 h-32 bg-[#1a1c22] border border-white/10 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse-slow">
+          <img src="/MK Logo.png" alt="Logo" className="w-20 h-20 object-contain" />
         </div>
-        <div className="absolute inset-x-0 bottom-[-40px] text-center">
-            <div className="w-24 h-[1px] bg-white/5 mx-auto relative overflow-hidden">
-                <div className="absolute inset-0 bg-primary w-1/2 animate-[splash-load_1.5s_infinite]" />
-            </div>
-            <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.5em] mt-3">Initializing Terminal</p>
+        
+        {/* Loading Indicator */}
+        <div className="mt-12 space-y-4 w-full max-w-[200px]">
+          <div className="w-full h-[2px] bg-white/5 relative overflow-hidden rounded-full">
+            <div className="absolute inset-0 bg-primary w-1/2 animate-[splash-load_1.5s_infinite]" />
+          </div>
+          <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.3em] text-center">
+            INITIALIZING TERMINAL
+          </p>
         </div>
       </div>
-      <style>{`@keyframes splash-load { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } } shadow-primary/20 { box-shadow: 0 0 20px rgba(33, 56, 188, 0.2); }`}</style>
+      
+      {/* Credits at bottom - absolutely positioned */}
+      <div className="absolute bottom-12 left-0 right-0 text-center">
+        <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">
+          BY TOPO RAPULA
+        </p>
+      </div>
+
+      <style>{`
+        @keyframes splash-load { 
+          0% { transform: translateX(-100%); } 
+          100% { transform: translateX(200%); } 
+        } 
+        @keyframes pulse-slow { 
+          0%, 100% { transform: scale(1); opacity: 1; } 
+          50% { transform: scale(0.95); opacity: 0.8; } 
+        }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

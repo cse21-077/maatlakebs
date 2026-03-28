@@ -83,7 +83,7 @@ export const AuthScreen = ({ onLogin }: Props) => {
             <div className="w-full max-w-sm space-y-10">
                 {/* Clean Logo Header */}
                 <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center shadow-xl mb-2">
+                    <div className="w-20 h-20 bg-[#1a1c22] border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl mb-2">
                         <img src="/MK Logo.png" alt="Maatla Kebs" className="w-12 h-12 object-contain" />
                     </div>
                     <div className="space-y-1">

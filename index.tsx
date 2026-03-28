@@ -121,31 +121,29 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   }, [onFinish]);
 
   return (
-    <div className="fixed inset-0 bg-dark z-[100] flex flex-col items-center justify-center overflow-hidden animate-fade-in relative">
-      {/* Background gradient for depth */}
+    <div className="fixed inset-0 bg-[#0d0f14] z-[100] flex flex-col items-center justify-center overflow-hidden animate-fade-in text-center h-full w-full">
+      {/* Immersive Depth Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark/95 to-dark/90" />
       
-      {/* Main content container - centered vertically */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full px-8">
-        {/* Logo */}
-        <div className="w-32 h-32 bg-[#1a1c22] border border-white/10 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse-slow">
+      {/* Central Identity Section - Perfectly Vertical Center */}
+      <div className="relative z-20 flex flex-col items-center justify-center space-y-12 animate-fade-in scale-110">
+        <div className="w-32 h-32 bg-[#1a1c22] border-2 border-white/10 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse-slow">
           <img src="/MK Logo.png" alt="Logo" className="w-20 h-20 object-contain" />
         </div>
         
-        {/* Loading Indicator */}
-        <div className="mt-12 space-y-4 w-full max-w-[200px]">
-          <div className="w-full h-[2px] bg-white/5 relative overflow-hidden rounded-full">
+        <div className="space-y-6">
+          <div className="w-40 h-[2px] bg-white/5 mx-auto relative overflow-hidden rounded-full">
             <div className="absolute inset-0 bg-primary w-1/2 animate-[splash-load_1.5s_infinite]" />
           </div>
-          <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.3em] text-center">
+          <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.6em] animate-pulse">
             INITIALIZING TERMINAL
           </p>
         </div>
       </div>
       
-      {/* Credits at bottom - absolutely positioned */}
-      <div className="absolute bottom-12 left-0 right-0 text-center">
-        <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">
+      {/* Foundation Signature at Base */}
+      <div className="absolute bottom-16 left-0 right-0 z-20 animate-fade-in delay-700">
+        <p className="text-[10px] font-black text-white uppercase tracking-[0.6em]">
           BY TOPO RAPULA
         </p>
       </div>
@@ -157,14 +155,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
         } 
         @keyframes pulse-slow { 
           0%, 100% { transform: scale(1); opacity: 1; } 
-          50% { transform: scale(0.95); opacity: 0.8; } 
-        }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out forwards;
+          50% { transform: scale(0.96); opacity: 0.8; } 
         }
       `}</style>
     </div>

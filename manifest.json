@@ -4,8 +4,8 @@
     "description": "Premium Copy Trading PWA - Secure, elegant, and designed for your mobile lifestyle",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0a0e1a",
-    "theme_color": "#2138bc",
+    "background_color": "#0d0f14",
+    "theme_color": "#0d0f14",
     "orientation": "portrait-primary",
     "scope": "/",
     "categories": [
@@ -15,28 +15,16 @@
     ],
     "icons": [
         {
-            "src": "/MK Logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/MK Logo.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
             "src": "/icon-192.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "any"
+            "purpose": "any maskable"
         },
         {
             "src": "/icon-512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "any"
+            "purpose": "any maskable"
         }
     ],
     "screenshots": [

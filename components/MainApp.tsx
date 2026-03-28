@@ -14,8 +14,9 @@ import { Button } from './shared';
 
 import { TerminalProtocol } from './TerminalProtocol';
 import { MembershipProtocol } from './MembershipProtocol';
+import { SupportProtocol } from './SupportProtocol';
 
-type AppView = 'HOME' | 'CONFIG' | 'BILLING';
+type AppView = 'HOME' | 'CONFIG' | 'BILLING' | 'SUPPORT';
 type UIPaymentStatus = 'UNPAID' | 'CONFIRMED';
 
 interface Props { session: Session; onDisconnect: () => void; }
@@ -30,7 +31,22 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
     const uid = session.user.id;
     const fullName = session.user.user_metadata?.full_name ?? 'Trader';
+    const initialAvatar = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${fullName}`;
+    const [avatarUrl, setAvatarUrl] = useState(initialAvatar);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const firstName = fullName.split(' ')[0];
+
+    const avatarOptions = [
+        `https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${fullName}`,
+        `https://api.dicebear.com/7.x/notionists/svg?seed=${fullName}`,
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${fullName}`,
+        `https://api.dicebear.com/7.x/bottts/svg?seed=${fullName}`
+    ];
+
+    const handleAvatarSelect = async (url: string) => {
+        setAvatarUrl(url);
+        await supabase.auth.updateUser({ data: { avatar_url: url } });
+    };
 
     const load = async (updatedRisk?: any) => {
         if (updatedRisk) setRisk(updatedRisk);
@@ -43,11 +59,11 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         }
         
         try {
-            const { data: acct } = await supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).single();
-            const { data: ps } = await supabase.from('payment_status').select('subscription_status').eq('user_id', uid).single();
+            const { data: acct } = await (supabase.from('student_accounts') as any).select('mt5_login').eq('user_id', uid).single();
+            const { data: ps } = await (supabase.from('payment_status') as any).select('subscription_status').eq('user_id', uid).single();
             setMt5Login(acct ? (acct as any).mt5_login : '');
-            setPaymentStatus(ps?.subscription_status === 'active' ? 'CONFIRMED' : 'UNPAID');
-            const { data: r } = await supabase.from('risk_profiles').select('*').eq('user_id', uid).single();
+            setPaymentStatus((ps as any)?.subscription_status === 'active' ? 'CONFIRMED' : 'UNPAID');
+            const { data: r } = await (supabase.from('risk_profiles') as any).select('*').eq('user_id', uid).single();
             if (r) {
                 const rs = r as any;
                 setRisk({ aggressiveness: rs.aggressiveness, maxLot: rs.max_lot, maxDD: rs.max_drawdown, pauseCopy: rs.pause_copy });
@@ -58,15 +74,47 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     useEffect(() => { load(); }, [uid, view]);
 
     return (
-        <div className="min-h-screen bg-[#0d0f14] flex flex-col pt-safe animate-fade-in relative overflow-hidden">
+        <div className="min-h-screen bg-[#0d0f14] flex flex-col pt-12 pb-safe animate-fade-in relative overflow-hidden">
             {view === 'BILLING' && <MembershipProtocol uid={uid} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onRefresh={load} />}
+            {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => setView('HOME')} />}
             {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={session.user.user_metadata?.trader_id} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} />}
 
+            {/* Profile Selection Overlay */}
+            {showProfileMenu && (
+                <div className="fixed inset-0 z-[600] flex items-center justify-center p-8 animate-fade-in backdrop-blur-md bg-dark/60">
+                    <div className="w-full max-w-sm bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-10 space-y-10 shadow-2xl animate-scale-in">
+                        <div className="text-center space-y-2">
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Profile Protocol</h3>
+                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest leading-relaxed">Select your institutional identifier</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            {avatarOptions.map((url, i) => (
+                                <div key={i} 
+                                    onClick={() => handleAvatarSelect(url)}
+                                    className={`aspect-square rounded-3xl border-2 transition-all cursor-pointer overflow-hidden p-2 ${avatarUrl === url ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                                >
+                                    <img src={url} alt={`Avatar ${i}`} className="w-full h-full object-contain" />
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-4 pt-4">
+                            <Button onClick={() => setShowProfileMenu(false)} className="w-full py-5 text-xs uppercase font-black tracking-widest">Done</Button>
+                            <button onClick={() => { if (confirm('Logout?')) supabase.auth.signOut().then(onDisconnect) }} 
+                                className="w-full flex items-center justify-center gap-2 border border-red-500/20 text-red-500 transition-all py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-500/5 hover:border-red-500/40 leading-none">
+                                <LogOutIcon size={14} /> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Top Navigation */}
-            <header className="px-8 pt-8 flex justify-between items-center h-24 shrink-0">
+            <header className="px-8 pt-6 flex justify-between items-center h-24 shrink-0">
                 <div><h1 className="text-3xl font-black text-white tracking-tighter">Hi {firstName}</h1><p className="text-xs text-white/30 font-bold uppercase tracking-widest mt-0.5">Welcome back</p></div>
-                <div className="w-14 h-14 rounded-2xl border border-white/10 relative overflow-hidden active:scale-95 transition-all shadow-2xl" onClick={() => { if (confirm('Logout?')) supabase.auth.signOut().then(onDisconnect) }}>
-                    <img src={`https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${firstName}`} alt="Avatar" className="w-full h-full object-cover" />
+                <div className="w-14 h-14 rounded-2xl border border-white/10 relative overflow-hidden active:scale-95 transition-all shadow-2xl" onClick={() => setShowProfileMenu(true)}>
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0d0f14]" />
                 </div>
             </header>
@@ -125,15 +173,15 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                         </div>
 
                         {/* Support Card (Horizontal banner) */}
-                        <div onClick={() => window.open('https://wa.me/26771000000', '_blank')}
+                        <div onClick={() => setView('SUPPORT')}
                             className="relative h-[140px] rounded-[2.5rem] overflow-hidden shadow-xl active:scale-95 transition-all cursor-pointer border border-white/5">
                             <img src="/support.jpg" alt="Support" className="absolute inset-0 w-full h-full object-cover opacity-60" />
                             <div className="absolute inset-0 bg-gradient-to-r from-dark/95 via-dark/40 to-transparent" />
                             <div className="absolute inset-0 p-8 flex flex-col justify-between items-start">
                                 <LifeBuoy size={28} className="text-white/40" />
                                 <div>
-                                    <p className="text-lg font-black text-white uppercase leading-none">Technical Help</p>
-                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Live Support Node</p>
+                                    <p className="text-lg font-black text-white uppercase leading-none">Get Help</p>
+                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Live Support Chat</p>
                                 </div>
                             </div>
                         </div>

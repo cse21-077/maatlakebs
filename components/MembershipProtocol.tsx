@@ -9,7 +9,7 @@ interface MembershipProtocolProps {
     uid: string;
     paymentStatus: string;
     onBack: () => void;
-    onRefresh: () => void;
+    onRefresh: (updatedRisk?: any) => void | Promise<void>;
 }
 
 export const MembershipProtocol = ({ 
@@ -109,8 +109,8 @@ export const MembershipProtocol = ({
                     <ChevronLeft size={24} />
                 </button>
                 <div className="text-center">
-                    <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1">Billing Protocol</h2>
-                    <p className="text-xl font-black text-white tracking-tighter">Membership Node</p>
+                    <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1">Billing & Payment</h2>
+                    <p className="text-xl font-black text-white tracking-tighter">My Membership</p>
                 </div>
                 <div className="w-12 h-12" /> {/* Spacer */}
             </header>
@@ -122,7 +122,7 @@ export const MembershipProtocol = ({
                         <div className="space-y-1">
                             <p className="text-[10px] text-white/30 font-black uppercase tracking-widest leading-none">Status</p>
                             <h3 className={`text-2xl font-black tracking-tighter ${isConfirmed ? 'text-primary' : 'text-red-500'}`}>
-                                {isConfirmed ? 'Institutional Active' : 'Protocol Suspended'}
+                                {isConfirmed ? 'Subscription Active' : 'Payment Required'}
                             </h3>
                         </div>
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isConfirmed ? 'bg-primary/10 text-primary' : 'bg-red-500/10 text-red-500'}`}>

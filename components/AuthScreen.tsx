@@ -66,13 +66,13 @@ export const AuthScreen = ({ onLogin }: Props) => {
         if (tErr || !trader) { setRError('System configuration error.'); setRLoading(false); return; }
 
         const { data, error: signUpErr } = await supabase.auth.signUp({
-            email: rEmail, password: rPass, options: { data: { full_name: rName, trader_id: trader.id } } as any,
+            email: rEmail, password: rPass, options: { data: { full_name: rName, trader_id: (trader as any).id } } as any,
         });
 
         if (signUpErr) { setRError(signUpErr.message); setRLoading(false); return; }
 
         if (data.user) {
-            await supabase.from('users').insert({ id: data.user.id, full_name: rName, email: rEmail, role: 'student', trader_id: trader.id });
+            await (supabase.from('users') as any).insert({ id: (data.user as any).id, full_name: rName, email: rEmail, role: 'student', trader_id: (trader as any).id });
             setRSuccess(true);
         }
         setRLoading(false);

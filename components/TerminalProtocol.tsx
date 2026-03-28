@@ -14,7 +14,7 @@ interface TerminalProtocolProps {
     paymentStatus: string;
     onBack: () => void;
     onSuccess: () => void;
-    onRefresh: () => void;
+    onRefresh: (updatedRisk?: any) => void | Promise<void>;
 }
 
 export const TerminalProtocol = ({ 
@@ -133,8 +133,8 @@ export const TerminalProtocol = ({
             <header className="p-8 flex items-center justify-between">
                 <button onClick={onBack} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40"><ChevronLeft size={24} /></button>
                 <div className="text-center">
-                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">Terminal Protocol</h2>
-                    <p className="text-[9px] text-white/30 font-black tracking-[0.2em] uppercase mt-1">Node Config</p>
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter">Account Settings</h2>
+                    <p className="text-[9px] text-white/30 font-black tracking-[0.2em] uppercase mt-1">MT5 Connection</p>
                 </div>
                 <div className="w-12" />
             </header>
@@ -159,7 +159,7 @@ export const TerminalProtocol = ({
                                         <img src="/weltrade.png" alt="Weltrade" className="w-10 h-10 object-contain" />
                                     </div>
                                 </div>
-                                <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all">Unlink Terminal Protocol →</button>
+                                <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all">Disconnect Account →</button>
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -198,14 +198,14 @@ export const TerminalProtocol = ({
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                <Zap size={16} className="text-primary opacity-40" />
-                               <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Risk Matrix</h3>
+                               <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Risk Management</h3>
                             </div>
                         </div>
                         <div className="space-y-10 transition-all duration-500" style={{ opacity: isLocked ? 0.3 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
                             {[
-                                { label: 'Aggressiveness', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 5.0, step: 0.1, unit: 'x' },
-                                { label: 'Lot Exposure Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 2.0, step: 0.01, unit: ' L' },
-                                { label: 'Drawdown Circuit', val: maxDD, set: setMaxDD, min: 5, max: 80, step: 5, unit: '%' },
+                                { label: 'Trade Size (Multiplied)', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 5.0, step: 0.1, unit: 'x' },
+                                { label: 'Lot Size Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 2.0, step: 0.01, unit: ' L' },
+                                { label: 'Loss Limit', val: maxDD, set: setMaxDD, min: 5, max: 80, step: 5, unit: '%' },
                             ].map((item, i) => (
                                 <div key={i} className="space-y-4">
                                     <div className="flex justify-between items-end"><p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{item.label}</p><p className="text-2xl font-black text-white tracking-tighter">{item.val}{item.unit}</p></div>
@@ -233,10 +233,10 @@ export const TerminalProtocol = ({
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <p className="text-sm font-black text-dark uppercase tracking-tighter">
-                                {isUnpaid ? 'Handshake Locked' : 'Emergency Kill-Switch'}
+                                {isUnpaid ? 'Handshake Locked' : 'Emergency Stop'}
                             </p>
                             <p className="text-[10px] text-dark/40 font-bold uppercase tracking-widest">
-                                {isUnpaid ? 'Payment Verification Required' : 'Mirroring Handshake'}
+                                {isUnpaid ? 'Payment Required' : 'Stop All Trades'}
                             </p>
                         </div>
                         <button 

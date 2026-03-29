@@ -46,231 +46,404 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
         <a href="#about" className="text-[13px] font-semibold text-secondary/60 hover:text-primary transition-colors hidden sm:block">About</a>
         <a href="#install" className="text-[13px] font-semibold text-secondary/60 hover:text-primary transition-colors hidden sm:block">Installation</a>
         <button onClick={onLaunch} className="px-5 py-2.5 bg-secondary text-white rounded-full text-[13px] font-bold shadow-lg shadow-secondary/10 hover:bg-secondary/90 transition-all hover:scale-105 active:scale-95">
-          Open App
+          Get App
         </button>
       </div>
     </nav>
   );
 
   return (
-    <div className="bg-surface min-h-screen text-secondary selection:bg-primary/20 scroll-smooth">
+    <div className="bg-charcoal min-h-screen text-white selection:bg-primary/20 scroll-smooth selection:text-white">
       <Nav />
-      
+
       {/* Hero Section */}
-      <header className="relative pt-40 pb-24 px-6 min-h-[95vh] flex flex-col items-center justify-center text-center overflow-hidden mesh-gradient">
-        <div className="absolute inset-0 hero-pattern" />
+      <header className="relative pt-48 pb-32 px-6 flex flex-col items-center justify-center overflow-hidden" style={{ backgroundColor: '#0a0e1a' }}>
+        {/* Mobile Background Image */}
+        <div className="absolute inset-0 z-0 lg:hidden">
+          <img 
+            src="/mkb.jpg" 
+            alt="Background" 
+            className="w-full h-full object-cover opacity-40"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e1a] via-transparent to-[#0a0e1a]"></div>
+        </div>
         
-        <div className="relative z-10 max-w-5xl mx-auto space-y-10 animate-slide-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 mb-2">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-primary">v2.0 Performance Node Active</span>
-          </div>
-          
-          <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-[900] tracking-[-0.03em] leading-[0.95] text-secondary">
-            Master the <span className="gradient-text uppercase">Algorithms</span><br />
-            of Wealth Creation.
-          </h1>
-          
-          <p className="text-lg sm:text-xl font-medium text-secondary/60 max-w-2xl mx-auto leading-relaxed">
-            A premium, zero-custody trading ecosystem designed for high-performance synthetic index execution. Secure, elegant, and native.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-            <button onClick={handleInstallClick} className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-center gap-3 hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all">
-              <Smartphone size={20} />
-              {isMobile ? 'Install Dashboard' : 'Get The App'}
-            </button>
-            <button onClick={onLaunch} className="w-full sm:w-auto px-10 py-5 bg-white border border-slate-200 text-secondary font-bold rounded-2xl shadow-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-95 transition-all">
-              <Zap size={20} className="text-primary" />
-              Launch Cloud Terminal
-            </button>
+        {/* Animated Background Mesh (Hidden on mobile to not overlay image) */}
+        <div className="absolute inset-0 z-0 hidden lg:block">
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full animate-pulse-slow" />
+          <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-secondary/10 blur-[150px] rounded-full" />
+          <div className="absolute inset-0 hero-pattern opacity-10" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left: Content */}
+          <div className="space-y-10 text-left animate-slide-up">
+            <h1 className="text-[clamp(2.8rem,9vw,6rem)] font-[900] tracking-[-0.04em] leading-[0.9] text-white">
+
+              Master the <br />
+              <span className="text-primary italic">Precision</span> of <br />
+              Digital Wealth.
+            </h1>
+
+            {/* Conditionally hide this paragraph on mobile */}
+            <p className="text-xl font-medium text-white/50 max-w-xl leading-relaxed hidden lg:block">
+              Join Botswana's premier trading community. Experience elite, automated wealth creation with Maatla Kebs—your trusted partner in safe, simple, and powerful financial freedom.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
+              <button
+                onClick={handleInstallClick}
+                className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all group"
+              >
+                <Smartphone size={22} className="group-hover:rotate-12 transition-transform" />
+                {isMobile ? 'Install Terminal' : 'Join The Community'}
+              </button>
+              {/* Removed the Launch Portal button as requested */}
+            </div>
+
+            <div className="pt-8 flex flex-wrap gap-10 opacity-30 grayscale items-center">
+              <img src="/metatrader.png" className="h-6 object-contain" alt="MT5" />
+              <img src="/weltrade.png" className="h-6 object-contain" alt="Weltrade" />
+              <img src="/binace.png" className="h-6 object-contain" alt="Binance" />
+            </div>
           </div>
 
-          <div className="pt-16 flex flex-wrap justify-center gap-12 sm:gap-16 opacity-30 grayscale transition-all hover:opacity-50 hover:grayscale-0">
-             <img src="/metatrader.png" className="h-7 object-contain" alt="MT5" />
-             <img src="/weltrade.png" className="h-7 object-contain" alt="Weltrade" />
-             <img src="/binace.png" className="h-7 object-contain" alt="Binance" />
+          {/* Right: Dual Device Showcase */}
+          <div className="relative group lg:block hidden h-[600px] w-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-40 animate-pulse-slow" />
+
+            <div className="relative h-full flex items-center justify-center">
+              {/* Android Mockup (Behind) */}
+              <div className="absolute left-[5%] top-[10%] w-[380px] z-10 animate-float delay-1000 opacity-80 group-hover:opacity-100 transition-opacity">
+                <img
+                  src="/android.png"
+                  alt="Android Terminal"
+                  className="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] -rotate-6 group-hover:-rotate-3 transition-transform duration-1000"
+                />
+              </div>
+
+              {/* iPhone Mockup (Front) */}
+              <div className="absolute right-[5%] bottom-[5%] w-[420px] z-20 animate-float">
+                <img
+                  src="/trans.png"
+                  alt="iOS Terminal"
+                  className="w-full h-auto object-contain drop-shadow-[0_40px_60px_rgba(33,56,188,0.4)] rotate-3 group-hover:rotate-0 transition-transform duration-1000"
+                />
+              </div>
+
+              {/* Decorative Asset: Glow behind iPhone */}
+              <div className="absolute z-15 bottom-1/4 right-1/4 w-64 h-64 bg-primary/40 blur-[100px] rounded-full pointer-events-none" />
+            </div>
           </div>
+
+
         </div>
       </header>
 
+
       {/* Stats Section */}
-      <section className="py-24 px-6 bg-white border-y border-slate-100">
+      <section className="py-24 px-6 bg-white/5 border-y border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
           {[
-            { label: 'Uptime Sync', val: '99.9%' },
-            { label: 'Latency', val: '< 2ms' },
-            { label: 'Execution', val: 'Instant' },
-            { label: 'Security', val: '256-bit' },
+            { label: 'Uptime Sync', val: '99.9%', col: 'text-primary' },
+            { label: 'Latency', val: '< 2ms', col: 'text-white' },
+            { label: 'Execution', val: 'Instant', col: 'text-white' },
+            { label: 'Security', val: '256-bit', col: 'text-white' },
           ].map((stat, i) => (
             <div key={i} className="space-y-2">
-              <p className="text-[clamp(1.5rem,3vw,2.5rem)] font-black text-secondary tracking-tighter">{stat.val}</p>
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-secondary/40">{stat.label}</p>
+              <p className={`text-[clamp(1.5rem,3vw,2.5rem)] font-black tracking-tighter ${stat.col}`}>{stat.val}</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/30">{stat.label}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="py-32 px-6 max-w-7xl mx-auto overflow-hidden">
-        <div className="text-center mb-20 space-y-4">
-          <span className="text-primary font-black text-[11px] uppercase tracking-[0.2em]">Institutional Edge</span>
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-secondary leading-tight">Built for Professionals.</h2>
+      {/* Feature Grid with Videos */}
+      <section className="py-32 px-6 max-w-7xl mx-auto">
+        <div className="text-left mb-20 space-y-4">
+          <span className="text-primary font-black text-[11px] uppercase tracking-[0.2em]">Real-World Execution</span>
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">The Architecture <br /> of Success.</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { img: '/tradeentry.jpg', title: 'Precise Entry Nodes', tag: 'Strategy', col: 'text-primary' },
-            { img: '/tradeinprofit.jpg', title: 'Real-Time Execution', tag: 'Momentum', col: 'text-emerald-500' },
-            { img: '/tradeprofit.jpg', title: 'Automated Yields', tag: 'Payout', col: 'text-pink-500' },
+            {
+              video: 'https://zo1zv0g4tz.ufs.sh/f/lfByGtJ28C7IdPb6jia6UI0HGSiqWL4foPpawBbN5D3jc1Yv',
+              title: 'Precise Entry Nodes',
+              tag: 'Profit Sync',
+              col: 'text-primary'
+            },
+            {
+              video: 'https://zo1zv0g4tz.ufs.sh/f/lfByGtJ28C7IyCbKgp7BHYFJUpjnvqw9QkeGL1af7mxVrsig',
+              title: 'Lifestyle Manifestation',
+              tag: 'Milestone',
+              col: 'text-blue-500'
+            },
+            {
+              video: 'https://zo1zv0g4tz.ufs.sh/f/lfByGtJ28C7Ij0OQsAlNsLbmeX5oyKwFnf8zWQpBZ67Mj1Dq',
+              title: 'Institutional Yields',
+              tag: 'Momentum',
+              col: 'text-primary'
+            },
           ].map((item, i) => (
-            <div key={i} className="glass-card rounded-5xl p-4 group">
-              <div className="aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-8 relative">
-                <img src={item.img} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={item.title} />
-                <div className="absolute top-6 left-6 flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm border border-white/50 shadow-sm">
-                   <div className={`w-1.5 h-1.5 rounded-full bg-current ${item.col}`} />
-                   <span className={`text-[10px] font-black uppercase tracking-widest ${item.col}`}>{item.tag}</span>
+            <div key={i} className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-4 group transition-all hover:bg-white/[0.05] hover:border-primary/30">
+              <div className="aspect-[4/5] rounded-[2rem] overflow-hidden mb-8 relative bg-black/40 shadow-inner">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100"
+                >
+                  <source src={item.video} type="video/mp4" />
+                </video>
+                <div className="absolute top-6 left-6 flex items-center gap-2 px-3 py-1 rounded-full bg-charcoal/80 backdrop-blur-sm border border-white/10 shadow-sm">
+                  <div className={`w-1.5 h-1.5 rounded-full bg-current ${item.col}`} />
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${item.col}`}>{item.tag}</span>
                 </div>
               </div>
               <div className="px-4 pb-4">
-                <h3 className="text-2xl font-black text-secondary">{item.title}</h3>
-                <p className="text-secondary/50 text-sm mt-2 font-medium">Advanced algorithmic processing ensures every node is executed with micro-second precision.</p>
+                <h3 className="text-2xl font-black text-white">{item.title}</h3>
+                <p className="text-white/40 text-sm mt-3 font-medium leading-relaxed">Experience live verification of algorithmic trading results and the manifestation of financial freedom.</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-32 px-6 bg-slate-50 border-y border-slate-200 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+
+      {/* About Section (Visionary) */}
+      <section id="about" className="py-32 px-6 overflow-hidden relative" style={{ backgroundColor: '#bfc5c4' }}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-20 relative z-10">
           <div className="w-full md:w-1/2">
-             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl shadow-primary/10 border-8 border-white group">
-                <img src="/mentoprinhallway.jpg" className="w-full aspect-[4/5] object-cover transition-transform duration-1000 group-hover:scale-105" alt="Architect" />
-                <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Founder & Lead Architect</p>
-                  <h4 className="text-white text-3xl font-black">Topo Rapula</h4>
-                </div>
-             </div>
+            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border-4 border-black/5 group">
+              <img src="/mentor.jpg" className="w-full aspect-[4/5] object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100" alt="Architect" />
+              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/60 to-transparent">
+                <p className="text-white/80 text-xs font-bold uppercase tracking-widest mb-1">Founder & Lead Architect</p>
+                <h4 className="text-white text-3xl font-black">Maatla Kebs</h4>
+              </div>
+            </div>
           </div>
+
           <div className="w-full md:w-1/2 space-y-10">
             <div className="space-y-4">
               <span className="text-primary font-black text-[11px] uppercase tracking-[0.2em]">The Visionary</span>
-              <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-secondary leading-tight">Bridging Reality and Profit.</h2>
+              <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-charcoal leading-tight">Bridging Reality <br /> and Profit.</h2>
             </div>
-            <p className="text-xl text-secondary/70 leading-relaxed font-medium">
-              Maatla Kebs isn't just a platform—it's a digital legacy. We simplify the complexity of modern financial markets into a sleek, automated experience that works for you, not the other way around.
+            <p className="text-xl text-charcoal/70 leading-relaxed font-medium">
+              Copy By Kebs isn't just a platform—it's a digital legacy. We simplify the complexity of modern financial markets into a sleek, automated experience that works for you.
             </p>
-            <button onClick={onLaunch} className="flex items-center gap-6 group">
-               <div className="w-16 h-16 rounded-3xl bg-secondary text-white flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all">
-                  <ShieldCheck size={28} />
-               </div>
-               <div className="text-left">
-                  <span className="block font-black text-xl text-secondary group-hover:text-primary transition-colors">Start Your Journey</span>
-                  <p className="text-xs font-bold text-secondary/40 uppercase tracking-widest">Connect to nodes →</p>
-               </div>
+            <button onClick={onLaunch} className="flex items-center gap-6 group hover:translate-x-2 transition-transform">
+              <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                <ShieldCheck size={28} />
+              </div>
+              <div className="text-left">
+                <span className="block font-black text-xl text-charcoal group-hover:text-primary transition-colors">Secure Node Access</span>
+                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Connect to portal →</p>
+              </div>
             </button>
           </div>
         </div>
       </section>
 
+
       {/* Integration Guide */}
-      <section id="install" className="py-32 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-20 space-y-4">
-          <span className="text-primary font-black text-[11px] uppercase tracking-[0.2em]">Getting Started</span>
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-secondary">Deploy the Ecosystem.</h2>
+      {/* Integration Guide */}
+<section id="install" className="py-32 px-6 max-w-7xl mx-auto">
+  <div className="text-center mb-20 space-y-4">
+    <span className="text-primary font-black text-[11px] uppercase tracking-[0.2em]">Getting Started</span>
+    <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-white">Install the Terminal.</h2>
+    <p className="text-white/40 text-lg max-w-2xl mx-auto">Install Maatla Kebs as a native app on your device for the best trading experience.</p>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+    {/* iOS Installation */}
+    <div className="bg-white/[0.03] border border-white/10 rounded-[3rem] p-8 transition-all hover:bg-white/[0.05] hover:border-primary/30 group">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-all">
+          <Smartphone size={32} className="text-primary" />
+        </div>
+        <div>
+          <h3 className="text-2xl font-black text-white">iOS Installation</h3>
+          <p className="text-white/40 text-sm">iPhone • iPad • Safari</p>
+        </div>
+      </div>
+      
+      <div className="space-y-6">
+        <div className="bg-black/30 rounded-2xl p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black shrink-0">1</div>
+            <div>
+              <p className="font-bold text-white">Open in Safari</p>
+              <p className="text-white/40 text-sm">Tap the Share button <span className="inline-block bg-white/10 px-2 py-1 rounded-lg text-xs">⎔</span> at the bottom of the screen</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black shrink-0">2</div>
+            <div>
+              <p className="font-bold text-white">Add to Home Screen</p>
+              <p className="text-white/40 text-sm">Scroll down and tap <span className="text-primary font-bold">"Add to Home Screen"</span></p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-black shrink-0">3</div>
+            <div>
+              <p className="font-bold text-white">Confirm Installation</p>
+              <p className="text-white/40 text-sm">Tap <span className="text-primary font-bold">"Add"</span> in the top right corner</p>
+            </div>
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { title: 'iOS implementation', icon: Smartphone, bg: 'bg-white' },
-            { title: 'Android Activation', icon: Zap, bg: 'bg-primary text-white shadow-2xl shadow-primary/20 md:scale-105' },
-            { title: 'Desktop Access', icon: ShieldCheck, bg: 'bg-white' },
-          ].map((item, i) => (
-            <div key={i} className={`p-10 rounded-5xl border border-slate-200 transition-all ${item.bg}`}>
-              <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-8 text-secondary">
-                 <item.icon size={28} />
-              </div>
-              <h3 className="text-2xl font-black mb-6">{item.title}</h3>
-              <div className="aspect-[9/16] bg-slate-100/50 rounded-3xl mb-8 overflow-hidden relative group">
-                 <div className="absolute inset-0 flex items-center justify-center text-center p-8 opacity-40">
-                    <p className="text-[10px] font-black uppercase tracking-widest leading-loose">Deployment Guide <br/> Uploading...</p>
-                 </div>
-              </div>
-              <ul className="space-y-4 text-sm font-semibold opacity-70">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 size={18} />
-                  <span>Secure handshake protocol</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 size={18} />
-                  <span>Native system integration</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 size={18} />
-                  <span>Real-time data sync</span>
-                </li>
-              </ul>
-            </div>
-          ))}
+        <div className="pt-4 border-t border-white/10">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white/40">✓ Full screen mode</span>
+            <span className="text-white/40">✓ Offline capable</span>
+            <span className="text-white/40">✓ Push notifications</span>
+          </div>
         </div>
-      </section>
+      </div>
+    </div>
+
+    {/* Android Installation */}
+    <div className="bg-primary border border-primary/30 rounded-[3rem] p-8 transition-all hover:scale-[1.02] shadow-2xl shadow-primary/20 group">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+          <Zap size={32} className="text-white" />
+        </div>
+        <div>
+          <h3 className="text-2xl font-black text-white">Android Installation</h3>
+          <p className="text-white/60 text-sm">All Android Devices • Chrome</p>
+        </div>
+      </div>
+      
+      <div className="space-y-6">
+        <div className="bg-black/20 rounded-2xl p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-black shrink-0">1</div>
+            <div>
+              <p className="font-bold text-white">Open in Chrome</p>
+              <p className="text-white/70 text-sm">Tap the menu button <span className="inline-block bg-white/20 px-2 py-1 rounded-lg text-xs">⋮</span> in the top right corner</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-black shrink-0">2</div>
+            <div>
+              <p className="font-bold text-white">Install App</p>
+              <p className="text-white/70 text-sm">Select <span className="text-white font-bold">"Install App"</span> or <span className="text-white font-bold">"Add to Home screen"</span></p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-black shrink-0">3</div>
+            <div>
+              <p className="font-bold text-white">Launch Terminal</p>
+              <p className="text-white/70 text-sm">Tap <span className="text-white font-bold">"Install"</span> and open from your home screen</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="pt-4 border-t border-white/20">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white/80">✓ Native app experience</span>
+            <span className="text-white/80">✓ Automatic updates</span>
+            <span className="text-white/80">✓ Background sync</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Additional Tips */}
+  <div className="mt-16 max-w-3xl mx-auto text-center">
+    <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6">
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <AlertCircle size={18} className="text-primary" />
+        <span className="text-sm font-bold text-white/60 uppercase tracking-wider">Pro Tips</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <p className="text-white font-semibold mb-1">After Installation</p>
+          <p className="text-white/40">Launch from home screen for full-screen PWA experience</p>
+        </div>
+        <div>
+          <p className="text-white font-semibold mb-1">Updates</p>
+          <p className="text-white/40">The app updates automatically when you open it</p>
+        </div>
+        <div>
+          <p className="text-white font-semibold mb-1">Notifications</p>
+          <p className="text-white/40">Enable notifications for real-time trade alerts</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+       
 
       {/* Final Call to Action */}
       <section className="py-24 px-6">
-        <div className="max-w-7xl mx-auto rounded-5xl bg-secondary p-12 sm:p-24 relative overflow-hidden text-center text-white space-y-12">
-          <div className="absolute inset-0 opacity-10 hero-pattern" />
-          <div className="absolute top-0 left-1/4 w-1/2 h-full bg-primary/20 blur-[100px] rounded-full -translate-y-1/2" />
-          
+        <div className="max-w-7xl mx-auto rounded-[4rem] bg-primary p-12 sm:p-24 relative overflow-hidden text-center text-white space-y-12 shadow-2xl shadow-primary/20">
+          <div className="absolute inset-0 opacity-20 hero-pattern" />
+          <div className="absolute top-0 left-1/4 w-1/2 h-full bg-white/10 blur-[100px] rounded-full -translate-y-1/2" />
+
           <div className="relative z-10 space-y-8 max-w-3xl mx-auto">
             <h2 className="text-4xl sm:text-7xl font-[900] tracking-tighter leading-tight italic uppercase">
-              Ready to automate <br /> your <span className="gradient-text">Freedom?</span>
+              Ready to automate <br /> your <span className="text-charcoal italic">Freedom?</span>
             </h2>
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-6">
-              <button onClick={onLaunch} className="w-full sm:w-auto px-12 py-6 bg-white text-secondary text-lg font-black rounded-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              <button onClick={onLaunch} className="w-full sm:w-auto px-12 py-6 bg-white text-primary text-xl font-black rounded-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
                 INITIALIZE NOW
               </button>
             </div>
-            <p className="text-white/30 text-[10px] font-black uppercase tracking-[0.6em]">24/7 Global Trading Nodes Active</p>
+            <p className="text-white/40 text-[10px] font-black uppercase tracking-[1em]">24/7 Global Nodes Active</p>
           </div>
         </div>
       </section>
 
-      <footer className="py-20 px-6 border-t border-slate-100 text-center space-y-8 bg-white">
-          <div className="w-14 h-14 bg-secondary text-white rounded-2xl flex items-center justify-center mx-auto shadow-2xl">
-            <img src="/MK Logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-          </div>
-          <div className="text-[10px] font-black text-secondary/30 uppercase tracking-[0.8em]">
-            &copy; 2026 MAATLA KEBS | BY TOPO RAPULA
-          </div>
-      </footer>
+<footer className="py-20 px-6 border-t border-white/5 text-center space-y-10">
+  <div className="w-16 h-16 bg-white/5 border border-white/10 text-white rounded-[1.5rem] flex items-center justify-center mx-auto shadow-2xl">
+    <img src="/MK Logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+  </div>
+  <div className="text-[10px] font-black text-white/20 uppercase tracking-[1.2em]">
+    &copy; 2026 MAATLA KEBS |{' '}
+    <a 
+      href="https://toporapula.vercel.app/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="hover:text-primary transition-colors duration-300 hover:tracking-[1.4em] inline-block"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      BY TOPO RAPULA
+    </a>
+  </div>
+</footer>
     </div>
   );
 };
 
 // ── Splash Screen ─────────────────────────────────────────────────────────────
+
 const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   useEffect(() => {
     // Technical Pre-load Node: Ensures all assets are cached before terminal handshake
     const assets = ['/kebs.jpg', '/support.jpg', '/MK Logo.png', '/weltrade.png', '/metatrader.png'];
     assets.forEach(src => { const img = new Image(); img.src = src; });
 
-    const t = setTimeout(onFinish, 3000); 
-    return () => clearTimeout(t); 
+    const t = setTimeout(onFinish, 3000);
+    return () => clearTimeout(t);
   }, [onFinish]);
 
   return (
     <div className="fixed inset-0 bg-[#0d0f14] z-[100] flex flex-col items-center justify-center overflow-hidden animate-fade-in text-center h-full w-full">
       {/* Immersive Depth Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark/95 to-dark/90" />
-      
+
       {/* Central Identity Section - Perfectly Vertical Center */}
       <div className="relative z-20 flex flex-col items-center justify-center space-y-12 animate-fade-in scale-110">
         <div className="w-32 h-32 bg-[#1a1c22] border-2 border-white/10 rounded-[2.5rem] flex items-center justify-center shadow-2xl animate-pulse-slow">
           <img src="/MK Logo.png" alt="Logo" className="w-20 h-20 object-contain" />
         </div>
-        
+
         <div className="space-y-6">
           <div className="w-40 h-[2px] bg-white/5 mx-auto relative overflow-hidden rounded-full">
             <div className="absolute inset-0 bg-primary w-1/2 animate-[splash-load_1.5s_infinite]" />
@@ -280,7 +453,7 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
           </p>
         </div>
       </div>
-      
+
       {/* Foundation Signature at Base */}
       <div className="absolute bottom-16 left-0 right-0 z-20 animate-fade-in delay-700">
         <p className="text-[10px] font-black text-white uppercase tracking-[0.6em]">

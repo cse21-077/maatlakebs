@@ -14,7 +14,7 @@ import { Button, Card } from './components/shared';
 type View = 'LANDING' | 'SPLASH' | 'AUTH' | 'ONBOARDING' | 'APP';
 
 // ── Landing Page ──────────────────────────────────────────────────────────────
-const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
+const LandingPage = ({ onLaunch, isPWA }: { onLaunch: () => void; isPWA: boolean }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -25,27 +25,39 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      setDeferredPrompt(null);
+    if (!isPWA) {
+      // Not in PWA mode - trigger install prompt
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          // Wait a moment for app to potentially install
+          setTimeout(() => {
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+              onLaunch();
+            }
+          }, 1000);
+        }
+        setDeferredPrompt(null);
+      }
       return;
     }
+    // Already in PWA mode - proceed
     onLaunch();
   };
 
   const Nav = () => (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-5xl glass-nav rounded-full px-6 py-3 flex items-center justify-between shadow-xl shadow-primary/5">
+    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-5xl lg:glass-nav rounded-full px-6 py-3 flex items-center justify-between lg:shadow-xl shadow-primary/5 lg:shadow-primary/5 lg:bg-[#bfc5c4]">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+        <div className="w-8 h-8 bg-primary lg:bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
           <img src="/MK Logo.png" alt="Logo" className="w-5 h-5 object-contain" />
         </div>
-        <span className="font-extrabold text-sm tracking-tight text-secondary">Maatla Kebs</span>
+        <span className="font-extrabold text-sm tracking-tight text-white lg:text-black">Maatla Kebs</span>
       </div>
       <div className="flex items-center gap-8">
-        <a href="#about" className="text-[13px] font-semibold text-secondary/60 hover:text-primary transition-colors hidden sm:block">About</a>
-        <a href="#install" className="text-[13px] font-semibold text-secondary/60 hover:text-primary transition-colors hidden sm:block">Installation</a>
-        <button onClick={onLaunch} className="px-5 py-2.5 bg-secondary text-white rounded-full text-[13px] font-bold shadow-lg shadow-secondary/10 hover:bg-secondary/90 transition-all hover:scale-105 active:scale-95">
+        <a href="#about" className="text-[13px] font-semibold text-white/70 lg:text-black hover:text-primary transition-colors hidden sm:block">About</a>
+        <a href="#install" className="text-[13px] font-semibold text-white/70 lg:text-black hover:text-primary transition-colors hidden sm:block">Installation</a>
+        <button onClick={handleInstallClick} className="px-5 py-2.5 bg-secondary text-white lg:bg-primary lg:text-white rounded-full text-[13px] font-bold shadow-lg shadow-secondary/10 hover:bg-secondary/90 lg:hover:bg-primary/90 transition-all hover:scale-105 active:scale-95">
           Get App
         </button>
       </div>
@@ -57,7 +69,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
       <Nav />
 
       {/* Hero Section */}
-      <header className="relative pt-48 pb-32 px-6 flex flex-col items-center justify-center overflow-hidden" style={{ backgroundColor: '#0a0e1a' }}>
+      <header className="relative pt-20 lg:pt-48 pb-16 lg:pb-32 px-4 lg:px-6 flex flex-col items-center justify-center overflow-hidden min-h-[120vh] lg:min-h-auto" style={{ backgroundColor: '#0a0e1a' }}>
         {/* Mobile Background Image */}
         <div className="absolute inset-0 z-0 lg:hidden">
           <img 
@@ -75,9 +87,9 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
           <div className="absolute inset-0 hero-pattern opacity-10" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left: Content */}
-          <div className="space-y-10 text-left animate-slide-up">
+          <div className="space-y-6 lg:space-y-10 text-left animate-slide-up lg:mg-0 mt-96 lg:mt-0">
             <h1 className="text-[clamp(2.8rem,9vw,6rem)] font-[900] tracking-[-0.04em] leading-[0.9] text-white">
 
               Master the <br />
@@ -90,18 +102,18 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
               Join Botswana's premier trading community. Experience elite, automated wealth creation with Maatla Kebs—your trusted partner in safe, simple, and powerful financial freedom.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
+            <div className="hidden lg:flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
               <button
                 onClick={handleInstallClick}
                 className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all group"
               >
                 <Smartphone size={22} className="group-hover:rotate-12 transition-transform" />
-                {isMobile ? 'Install Terminal' : 'Join The Community'}
+                Start Trading
               </button>
               {/* Removed the Launch Portal button as requested */}
             </div>
 
-            <div className="pt-8 flex flex-wrap gap-10 opacity-30 grayscale items-center">
+            <div className="pt-8 flex flex-wrap gap-10 opacity-30 grayscale items-center hidden lg:flex">
               <img src="/metatrader.png" className="h-6 object-contain" alt="MT5" />
               <img src="/weltrade.png" className="h-6 object-contain" alt="Weltrade" />
               <img src="/binace.png" className="h-6 object-contain" alt="Binance" />
@@ -233,15 +245,6 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
             <p className="text-xl text-charcoal/70 leading-relaxed font-medium">
               Copy By Kebs isn't just a platform—it's a digital legacy. We simplify the complexity of modern financial markets into a sleek, automated experience that works for you.
             </p>
-            <button onClick={onLaunch} className="flex items-center gap-6 group hover:translate-x-2 transition-transform">
-              <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/20 group-hover:scale-110 group-hover:rotate-6 transition-all">
-                <ShieldCheck size={28} />
-              </div>
-              <div className="text-left">
-                <span className="block font-black text-xl text-charcoal group-hover:text-primary transition-colors">Secure Node Access</span>
-                <p className="text-[10px] font-black text-charcoal/40 uppercase tracking-[0.4em]">Connect to portal →</p>
-              </div>
-            </button>
           </div>
         </div>
       </section>
@@ -389,7 +392,7 @@ const LandingPage = ({ onLaunch }: { onLaunch: () => void }) => {
               Ready to automate <br /> your <span className="text-charcoal italic">Freedom?</span>
             </h2>
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-6">
-              <button onClick={onLaunch} className="w-full sm:w-auto px-12 py-6 bg-white text-primary text-xl font-black rounded-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              <button onClick={handleInstallClick} className="w-full sm:w-auto px-12 py-6 bg-white text-primary text-xl font-black rounded-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
                 INITIALIZE NOW
               </button>
             </div>
@@ -515,7 +518,7 @@ const App = () => {
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">
-      {view === 'LANDING' && <LandingPage onLaunch={() => setView('SPLASH')} />}
+      {view === 'LANDING' && <LandingPage isPWA={isPWA} onLaunch={() => setView('SPLASH')} />}
       {view === 'SPLASH' && <SplashScreen onFinish={() => setView('AUTH')} />}
       {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
         if (s) { setSession(s); setView('ONBOARDING'); return; }

@@ -14,7 +14,7 @@ const mockSession: Session = {
     user: {
         id: '00000000-0000-4000-a000-000000000000',
         app_metadata: {},
-        user_metadata: { full_name: 'Demo User', trader_id: '00000000-0000-0000-0000-000000000000' },
+        user_metadata: { full_name: 'Maatla Kebs', trader_id: '00000000-0000-0000-0000-000000000000' },
         aud: 'authenticated',
         created_at: new Date().toISOString(),
         email: 'demo@maatlakebs.com',

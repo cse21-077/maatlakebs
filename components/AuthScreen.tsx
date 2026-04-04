@@ -75,21 +75,8 @@ export const AuthScreen = ({ onLogin }: Props) => {
             }
 
             if (data.user) {
-                // Insert into public users table
-                const { error: insertErr } = await supabase.from('users').insert({ 
-                    id: data.user.id, 
-                    full_name: rName, 
-                    email: rEmail, 
-                    role: 'student', 
-                    trader_id: resolvedTraderId 
-                });
-
-                if (insertErr) {
-                    console.error('User Insert Error:', insertErr);
-                    setRError('Success, but profile creation failed: ' + insertErr.message);
-                } else {
-                    setRSuccess(true);
-                }
+                // Profile creation is handled by database trigger
+                setRSuccess(true);
             }
         } catch (e: any) {
             setRError(e.message || 'An unexpected error occurred.');

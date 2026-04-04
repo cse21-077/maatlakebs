@@ -2,24 +2,10 @@ import React, { useState } from 'react';
 import { User, Lock, AlertCircle, CheckCircle2, Mail, Key } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_TRADER_ID } from '../lib/database.types';
 import { Button, Card } from './shared';
 
 interface Props { onLogin: (s?: Session) => void; }
-
-const mockSession: Session = {
-    access_token: 'mock',
-    refresh_token: 'mock',
-    expires_in: 3600,
-    token_type: 'bearer',
-    user: {
-        id: '00000000-0000-4000-a000-000000000000',
-        app_metadata: {},
-        user_metadata: { full_name: 'Maatla Kebs', trader_id: '00000000-0000-0000-0000-000000000000' },
-        aud: 'authenticated',
-        created_at: new Date().toISOString(),
-        email: 'demo@maatlakebs.com',
-    }
-} as any;
 
 export const AuthScreen = ({ onLogin }: Props) => {
     const [tab, setTab] = useState<'login' | 'register'>('login');
@@ -60,22 +46,56 @@ export const AuthScreen = ({ onLogin }: Props) => {
         if (rPass.length < 8) { setRError('Password must be at least 8 characters.'); return; }
         setRLoading(true);
 
-        const { data: trader, error: tErr } = await supabase.from('users').select('id')
-            .eq('referral_code', SYSTEM_REFERRAL_CODE).eq('role', 'trader').single();
+        try {
+            // Find trader or use default
+            const { data: trader } = await supabase
+                .from('users')
+                .select('id')
+                .eq('referral_code', SYSTEM_REFERRAL_CODE)
+                .eq('role', 'trader')
+                .maybeSingle();
 
-        if (tErr || !trader) { setRError('System configuration error.'); setRLoading(false); return; }
+            const resolvedTraderId = trader?.id || DEFAULT_TRADER_ID;
 
-        const { data, error: signUpErr } = await supabase.auth.signUp({
-            email: rEmail, password: rPass, options: { data: { full_name: rName, trader_id: (trader as any).id } } as any,
-        });
+            const { data, error: signUpErr } = await supabase.auth.signUp({
+                email: rEmail,
+                password: rPass,
+                options: { 
+                    data: { 
+                        full_name: rName, 
+                        trader_id: resolvedTraderId 
+                    } 
+                }
+            });
 
-        if (signUpErr) { setRError(signUpErr.message); setRLoading(false); return; }
+            if (signUpErr) { 
+                setRError(signUpErr.message); 
+                setRLoading(false); 
+                return; 
+            }
 
-        if (data.user) {
-            await (supabase.from('users') as any).insert({ id: (data.user as any).id, full_name: rName, email: rEmail, role: 'student', trader_id: (trader as any).id });
-            setRSuccess(true);
+            if (data.user) {
+                // Insert into public users table
+                const { error: insertErr } = await supabase.from('users').insert({ 
+                    id: data.user.id, 
+                    full_name: rName, 
+                    email: rEmail, 
+                    role: 'student', 
+                    trader_id: resolvedTraderId 
+                });
+
+                if (insertErr) {
+                    console.error('User Insert Error:', insertErr);
+                    setRError('Success, but profile creation failed: ' + insertErr.message);
+                } else {
+                    setRSuccess(true);
+                }
+            }
+        } catch (e: any) {
+            setRError(e.message || 'An unexpected error occurred.');
+        } finally {
+            setRLoading(false);
         }
-        setRLoading(false);
     };
 
     return (
@@ -125,9 +145,6 @@ export const AuthScreen = ({ onLogin }: Props) => {
                                 <Button loading={loading} type="submit" className="w-full py-4 text-base">
                                     Sign In
                                 </Button>
-                                <button type="button" onClick={() => onLogin(mockSession)} className="text-xs font-bold text-white/20 uppercase tracking-widest hover:text-white transition-colors">
-                                    Continue as Guest
-                                </button>
                             </div>
                         </form>
                     )}

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Button } from './shared';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_TRADER_ID } from '../lib/database.types';
 
 interface TerminalProtocolProps {
     uid: string;
@@ -60,9 +61,11 @@ export const TerminalProtocol = ({
         try {
             if (!localMt5Login && mt5.login) {
                 const encrypted = btoa(mt5.password);
+                // Use the trader's ID from user metadata, falling back to the default trader
+                const resolvedTraderId = traderId || DEFAULT_TRADER_ID;
                 const { error: acctErr } = await supabase.from('student_accounts').upsert({
                     user_id: uid, mt5_login: mt5.login, mt5_server: mt5.server,
-                    encrypted_password: encrypted, is_active: true, trader_id: traderId,
+                    encrypted_password: encrypted, is_active: true, trader_id: resolvedTraderId,
                 } as any, { onConflict: 'user_id' });
                 if (acctErr) throw acctErr;
                 setLocalMt5Login(mt5.login); // Immediate UI update

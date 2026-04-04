@@ -490,21 +490,48 @@ const App = () => {
   // ── Session management ──
   useEffect(() => {
     const checkOnboarding = async (s: Session) => {
-      // We check for risk_profiles as a proxy for 'has accepted legal disclosure'
-      const { data } = await supabase
-        .from('risk_profiles').select('id').eq('user_id', s.user.id).single();
-      setView(data ? 'APP' : 'ONBOARDING');
+      try {
+        // Use maybeSingle() to avoid 406 error if not found
+        const { data, error } = await supabase
+          .from('risk_profiles')
+          .select('id')
+          .eq('user_id', s.user.id)
+          .maybeSingle();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Onboarding Check Error:', error);
+        }
+        
+        setView(data ? 'APP' : 'ONBOARDING');
+      } catch (e) {
+        console.error('CheckOnboarding Catch:', e);
+        // Fallback to onboarding if we can't confirm app state
+        setView('ONBOARDING');
+      }
     };
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      if (s) { setSession(s); checkOnboarding(s); }
-      else setView(isPWA ? 'SPLASH' : 'LANDING');
+    const initialize = async () => {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      if (s) { 
+        setSession(s); 
+        await checkOnboarding(s); 
+      } else {
+        setView(isPWA ? 'SPLASH' : 'LANDING');
+      }
       setBooting(false);
-    });
+    };
+
+    initialize();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === 'SIGNED_OUT') { setSession(null); setView('AUTH'); }
-      if (event === 'SIGNED_IN' && s) { setSession(s); checkOnboarding(s); }
+      if (event === 'SIGNED_OUT') { 
+        setSession(null); 
+        setView('AUTH'); 
+      }
+      if (event === 'SIGNED_IN' && s) { 
+        setSession(s); 
+        checkOnboarding(s); 
+      }
     });
 
     return () => subscription.unsubscribe();

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2, CheckCircle, ShieldAlert } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_TRADER_ID } from '../lib/database.types';
 import { Button } from './shared';
 
 interface Props { session: Session; onComplete: () => void; }
@@ -29,7 +30,8 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
         const isGuest = session.user.id === '00000000-0000-4000-a000-000000000000';
 
         if (!isGuest) {
-            // Create or update risk profile to mark onboarding as complete
+            // Create or update risk profile to mark onboarding as complete.
+            // NOTE: risk_profiles has no trader_id column — that lives in student_accounts.
             const { error: riskErr } = await supabase.from('risk_profiles')
                 .upsert({
                     user_id: session.user.id,
@@ -37,7 +39,6 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
                     max_lot: 0.5,
                     max_drawdown: 20,
                     pause_copy: false,
-                    trader_id: traderId
                 } as any, { onConflict: 'user_id' });
 
             if (riskErr) {

@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import type { SubscriptionStatus, ConnectionState } from '../lib/database.types';
+import { DEFAULT_TRADER_ID } from '../lib/database.types';
+import type { SubscriptionStatus, ConnectionState, RiskProfileRow, StudentAccountRow, PaymentStatusRow } from '../lib/database.types';
 import { Button } from './shared';
 
 import { TerminalProtocol } from './TerminalProtocol';
@@ -28,6 +29,9 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [mt5Login, setMt5Login] = useState('');
     const [paymentStatus, setPaymentStatus] = useState<UIPaymentStatus>('UNPAID');
     const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false });
+
+    // Link student to default trader if not present in metadata
+    const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
 
     const uid = session.user.id;
     const fullName = session.user.user_metadata?.full_name ?? 'Trader';
@@ -51,24 +55,34 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const load = async (updatedRisk?: any) => {
         if (updatedRisk) setRisk(updatedRisk);
 
-        const isGuest = uid === '00000000-0000-4000-a000-000000000000';
-        if (isGuest) { 
-            setMt5Login('8850921'); 
-            setPaymentStatus('CONFIRMED'); 
-            return; 
-        }
-        
         try {
-            const { data: acct } = await (supabase.from('student_accounts') as any).select('mt5_login').eq('user_id', uid).single();
-            const { data: ps } = await (supabase.from('payment_status') as any).select('subscription_status').eq('user_id', uid).single();
-            setMt5Login(acct ? (acct as any).mt5_login : '');
-            setPaymentStatus((ps as any)?.subscription_status === 'active' ? 'CONFIRMED' : 'UNPAID');
-            const { data: r } = await (supabase.from('risk_profiles') as any).select('*').eq('user_id', uid).single();
-            if (r) {
-                const rs = r as any;
-                setRisk({ aggressiveness: rs.aggressiveness, maxLot: rs.max_lot, maxDD: rs.max_drawdown, pauseCopy: rs.pause_copy });
+            // Fetch relevant data in parallel for speed
+            const [acctRes, payRes, riskRes] = await Promise.all([
+                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).maybeSingle(),
+                supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle(),
+                supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle(),
+            ]);
+
+            if (acctRes.data) {
+                setMt5Login(acctRes.data.mt5_login);
             }
-        } catch (e) { console.error('Load Error:', e); }
+
+            if (payRes.data) {
+                setPaymentStatus(payRes.data.subscription_status === 'active' ? 'CONFIRMED' : 'UNPAID');
+            }
+
+            if (riskRes.data) {
+                const r = riskRes.data as RiskProfileRow;
+                setRisk({ 
+                    aggressiveness: Number(r.aggressiveness), 
+                    maxLot: Number(r.max_lot), 
+                    maxDD: Number(r.max_drawdown), 
+                    pauseCopy: r.pause_copy 
+                });
+            }
+        } catch (e) { 
+            console.error('Load Error:', e); 
+        }
     };
 
     useEffect(() => { load(); }, [uid, view]);

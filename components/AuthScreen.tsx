@@ -47,15 +47,8 @@ export const AuthScreen = ({ onLogin }: Props) => {
         setRLoading(true);
 
         try {
-            // Find trader or use default
-            const { data: trader } = await supabase
-                .from('users')
-                .select('id')
-                .eq('referral_code', SYSTEM_REFERRAL_CODE)
-                .eq('role', 'trader')
-                .maybeSingle();
-
-            const resolvedTraderId = trader?.id || DEFAULT_TRADER_ID;
+            // We use the default LeanBridge Mentor for all new registrations
+            const resolvedTraderId = DEFAULT_TRADER_ID;
 
             const { data, error: signUpErr } = await supabase.auth.signUp({
                 email: rEmail,

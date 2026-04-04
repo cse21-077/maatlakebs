@@ -437,9 +437,9 @@ const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   }, [onFinish]);
 
   return (
-    <div className="fixed inset-0 bg-[#0d0f14] z-[100] flex flex-col items-center justify-center overflow-hidden animate-fade-in text-center h-full w-full">
+    <div className="fixed inset-0 bg-[#0d0f14] z-[99999] flex flex-col items-center justify-center overflow-hidden animate-fade-in text-center h-[100vh] w-full pt-safe pb-safe">
       {/* Immersive Depth Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-dark via-dark/95 to-dark/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0d0f14] via-[#0d0f14]/95 to-[#0d0f14]/90" />
 
       {/* Central Identity Section - Perfectly Vertical Center */}
       <div className="relative z-20 flex flex-col items-center justify-center space-y-12 animate-fade-in scale-110">

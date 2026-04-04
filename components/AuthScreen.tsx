@@ -34,8 +34,19 @@ export const AuthScreen = ({ onLogin }: Props) => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true); setError('');
+        
+        console.log('[Login] Attempting sign-in for:', email);
+
         const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
-        if (err) { setError(err.message); setLoading(false); return; }
+        
+        if (err) { 
+            console.error('[Login] Error:', err);
+            setError(err.message); 
+            setLoading(false); 
+            return; 
+        }
+
+        console.log('[Login] Sign-in successful! User ID:', data.user?.id);
         if (data.user) onLogin();
         setLoading(false);
     };
@@ -49,6 +60,9 @@ export const AuthScreen = ({ onLogin }: Props) => {
         try {
             // We use the default LeanBridge Mentor for all new registrations
             const resolvedTraderId = DEFAULT_TRADER_ID;
+            
+            console.log('[Register] Starting signup for:', rEmail);
+            console.log('[Register] Using Trader ID:', resolvedTraderId);
 
             const { data, error: signUpErr } = await supabase.auth.signUp({
                 email: rEmail,
@@ -62,16 +76,18 @@ export const AuthScreen = ({ onLogin }: Props) => {
             });
 
             if (signUpErr) { 
+                console.error('[Register] Supabase Sign-Up Error:', signUpErr);
                 setRError(signUpErr.message); 
                 setRLoading(false); 
                 return; 
             }
 
+            console.log('[Register] Sign-Up Success! User ID:', data.user?.id);
             if (data.user) {
-                // Profile creation is handled by database trigger
                 setRSuccess(true);
             }
         } catch (e: any) {
+            console.error('[Register] Unexpected Exception:', e);
             setRError(e.message || 'An unexpected error occurred.');
         } finally {
             setRLoading(false);

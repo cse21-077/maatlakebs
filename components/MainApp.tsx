@@ -195,7 +195,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                 <LifeBuoy size={28} className="text-white/40" />
                                 <div>
                                     <p className="text-lg font-black text-white uppercase leading-none">Get Help</p>
-                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Live Support Chat</p>
+                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Live Tech Support Chat</p>
                                 </div>
                             </div>
                         </div>

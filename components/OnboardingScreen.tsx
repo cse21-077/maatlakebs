@@ -30,20 +30,23 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
         const isGuest = session.user.id === '00000000-0000-4000-a000-000000000000';
 
         if (!isGuest) {
-            // Create or update risk profile to mark onboarding as complete.
-            // NOTE: risk_profiles has no trader_id column — that lives in student_accounts.
-            const { error: riskErr } = await supabase.from('risk_profiles')
-                .upsert({
+            // Create or update risk profile via backend API (RLS bypass)
+            const riskRes = await fetch('/api/upsert-risk-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     user_id: session.user.id,
                     aggressiveness: 1.0,
                     max_lot: 0.5,
                     max_drawdown: 20,
                     pause_copy: false,
-                } as any, { onConflict: 'user_id' });
+                }),
+            });
 
-            if (riskErr) {
+            if (!riskRes.ok) {
+                const riskErr = await riskRes.json();
                 console.error('Onboarding Error:', riskErr);
-                setError('System error: ' + riskErr.message);
+                setError('System error: ' + (riskErr.error || 'Failed to create risk profile'));
                 setLoading(false);
                 return;
             }

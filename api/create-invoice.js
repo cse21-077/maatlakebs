@@ -9,13 +9,19 @@ export default async function handler(req, res) {
   try {
     console.log('Attempting to fetch from NowPayments (LIVE)...');
     
+    // Pre-select TRX as payment currency for better UX
+    const requestBody = {
+      ...req.body,
+      pay_currency: 'trx',
+    };
+    
     const response = await fetch('https://api-sandbox.nowpayments.io/v1/invoice', {
       method: 'POST',
       headers: {
         'x-api-key': process.env.NOW_PAYMENTS_API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(requestBody),
     });
 
     console.log('Response status:', response.status);
@@ -31,9 +37,11 @@ export default async function handler(req, res) {
     res.status(200).json({
       id: data.id,
       invoice_id: data.id,
+      token_id: data.token_id,
       payment_url: data.invoice_url,
       price_amount: data.price_amount,
       price_currency: data.price_currency,
+      pay_currency: data.pay_currency || 'trx',
       status: data.status,
     });
   } catch (error) {

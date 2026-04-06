@@ -74,8 +74,8 @@ export const MembershipProtocol = ({
         order_id: `order_${uid}_${Date.now()}`,
         order_description: 'Mentor Maatla Kebs - Monthly Subscription',
         ipn_callback_url: `${import.meta.env.VITE_APP_URL}/api/webhooks/nowpayments`,
-        success_url: `${import.meta.env.VITE_APP_URL}/dashboard?payment=success`,
-        cancel_url: `${import.meta.env.VITE_APP_URL}/dashboard?payment=cancelled`,
+        success_url: `${import.meta.env.VITE_APP_URL}/?payment=success`,
+        cancel_url: `${import.meta.env.VITE_APP_URL}/?payment=cancelled`,
         user_id: uid,
         subscription_plan: 'active',
       });

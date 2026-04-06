@@ -10,22 +10,12 @@ export default async function handler(req, res) {
     console.log('📨 Webhook headers received:', Object.keys(req.headers));
     console.log('📨 Full headers:', req.headers);
 
-    // Try multiple header name variations
-    let signature = req.headers['nowpayments-signature'] 
-      || req.headers['x-nowpayments-signature']
-      || req.headers['signature']
-      || req.body?.signature;
+    // Get signature from header (NowPayments uses x-nowpayments-sig)
+    let signature = req.headers['x-nowpayments-sig'];
 
     if (!signature) {
-      console.warn('⚠️ Missing signature - checked headers:', {
-        'nowpayments-signature': req.headers['nowpayments-signature'],
-        'x-nowpayments-signature': req.headers['x-nowpayments-signature'],
-        'signature': req.headers['signature'],
-        'in-body': req.body?.signature ? 'YES' : 'NO',
-      });
+      console.warn('⚠️ Missing signature header x-nowpayments-sig');
       console.log('📦 Webhook body received:', req.body);
-      
-      // Allow processing without signature for now to see the data
       console.warn('⚠️ Proceeding without signature verification (dev mode)');
     } else {
       console.log('✅ Signature found:', signature.substring(0, 20) + '...');
@@ -95,14 +85,16 @@ export default async function handler(req, res) {
     );
 
     // 1. Get user_id and subscription plan from invoice
+    // NowPayments sends invoice_id as number, but convert to string for lookup
     const { data: invoiceData, error: invoiceError } = await supabase
       .from('invoices')
       .select('user_id, subscription_plan')
-      .eq('invoice_id', invoice_id)
+      .eq('invoice_id', String(invoice_id))
       .single();
 
     if (invoiceError || !invoiceData) {
       console.error('❌ Invoice lookup failed:', invoiceError?.message);
+      console.error('📌 Searched for invoice_id:', String(invoice_id));
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
@@ -116,14 +108,7 @@ export default async function handler(req, res) {
         payment_status: 'CONFIRMED',
         paid_for_month: new Date().toISOString(),
       })
-      .eq('invoice_id', invoice_id);
-
-    if (updateInvoiceError) {
-      console.error('❌ Failed to update invoice:', updateInvoiceError.message);
-      return res.status(500).json({ error: 'Failed to update invoice' });
-    }
-
-    console.log('✅ Invoice marked as CONFIRMED');
+        .eq('invoice_id', String(invoice_id));
 
     // 3. Update payment_status table: activate subscription + set next billing date
     const nextDue = new Date();

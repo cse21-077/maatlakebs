@@ -83,7 +83,7 @@ export const MembershipProtocol = ({
       // Store invoice in DB for tracking
       await supabase.from('invoices').insert({
         user_id: uid,
-        invoice_id: invoice.invoice_id,
+        invoice_id: String(invoice.invoice_id), // Convert to string to match DB type
         price_amount: 100,
         price_currency: 'usd',
         payment_status: 'pending',

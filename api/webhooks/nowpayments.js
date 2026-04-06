@@ -133,39 +133,9 @@ export default async function handler(req, res) {
     console.log('✅ Subscription activated for user:', userId);
     console.log('📅 Next billing date:', nextDue.toISOString());
 
-    // 4. Provision MT5 terminal slot (if manager is configured)
-    const mt5ManagerUrl = process.env.MT5_MANAGER_URL;
-    const provisionSecret = process.env.PROVISION_SECRET;
-
-    if (mt5ManagerUrl && provisionSecret) {
-      try {
-        console.log('🎯 Provisioning MT5 terminal slot for user:', userId);
-        const provisionResponse = await fetch(`${mt5ManagerUrl}/provision`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Provision-Secret': provisionSecret,
-          },
-          body: JSON.stringify({ user_id: userId }),
-        });
-
-        const provisionData = await provisionResponse.json();
-
-        if (provisionResponse.ok && provisionData.status === 'success') {
-          console.log('✅ MT5 terminal provisioned:', provisionData.folder_path);
-        } else {
-          console.warn('⚠️ Provision failed:', provisionData.error);
-          // Don't fail the webhook — provision can be retried
-        }
-      } catch (provisionError) {
-        console.error('⚠️ Provision request error:', provisionError.message);
-        // Don't fail the webhook — subscription is already activated
-      }
-    } else {
-      console.log('ℹ️ MT5_MANAGER_URL or PROVISION_SECRET not configured — skipping provision');
-    }
-
-    // Success!
+    // Success! Subscription is now active.
+    // Note: MT5 terminal provisioning happens in TerminalProtocol.tsx when user connects,
+    // not here. This ensures student_accounts record exists before provisioning.
     res.status(200).json({
       success: true,
       message: 'Payment confirmed and subscription activated',

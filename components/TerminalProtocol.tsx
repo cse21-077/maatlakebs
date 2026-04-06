@@ -86,6 +86,23 @@ export const TerminalProtocol = ({
                 }
 
                 setLocalMt5Login(mt5.login); // Immediate UI update
+
+                // Now provision the MT5 terminal slot
+                console.log('🎯 Provisioning terminal slot for user:', uid);
+                const provisionResponse = await fetch('/api/provision-terminal', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ user_id: uid }),
+                });
+
+                const provisionData = await provisionResponse.json();
+
+                if (!provisionResponse.ok) {
+                  console.warn('⚠️ Provision warning:', provisionData.error);
+                  // Don't fail — provision can be retried, but account is saved
+                } else {
+                  console.log('✅ Terminal provisioned:', provisionData.folder_path);
+                }
             }
 
             const { error: riskErr } = await supabase.from('risk_profiles').upsert({

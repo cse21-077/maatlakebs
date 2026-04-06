@@ -26,8 +26,9 @@ export const TerminalProtocol = ({
     const [mt5, setMt5] = useState({ login: '', server: '', password: '' });
     const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
     const [aggressiveness, setAggressiveness] = useState(riskState.aggressiveness || 1.0);
-    const [maxLot, setMaxLot] = useState(riskState.maxLot || 0.10);
-    const [maxDD, setMaxDD] = useState(riskState.maxDD || 20.0);
+    const [maxLot, setMaxLot] = useState(riskState.maxLot || 0.01);
+    const [maxDD, setMaxDD] = useState(riskState.maxDD || 15.0);
+    const [minBal, setMinBal] = useState(riskState.minBalance || 5.0);
     const [pauseCopy, setPauseCopy] = useState(isUnpaid ? true : (riskState.pauseCopy || false));
     const [advanced, setAdvanced] = useState(riskState.advanced_options || { hedge: false });
 
@@ -37,8 +38,9 @@ export const TerminalProtocol = ({
             setPauseCopy(riskState.pauseCopy || false);
         }
         setAggressiveness(riskState.aggressiveness || 1.0);
-        setMaxLot(riskState.maxLot || 0.10);
-        setMaxDD(riskState.maxDD || 20.0);
+        setMaxLot(riskState.maxLot || 0.01);
+        setMaxDD(riskState.maxDD || 15.0);
+        setMinBal(riskState.minBalance || 5.0);
         setAdvanced(riskState.advanced_options || { hedge: false });
     }, [riskState, isUnpaid]);
 
@@ -73,7 +75,7 @@ export const TerminalProtocol = ({
 
             const { error: riskErr } = await supabase.from('risk_profiles').upsert({
                 user_id: uid, aggressiveness, max_lot: maxLot, max_drawdown: maxDD, 
-                pause_copy: pauseCopy, advanced_options: advanced
+                min_balance: minBal, pause_copy: pauseCopy, advanced_options: advanced
             } as any, { onConflict: 'user_id' });
             if (riskErr) throw riskErr;
 
@@ -209,6 +211,7 @@ export const TerminalProtocol = ({
                                 { label: 'Trade Size (Multiplied)', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 5.0, step: 0.1, unit: 'x' },
                                 { label: 'Lot Size Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 2.0, step: 0.01, unit: ' L' },
                                 { label: 'Loss Limit', val: maxDD, set: setMaxDD, min: 5, max: 80, step: 5, unit: '%' },
+                                { label: 'Minimum Equity', val: minBal, set: setMinBal, min: 5, max: 500, step: 5, unit: '$' }
                             ].map((item, i) => (
                                 <div key={i} className="space-y-4">
                                     <div className="flex justify-between items-end"><p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{item.label}</p><p className="text-2xl font-black text-white tracking-tighter">{item.val}{item.unit}</p></div>

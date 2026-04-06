@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { User, Lock, AlertCircle, CheckCircle2, Mail, Key } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { DEFAULT_TRADER_ID } from '../lib/database.types';
 import { Button, Card } from './shared';
 
 interface Props { onLogin: (s?: Session) => void; }
@@ -58,19 +57,15 @@ export const AuthScreen = ({ onLogin }: Props) => {
         setRLoading(true);
 
         try {
-            // We use the default LeanBridge Mentor for all new registrations
-            const resolvedTraderId = DEFAULT_TRADER_ID;
-            
             console.log('[Register] Starting signup for:', rEmail);
-            console.log('[Register] Using Trader ID:', resolvedTraderId);
 
             const { data, error: signUpErr } = await supabase.auth.signUp({
                 email: rEmail,
                 password: rPass,
                 options: { 
                     data: { 
-                        full_name: rName, 
-                        trader_id: resolvedTraderId 
+                        full_name: rName
+                        // trader_id will be assigned later by mentor or admin
                     } 
                 }
             });

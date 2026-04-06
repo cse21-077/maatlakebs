@@ -7,21 +7,16 @@ export default async function handler(req, res) {
   console.log('Request body:', req.body);
 
   try {
-    console.log('Attempting to fetch from NowPayments...');
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const response = await fetch('https://api.sandbox.nowpayments.io/v1/invoice', {
+    console.log('Attempting to fetch from NowPayments (LIVE)...');
+    
+    const response = await fetch('https://api.nowpayments.io/v1/invoice', {
       method: 'POST',
       headers: {
         'x-api-key': process.env.NOW_PAYMENTS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
-      signal: controller.signal,
     });
-
-    clearTimeout(timeout);
 
     console.log('Response status:', response.status);
     const data = await response.json();
@@ -42,13 +37,23 @@ export default async function handler(req, res) {
       status: data.status,
     });
   } catch (error) {
-    console.error('Serverless function error:', error.name, error.message);
-    console.error('Error code:', error.code);
-    console.error('Full error:', JSON.stringify(error, null, 2));
-    res.status(500).json({ 
-      error: error.message,
+    console.error('Fetch error caught:', {
+      name: error.name,
+      message: error.message,
+      cause: error.cause,
       code: error.code,
-      name: error.name
+      errno: error.errno,
+    });
+    
+    // More helpful error message
+    let errorMsg = error.message;
+    if (error.message.includes('ENOTFOUND')) errorMsg = 'DNS resolution failed - cannot reach NowPayments';
+    if (error.message.includes('ECONNREFUSED')) errorMsg = 'Connection refused - NowPayments not responding';
+    if (error.name === 'AbortError') errorMsg = 'Request timeout';
+    
+    res.status(500).json({ 
+      error: errorMsg,
+      details: error.message
     });
   }
 }

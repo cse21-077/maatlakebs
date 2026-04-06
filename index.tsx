@@ -491,18 +491,20 @@ const App = () => {
   useEffect(() => {
     const checkOnboarding = async (s: Session) => {
       try {
-        // Use maybeSingle() to avoid 406 error if not found
-        const { data, error } = await supabase
-          .from('risk_profiles')
-          .select('id')
-          .eq('user_id', s.user.id)
+        // Check if user has completed onboarding
+        const { data: rawData, error } = await supabase
+          .from('users')
+          .select('onboarding_completed')
+          .eq('id', s.user.id)
           .maybeSingle();
+        
+        const data = rawData as any;
         
         if (error && error.code !== 'PGRST116') {
           console.error('Onboarding Check Error:', error);
         }
         
-        setView(data ? 'APP' : 'ONBOARDING');
+        setView(data ? (data.onboarding_completed ? 'APP' : 'ONBOARDING') : 'ONBOARDING');
       } catch (e) {
         console.error('CheckOnboarding Catch:', e);
         // Fallback to onboarding if we can't confirm app state

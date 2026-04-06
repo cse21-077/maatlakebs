@@ -58,9 +58,9 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         try {
             // Fetch relevant data in parallel for speed
             const [acctRes, payRes, riskRes] = await Promise.all([
-                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).maybeSingle(),
-                supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle(),
-                supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle(),
+                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).maybeSingle() as any,
+                supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle() as any,
+                supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle() as any,
             ]);
 
             if (acctRes.data) {

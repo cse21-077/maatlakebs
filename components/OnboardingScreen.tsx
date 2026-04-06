@@ -47,6 +47,19 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
                 setLoading(false);
                 return;
             }
+
+            // Mark onboarding as complete
+            const { error: updateErr } = await (supabase
+                .from('users') as any)
+                .update({ onboarding_completed: true })
+                .eq('id', session.user.id);
+
+            if (updateErr) {
+                console.error('Onboarding Completion Error:', updateErr);
+                setError('System error: ' + updateErr.message);
+                setLoading(false);
+                return;
+            }
         }
 
         setLoading(false);

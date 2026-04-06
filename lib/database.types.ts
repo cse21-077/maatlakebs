@@ -22,6 +22,7 @@ export type Database = {
           role: 'student' | 'trader' | 'super_admin';
           full_name: string | null;
           trader_id: string | null;
+          onboarding_completed: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -164,6 +165,26 @@ export type Database = {
         Update: Partial<Database['public']['Tables']['system_flags']['Insert']>;
       };
 
+      // ── invoices ────────────────────────────────────────────────────────────
+      invoices: {
+        Row: {
+          id: string;
+          user_id: string;
+          invoice_id: string;
+          token_id: string | null;
+          price_amount: string;
+          price_currency: string;
+          pay_currency: string | null;
+          payment_status: string;
+          subscription_plan: string;
+          paid_for_month: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['invoices']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['invoices']['Insert']>;
+      };
+
       // ── dead_letter_queue ────────────────────────────────────────────────────
       dead_letter_queue: {
         Row: {
@@ -237,6 +258,7 @@ export type ConnectionStatusRow = Database['public']['Tables']['connection_statu
 export type RiskProfileRow = Database['public']['Tables']['risk_profiles']['Row'];
 export type MentorHeartbeatRow = Database['public']['Tables']['mentor_heartbeat']['Row'];
 export type TradeLogRow = Database['public']['Tables']['trade_logs']['Row'];
+export type InvoiceRow = Database['public']['Tables']['invoices']['Row'];
 
 export type SubscriptionStatus = PaymentStatusRow['subscription_status'];
 export type ConnectionState = ConnectionStatusRow['mt5_status'];

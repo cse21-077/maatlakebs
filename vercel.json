@@ -1,10 +1,6 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
-  ],
-  "env": {
-    "NOW_PAYMENTS_API_KEY": "@now_payments_api_key",
-    "NOW_PAYMENTS_IPN_SECRET": "@now_payments_ipn_secret",
-    "SUPABASE_SERVICE_KEY": "@supabase_service_key"
-  }
+  ]
 }
+

@@ -78,6 +78,7 @@ export const ModelName = {
   dead_letter_queue: 'dead_letter_queue',
   mentor_heartbeat: 'mentor_heartbeat',
   payment_status: 'payment_status',
+  invoices: 'invoices',
   risk_profiles: 'risk_profiles',
   student_accounts: 'student_accounts',
   system_events: 'system_events',
@@ -534,6 +535,24 @@ export const Payment_statusScalarFieldEnum = {
 } as const
 
 export type Payment_statusScalarFieldEnum = (typeof Payment_statusScalarFieldEnum)[keyof typeof Payment_statusScalarFieldEnum]
+
+
+export const InvoicesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  invoice_id: 'invoice_id',
+  token_id: 'token_id',
+  price_amount: 'price_amount',
+  price_currency: 'price_currency',
+  pay_currency: 'pay_currency',
+  payment_status: 'payment_status',
+  subscription_plan: 'subscription_plan',
+  paid_for_month: 'paid_for_month',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
 
 
 export const Risk_profilesScalarFieldEnum = {

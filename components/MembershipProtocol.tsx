@@ -80,19 +80,33 @@ export const MembershipProtocol = ({
         subscription_plan: 'active',
       });
 
-      // Store invoice in DB for tracking
-      await supabase.from('invoices').insert({
-        user_id: uid,
-        invoice_id: String(invoice.invoice_id), // Convert to string to match DB type
-        price_amount: 100,
-        price_currency: 'usd',
-        payment_status: 'pending',
-        subscription_plan: 'active',
-      } as any);
+      console.log('✅ Invoice created from NowPayments:', {
+        id: invoice.invoice_id,
+        payment_url: invoice.payment_url,
+      });
 
+      // Store invoice in DB for tracking
+      const { data: insertData, error: insertError } = await supabase
+        .from('invoices')
+        .insert({
+          user_id: uid,
+          invoice_id: String(invoice.invoice_id),
+          price_amount: 100,
+          price_currency: 'usd',
+          payment_status: 'pending',
+          subscription_plan: 'active',
+        });
+
+      if (insertError) {
+        console.error('❌ Failed to insert invoice to Supabase:', insertError);
+        throw new Error(`Invoice storage failed: ${insertError.message}`);
+      }
+
+      console.log('✅ Invoice stored in Supabase:', insertData);
       setPaymentUrl(invoice.payment_url);
       setPaymentLoading(false);
     } catch (err: any) {
+      console.error('❌ Payment error:', err);
       setError(err.message || 'Failed to create payment');
       setPaymentLoading(false);
     }

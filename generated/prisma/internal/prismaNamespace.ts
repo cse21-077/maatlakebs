@@ -411,6 +411,7 @@ export const ModelName = {
   dead_letter_queue: 'dead_letter_queue',
   mentor_heartbeat: 'mentor_heartbeat',
   payment_status: 'payment_status',
+  invoices: 'invoices',
   risk_profiles: 'risk_profiles',
   student_accounts: 'student_accounts',
   system_events: 'system_events',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "public_users"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "invoices" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "public_users"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2434,6 +2435,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    invoices: {
+      payload: Prisma.$invoicesPayload<ExtArgs>
+      fields: Prisma.invoicesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.invoicesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.invoicesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        findFirst: {
+          args: Prisma.invoicesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.invoicesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        findMany: {
+          args: Prisma.invoicesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>[]
+        }
+        create: {
+          args: Prisma.invoicesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        createMany: {
+          args: Prisma.invoicesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.invoicesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>[]
+        }
+        delete: {
+          args: Prisma.invoicesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        update: {
+          args: Prisma.invoicesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        deleteMany: {
+          args: Prisma.invoicesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.invoicesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.invoicesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>[]
+        }
+        upsert: {
+          args: Prisma.invoicesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$invoicesPayload>
+        }
+        aggregate: {
+          args: Prisma.InvoicesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvoices>
+        }
+        groupBy: {
+          args: Prisma.invoicesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoicesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.invoicesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvoicesCountAggregateOutputType> | number
+        }
+      }
+    }
     risk_profiles: {
       payload: Prisma.$risk_profilesPayload<ExtArgs>
       fields: Prisma.risk_profilesFieldRefs
@@ -3351,6 +3426,24 @@ export const Payment_statusScalarFieldEnum = {
 export type Payment_statusScalarFieldEnum = (typeof Payment_statusScalarFieldEnum)[keyof typeof Payment_statusScalarFieldEnum]
 
 
+export const InvoicesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  invoice_id: 'invoice_id',
+  token_id: 'token_id',
+  price_amount: 'price_amount',
+  price_currency: 'price_currency',
+  pay_currency: 'pay_currency',
+  payment_status: 'payment_status',
+  subscription_plan: 'subscription_plan',
+  paid_for_month: 'paid_for_month',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
+
+
 export const Risk_profilesScalarFieldEnum = {
   id: 'id',
   user_id: 'user_id',
@@ -3960,6 +4053,7 @@ export type GlobalOmitConfig = {
   dead_letter_queue?: Prisma.dead_letter_queueOmit
   mentor_heartbeat?: Prisma.mentor_heartbeatOmit
   payment_status?: Prisma.payment_statusOmit
+  invoices?: Prisma.invoicesOmit
   risk_profiles?: Prisma.risk_profilesOmit
   student_accounts?: Prisma.student_accountsOmit
   system_events?: Prisma.system_eventsOmit

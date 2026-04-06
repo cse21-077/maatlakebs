@@ -85,24 +85,27 @@ export const MembershipProtocol = ({
         payment_url: invoice.payment_url,
       });
 
-      // Store invoice in DB for tracking
-      const { data: insertData, error: insertError } = await supabase
-        .from('invoices')
-        .insert({
+      // Store invoice in DB via backend API (uses service key to bypass RLS)
+      const storeResponse = await fetch('/api/store-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           user_id: uid,
-          invoice_id: String(invoice.invoice_id),
+          invoice_id: invoice.invoice_id,
           price_amount: 100,
           price_currency: 'usd',
-          payment_status: 'pending',
           subscription_plan: 'active',
-        });
+        }),
+      });
 
-      if (insertError) {
-        console.error('❌ Failed to insert invoice to Supabase:', insertError);
-        throw new Error(`Invoice storage failed: ${insertError.message}`);
+      const storeData = await storeResponse.json();
+
+      if (!storeResponse.ok) {
+        console.error('❌ Failed to store invoice:', storeData.error);
+        throw new Error(`Invoice storage failed: ${storeData.error}`);
       }
 
-      console.log('✅ Invoice stored in Supabase:', insertData);
+      console.log('✅ Invoice stored in Supabase:', storeData.data);
       setPaymentUrl(invoice.payment_url);
       setPaymentLoading(false);
     } catch (err: any) {

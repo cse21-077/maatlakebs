@@ -7,6 +7,10 @@ export default async function handler(req, res) {
   console.log('Request body:', req.body);
 
   try {
+    console.log('Attempting to fetch from NowPayments...');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch('https://api.sandbox.nowpayments.io/v1/invoice', {
       method: 'POST',
       headers: {
@@ -14,9 +18,14 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
+      signal: controller.signal,
     });
 
+    clearTimeout(timeout);
+
+    console.log('Response status:', response.status);
     const data = await response.json();
+    console.log('NowPayments response:', data);
 
     if (!response.ok) {
       console.error('NowPayments API error:', data);
@@ -33,8 +42,14 @@ export default async function handler(req, res) {
       status: data.status,
     });
   } catch (error) {
-    console.error('Serverless function error:', error.message, error.stack);
-    res.status(500).json({ error: error.message });
+    console.error('Serverless function error:', error.name, error.message);
+    console.error('Error code:', error.code);
+    console.error('Full error:', JSON.stringify(error, null, 2));
+    res.status(500).json({ 
+      error: error.message,
+      code: error.code,
+      name: error.name
+    });
   }
 }
 

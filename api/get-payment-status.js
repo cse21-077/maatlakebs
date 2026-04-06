@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(`https://api.nowpayments.io/v1/payment/${invoiceId}`, {
+    const response = await fetch(`https://api.sandbox.nowpayments.io/v1/payment/${invoiceId}`, {
       method: 'GET',
       headers: {
         'x-api-key': process.env.NOW_PAYMENTS_API_KEY,

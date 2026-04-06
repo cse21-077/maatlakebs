@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `https://api.nowpayments.io/v1/min-amount?from_currency=${from_currency}&to_currency=${to_currency}`,
+      `https://api.sandbox.nowpayments.io/v1/min-amount?from_currency=${from_currency}&to_currency=${to_currency}`,
       {
         method: 'GET',
         headers: {

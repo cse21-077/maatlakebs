@@ -65,12 +65,26 @@ export const TerminalProtocol = ({
                 const encrypted = btoa(mt5.password);
                 // Use the trader's ID from user metadata, falling back to the default trader
                 const resolvedTraderId = traderId || DEFAULT_TRADER_ID;
-                // Upsert on the unique constraint: [mt5_login, mt5_server]
-                const { error: acctErr } = await supabase.from('student_accounts').upsert({
-                    user_id: uid, mt5_login: mt5.login, mt5_server: mt5.server,
-                    encrypted_password: encrypted, is_active: true, trader_id: resolvedTraderId,
-                } as any, { onConflict: 'mt5_login,mt5_server' });
-                if (acctErr) throw acctErr;
+                
+                // Call backend API to upsert (uses service key to bypass RLS)
+                const upsertResponse = await fetch('/api/upsert-student-account', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    user_id: uid,
+                    mt5_login: mt5.login,
+                    mt5_server: mt5.server,
+                    encrypted_password: encrypted,
+                    trader_id: resolvedTraderId,
+                    is_active: true,
+                  }),
+                });
+
+                const upsertData = await upsertResponse.json();
+                if (!upsertResponse.ok) {
+                  throw new Error(upsertData.error || 'Failed to save student account');
+                }
+
                 setLocalMt5Login(mt5.login); // Immediate UI update
             }
 

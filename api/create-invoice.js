@@ -27,11 +27,11 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data });
     }
 
-    console.log('Invoice created successfully:', data.invoice_id);
+    console.log('Invoice created successfully:', data.id);
     res.status(200).json({
       id: data.id,
-      invoice_id: data.invoice_id,
-      payment_url: data.link,
+      invoice_id: data.id,
+      payment_url: data.invoice_url,
       price_amount: data.price_amount,
       price_currency: data.price_currency,
       status: data.status,

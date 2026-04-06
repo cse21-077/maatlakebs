@@ -3,7 +3,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // DIAGNOSTIC: Check if API key is loading
   console.log('API KEY:', process.env.NOW_PAYMENTS_API_KEY);
   console.log('Request body:', req.body);
 
@@ -24,6 +23,7 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data });
     }
 
+    console.log('Invoice created successfully:', data.invoice_id);
     res.status(200).json({
       id: data.id,
       invoice_id: data.invoice_id,
@@ -33,7 +33,8 @@ export default async function handler(req, res) {
       status: data.status,
     });
   } catch (error) {
-    console.error('Serverless function error:', error.message);
+    console.error('Serverless function error:', error.message, error.stack);
     res.status(500).json({ error: error.message });
   }
 }
+

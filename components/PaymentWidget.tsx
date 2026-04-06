@@ -45,7 +45,7 @@ const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'pro',
     name: 'Pro Plan',
-    price_usd: 79.99,
+    price_usd: 99.99,
     features: [
       'Copy unlimited mentors',
       'Unlimited accounts',

@@ -68,19 +68,32 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
         if (!input.trim() || loading) return;
 
         setLoading(true);
-        const newMsg = {
+        const content = input.trim();
+        const optimisticMsg: Message = {
+            id: `optimistic-${Date.now()}`,
             user_id: uid,
-            content: input.trim(),
+            content,
             is_admin: false,
             created_at: new Date().toISOString()
         };
 
+        // Optimistically show the message immediately
+        setMessages(prev => [...prev, optimisticMsg]);
+        setInput('');
+
         try {
-            const { error } = await (supabase.from('support_messages' as any) as any).insert(newMsg);
+            const { data, error } = await (supabase.from('support_messages' as any) as any)
+                .insert({ user_id: uid, content, is_admin: false })
+                .select()
+                .single();
             if (error) throw error;
-            setInput('');
+            // Replace optimistic message with real one from DB
+            setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? data : m));
         } catch (e: any) {
             console.error('Chat Error:', e.message);
+            // Remove optimistic message on failure
+            setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
+            setInput(content); // restore input
         } finally {
             setLoading(false);
         }

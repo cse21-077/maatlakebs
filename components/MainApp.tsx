@@ -16,6 +16,7 @@ import { Button } from './shared';
 import { TerminalProtocol } from './TerminalProtocol';
 import { MembershipProtocol } from './MembershipProtocol';
 import { SupportProtocol } from './SupportProtocol';
+import { TechSupportDashboard } from './TechSupportDashboard';
 
 type AppView = 'HOME' | 'CONFIG' | 'BILLING' | 'SUPPORT';
 type UIPaymentStatus = 'UNPAID' | 'CONFIRMED';
@@ -29,12 +30,15 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [mt5Login, setMt5Login] = useState('');
     const [paymentStatus, setPaymentStatus] = useState<UIPaymentStatus>('UNPAID');
     const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false });
+    const [supportMessage, setSupportMessage] = useState<string | undefined>();
 
     // Link student to default trader if not present in metadata
     const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
 
     const uid = session.user.id;
     const fullName = session.user.user_metadata?.full_name ?? 'Trader';
+    const userRole = session.user.user_metadata?.role || 'user';
+    const isTechSupport = userRole === 'techsupport';
     const initialAvatar = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${fullName}`;
     const [avatarUrl, setAvatarUrl] = useState(initialAvatar);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -87,11 +91,21 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
     useEffect(() => { load(); }, [uid, view]);
 
+    // TechSupport staff dashboard
+    if (isTechSupport) {
+        return (
+            <div className="min-h-screen bg-[#0d0f14]">
+                {view === 'HOME' && <TechSupportDashboard uid={uid} onBack={() => setView('HOME')} />}
+                {view !== 'HOME' && <TechSupportDashboard uid={uid} onBack={() => setView('HOME')} />}
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-[#0d0f14] flex flex-col pt-12 pb-safe animate-fade-in relative overflow-hidden">
             {view === 'BILLING' && <MembershipProtocol uid={uid} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onRefresh={load} />}
-            {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => setView('HOME')} />}
-            {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={session.user.user_metadata?.trader_id} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} />}
+            {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => setView('HOME')} prefillMessage={supportMessage} />}
+            {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={session.user.user_metadata?.trader_id} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} onOpenSupport={(msg) => { setSupportMessage(msg); setView('SUPPORT'); }} onAccountChanged={load} />}
 
             {/* Profile Selection Overlay */}
             {showProfileMenu && (

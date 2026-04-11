@@ -400,10 +400,8 @@ def provision_student():
         if student.get("is_ghost"):
             return jsonify({"status": "failed", "error": "Ghost accounts cannot be provisioned"}), 400
 
-        if student.get("folder_path"):
-            # Already provisioned — return existing path (idempotent)
-            logger.info(f"Student {user_id} already provisioned at {student['folder_path']}")
-            return jsonify({"status": "success", "folder_path": student["folder_path"], "already_assigned": True})
+        # Note: Folder reuse is now handled by provision-terminal.js (API layer)
+        # This endpoint ONLY assigns NEW folders for users with no folder yet
 
     except Exception as e:
         logger.error(f"Provision check error: {e}")

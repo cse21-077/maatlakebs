@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 interface SupportProtocolProps {
     uid: string;
     onBack: () => void;
+    prefillMessage?: string;
 }
 
 interface Message {
@@ -18,11 +19,12 @@ interface Message {
     created_at: string;
 }
 
-export const SupportProtocol = ({ uid, onBack }: SupportProtocolProps) => {
+export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocolProps) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState('');
+    const [input, setInput] = useState(prefillMessage || '');
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [messageSent, setMessageSent] = useState(false);
 
     const loadMessages = async () => {
         const { data, error } = await supabase
@@ -33,6 +35,14 @@ export const SupportProtocol = ({ uid, onBack }: SupportProtocolProps) => {
         
         if (data) setMessages(data);
     };
+
+    // Auto-send prefilled message on mount
+    useEffect(() => {
+        if (prefillMessage && !messageSent && !loading) {
+            handleSendMessage(new Event('submit') as any);
+            setMessageSent(true);
+        }
+    }, [prefillMessage, messageSent, loading]);
 
     useEffect(() => {
         loadMessages();

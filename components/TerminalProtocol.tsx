@@ -16,15 +16,18 @@ interface TerminalProtocolProps {
     onBack: () => void;
     onSuccess: () => void;
     onRefresh: (updatedRisk?: any) => void | Promise<void>;
+    onOpenSupport?: (message: string) => void;
+    onAccountChanged?: () => void | Promise<void>;
 }
 
 export const TerminalProtocol = ({ 
-    uid, traderId, mt5Login, riskState, paymentStatus, onBack, onSuccess, onRefresh 
+    uid, traderId, mt5Login, riskState, paymentStatus, onBack, onSuccess, onRefresh, onOpenSupport, onAccountChanged
 }: TerminalProtocolProps) => {
     const isUnpaid = paymentStatus !== 'CONFIRMED' && uid !== '00000000-0000-4000-a000-000000000000';
     
     const [mt5, setMt5] = useState({ login: '', server: '', password: '' });
     const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [aggressiveness, setAggressiveness] = useState(riskState.aggressiveness || 1.0);
     const [maxLot, setMaxLot] = useState(riskState.maxLot || 0.01);
     const [maxDD, setMaxDD] = useState(riskState.maxDD || 15.0);
@@ -62,11 +65,10 @@ export const TerminalProtocol = ({
         setErr(''); setLoading(true);
         try {
             if (!localMt5Login && mt5.login) {
-                const encrypted = btoa(mt5.password);
-                // Use the trader's ID from user metadata, falling back to the default trader
+                const encrypted = mt5.password;
                 const resolvedTraderId = traderId || DEFAULT_TRADER_ID;
                 
-                // Call backend API to upsert (uses service key to bypass RLS)
+                // Save credentials
                 const upsertResponse = await fetch('/api/upsert-student-account', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -85,9 +87,9 @@ export const TerminalProtocol = ({
                   throw new Error(upsertData.error || 'Failed to save student account');
                 }
 
-                setLocalMt5Login(mt5.login); // Immediate UI update
+                setLocalMt5Login(mt5.login);
 
-                // Now provision the MT5 terminal slot
+                // Immediately provision terminal folder
                 console.log('🎯 Provisioning terminal slot for user:', uid);
                 const provisionResponse = await fetch('/api/provision-terminal', {
                   method: 'POST',
@@ -96,19 +98,18 @@ export const TerminalProtocol = ({
                 });
 
                 const provisionData = await provisionResponse.json();
-
                 if (!provisionResponse.ok) {
-                  console.warn('⚠️ Provision warning:', provisionData.error);
-                  // Don't fail — provision can be retried, but account is saved
-                } else {
-                  console.log('✅ Terminal provisioned:', provisionData.folder_path);
+                  throw new Error(provisionData.error || 'Failed to provision terminal');
                 }
+
+                console.log('✅ Terminal provisioned:', provisionData.folder_path);
+                setShowVerifyModal(true); // Show verification modal
             }
 
-            const { error: riskErr } = await supabase.from('risk_profiles').upsert({
+            const { error: riskErr } = await (supabase as any).from('risk_profiles').upsert({
                 user_id: uid, aggressiveness, max_lot: maxLot, max_drawdown: maxDD, 
                 min_balance: minBal, pause_copy: pauseCopy, advanced_options: advanced
-            } as any, { onConflict: 'user_id' });
+            });
             if (riskErr) throw riskErr;
 
             onRefresh({
@@ -118,7 +119,6 @@ export const TerminalProtocol = ({
                 pauseCopy,
                 advanced_options: advanced
             }); 
-            // onSuccess(); // Removed to keep user on same screen
         } catch (e: any) { setErr(e.message); }
         finally { setLoading(false); }
     };
@@ -128,20 +128,64 @@ export const TerminalProtocol = ({
         try {
             // If it's the guest account, just simulate the unlink locally
             if (uid !== '00000000-0000-4000-a000-000000000000') {
-                const { error } = await supabase.from('student_accounts').delete().eq('user_id', uid);
+                // Deactivate instead of delete — preserve folder_path for reuse
+                const { error } = await (supabase as any)
+                    .from('student_accounts')
+                    .update({ 
+                        is_active: false,
+                        encrypted_password: ''
+                    })
+                    .eq('user_id', uid);
                 if (error) throw error;
             }
             
             setLocalMt5Login(''); 
             setMt5({ login: '', server: '', password: '' });
             setShowUnlinkConfirm(false);
-            onRefresh(); 
+            
+            // Notify parent to refresh account data from database
+            if (onAccountChanged) await onAccountChanged();
+            else onRefresh();
         } catch (e: any) { setErr(e.message); }
         finally { setLoading(false); }
     };
 
     return (
         <>
+        {showVerifyModal && (
+            <div className="fixed inset-0 bg-dark/95 z-[500] flex items-center justify-center p-8 animate-fade-in backdrop-blur-md">
+                <div className="w-full max-w-xs bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 space-y-8 shadow-2xl animate-slide-up">
+                    <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
+                        <Zap size={32} />
+                    </div>
+                    <div className="text-center space-y-4">
+                        <h3 className="text-xl font-black text-white uppercase tracking-tighter">Verify Connection</h3>
+                        <p className="text-[11px] text-white/50 font-bold leading-relaxed">
+                            Your account has been saved. We need to verify connectivity to ensure seamless signal mirroring. Please request verification through support — our team will confirm and activate your terminal.
+                        </p>
+                    </div>
+                    <div className="space-y-3">
+                        <button 
+                            onClick={() => {
+                                setShowVerifyModal(false);
+                                if (onOpenSupport) {
+                                    onOpenSupport('Hi, Please verify that my account has successfully linked and is ready for signal mirroring.');
+                                }
+                            }}
+                            className="w-full py-5 text-primary hover:text-primary/80 font-black uppercase text-xs tracking-widest border border-primary/30 hover:border-primary/60 rounded-xl transition-all"
+                        >
+                            Request Verification →
+                        </button>
+                        <button 
+                            onClick={() => setShowVerifyModal(false)}
+                            className="w-full py-4 text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-white transition-all"
+                        >
+                            I'll Do This Later
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
         {showUnlinkConfirm && (
             <div className="fixed inset-0 bg-dark/95 z-[500] flex items-center justify-center p-8 animate-fade-in backdrop-blur-md">
                 <div className="w-full max-w-xs bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 space-y-8 shadow-2xl animate-slide-up">
@@ -151,7 +195,7 @@ export const TerminalProtocol = ({
                     <div className="text-center space-y-2">
                         <h3 className="text-xl font-black text-white uppercase tracking-tighter">Unlink Terminal?</h3>
                         <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest leading-relaxed">
-                            Signal mirroring will stop immediately. This cannot be undone.
+                            Signal mirroring will stop. You can reconnect with a different account anytime — the terminal slot is reserved.
                         </p>
                     </div>
                     <div className="space-y-3">
@@ -296,14 +340,14 @@ export const TerminalProtocol = ({
                                     };
 
                                     if (!isGuest) {
-                                        const { error } = await supabase.from('risk_profiles').upsert({ 
+                                        const { error } = await (supabase as any).from('risk_profiles').upsert({ 
                                             user_id: uid, 
                                             pause_copy: nextState,
                                             aggressiveness,
                                             max_lot: maxLot,
                                             max_drawdown: maxDD,
                                             advanced_options: advanced
-                                        } as any, { onConflict: 'user_id' });
+                                        });
                                         if (error) throw error;
                                     }
                                     

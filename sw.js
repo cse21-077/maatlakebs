@@ -95,40 +95,47 @@ async function syncTrades() {
 
 // Push notifications support
 self.addEventListener('push', (event) => {
+  let data = { title: 'Maatla Kebs', body: 'You have a new message from Support.', url: '/' };
+  try {
+    if (event.data) {
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
+    }
+  } catch (_) {
+    if (event.data) data.body = event.data.text();
+  }
+
   const options = {
-    body: event.data ? event.data.text() : 'New trading update',
-    icon: '/logo.png',
-    badge: '/logo.png',
+    body: data.body,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
     vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
+    data: { url: data.url || '/' },
     actions: [
-      {
-        action: 'explore',
-        title: 'View Dashboard',
-        icon: '/logo.png'
-      },
-      {
-        action: 'close',
-        title: 'Close',
-        icon: '/logo.png'
-      }
+      { action: 'open', title: 'Open Chat' },
+      { action: 'close', title: 'Dismiss' }
     ]
   };
 
   event.waitUntil(
-    self.registration.showNotification('Maatla Kebs', options)
+    self.registration.showNotification(data.title, options)
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const url = event.notification.data?.url || '/';
 
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
+  if (event.action === 'close') return;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
 });

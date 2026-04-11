@@ -113,15 +113,27 @@ export const TechSupportDashboard = ({ uid, onBack }: TechSupportDashboardProps)
         if (!input.trim() || !selectedTicketId || loading) return;
 
         setLoading(true);
+        const content = input.trim();
         try {
             const { error } = await (supabase.from('support_messages' as any) as any).insert({
                 user_id: selectedTicketId,
-                content: input.trim(),
+                content,
                 is_admin: true,
                 created_at: new Date().toISOString()
             });
             if (error) throw error;
             setInput('');
+            // Trigger push notification to the user
+            await fetch('/api/send-push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: selectedTicketId,
+                    title: 'Support Reply',
+                    body: content.length > 80 ? content.slice(0, 77) + '...' : content,
+                    url: '/'
+                })
+            });
         } catch (e: any) {
             console.error('Error sending message:', e);
         } finally {
@@ -172,9 +184,9 @@ export const TechSupportDashboard = ({ uid, onBack }: TechSupportDashboardProps)
                     
                     {messages.map((msg, i) => (
                         <div key={msg.id || i} className={`flex items-end gap-3 ${msg.is_admin ? 'justify-start' : 'justify-end'} animate-fade-in`}>
-                            <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-primary text-dark rounded-bl-lg shadow-xl shadow-primary/10' : 'bg-[#1a1c22] rounded-tr-lg border border-white/5'}`}>
+                            <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-primary text-white rounded-bl-lg shadow-xl shadow-primary/10' : 'bg-[#1a1c22] rounded-tr-lg border border-white/5'}`}>
                                 <p className="text-xs leading-relaxed font-bold">{msg.content}</p>
-                                <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-dark/40' : 'text-white/20'}`}>
+                                <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/50' : 'text-white/20'}`}>
                                     <Clock size={10} />
                                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
@@ -197,7 +209,7 @@ export const TechSupportDashboard = ({ uid, onBack }: TechSupportDashboardProps)
                         <button 
                             type="submit"
                             disabled={!input.trim() || loading}
-                            className={`absolute right-3 top-3 w-12 h-12 rounded-xl flex items-center justify-center transition-all ${input.trim() ? 'bg-primary text-dark shadow-lg shadow-primary/20' : 'bg-white/5 text-white/20'}`}
+                            className={`absolute right-3 top-3 w-12 h-12 rounded-xl flex items-center justify-center transition-all ${input.trim() ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-white/20'}`}
                         >
                             <Send size={18} />
                         </button>

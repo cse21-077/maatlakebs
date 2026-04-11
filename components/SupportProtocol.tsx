@@ -1,9 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-    ChevronLeft, Send, User, ShieldCheck, 
-    ArrowDown, MessageSquare, Clock, ShieldAlert
+import {
+    ChevronLeft, Send, User, ShieldCheck,
+    ArrowDown, MessageSquare, Clock, ShieldAlert, Bell
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+// VAPID public key for push notifications
+const VAPID_PUBLIC_KEY = 'BCuOGe8e3f4Dt-BhVjS3m7KI5tSniQbPUoz85WvOmVB0retsClv3jR65FtHKzfn9EkGDIxKVXRj2e_veuBcyLUI';
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const array = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) array[i] = rawData.charCodeAt(i);
+    return array;
+}
+
+async function subscribeToPush(uid: string) {
+    try {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return;
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+            sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+        }
+        // Save subscription to Supabase
+        await (supabase.from('push_subscriptions' as any) as any).upsert({
+            user_id: uid,
+            subscription: JSON.stringify(sub),
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+    } catch (err) {
+        console.warn('[Push] Subscription failed:', err);
+    }
+}
 
 interface SupportProtocolProps {
     uid: string;
@@ -32,7 +68,7 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
             .select('*')
             .eq('user_id', uid)
             .order('created_at', { ascending: true });
-        
+
         if (data) setMessages(data);
     };
 
@@ -46,13 +82,18 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
 
     useEffect(() => {
         loadMessages();
+        // Request push notification permission and subscribe
+        subscribeToPush(uid);
 
-        // Real-time subscription to institutional support node
+        // Real-time subscription — only picks up admin replies (not our own optimistic sends)
         const channel = supabase.channel('support_changes')
-            .on('postgres_changes' as any, 
+            .on('postgres_changes' as any,
                 { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `user_id=eq.${uid}` },
                 (payload: any) => {
-                    setMessages(prev => [...prev, payload.new]);
+                    // Only add if it's an admin message (our own messages are already optimistically added)
+                    if (payload.new.is_admin) {
+                        setMessages(prev => [...prev, payload.new]);
+                    }
                 }
             ).subscribe();
 
@@ -120,7 +161,7 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
             {/* Chat Messages */}
             <main className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col custom-scrollbar">
                 <div className="flex-1" /> {/* Push messages to bottom */}
-                
+
                 {messages.length === 0 && (
                     <div className="text-center p-10 space-y-4 opacity-20">
                         <MessageSquare size={48} className="mx-auto" />
@@ -135,17 +176,17 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
                                 <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=Felix`} alt="Admin" className="w-full h-full object-contain" />
                             </div>
                         )}
-                        <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-lg border border-white/5' : 'bg-primary rounded-tr-lg shadow-xl shadow-primary/10 text-dark font-bold'}`}>
+                        <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-lg border border-white/5' : 'bg-primary rounded-tr-lg shadow-xl shadow-primary/10 text-white font-bold'}`}>
                             <p className="text-xs leading-relaxed">{msg.content}</p>
-                            <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/20' : 'text-dark/40'}`}>
+                            <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/20' : 'text-white/50'}`}>
                                 <Clock size={10} />
                                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>
                         {!msg.is_admin && (
-                             <div className="w-8 h-8 rounded-xl border border-white/5 bg-white/5 p-1 overflow-hidden shrink-0">
-                                 <User size={20} className="w-full h-full text-white/20" />
-                             </div>
+                            <div className="w-8 h-8 rounded-xl border border-white/5 bg-white/5 p-1 overflow-hidden shrink-0">
+                                <User size={20} className="w-full h-full text-white/20" />
+                            </div>
                         )}
                     </div>
                 ))}
@@ -155,14 +196,14 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
             {/* Input Area */}
             <form onSubmit={handleSendMessage} className="p-8 pb-10 border-t border-white/5 bg-[#1a1c22]">
                 <div className="relative">
-                    <input 
-                        type="text" 
-                        placeholder="Message Admin Node..." 
+                    <input
+                        type="text"
+                        placeholder="Message Admin Node..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-sm font-bold pr-16 focus:border-primary transition-all outline-none"
                     />
-                    <button 
+                    <button
                         type="submit"
                         disabled={!input.trim() || loading}
                         className={`absolute right-3 top-3 w-12 h-12 rounded-xl flex items-center justify-center transition-all ${input.trim() ? 'bg-primary text-dark shadow-lg shadow-primary/20' : 'bg-white/5 text-white/20'}`}

@@ -41,7 +41,7 @@ LANDING → (user installs / launches) → SPLASH → AUTH → ONBOARDING → AP
 | `SPLASH` | 2.5-second branded splash screen shown on every cold launch after install |
 | `AUTH` | Login screen; after login routes to ONBOARDING or APP depending on `localStorage` |
 | `ONBOARDING` | Two-step first-run wizard (Risk Disclaimer → MT5 setup) |
-| `APP` | Main tabbed application shell |
+| `APP` | Main tabbed application shell | lest fix
 
 ---
 

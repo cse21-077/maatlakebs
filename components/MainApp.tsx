@@ -31,6 +31,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [paymentStatus, setPaymentStatus] = useState<UIPaymentStatus>('UNPAID');
     const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false });
     const [supportMessage, setSupportMessage] = useState<string | undefined>();
+    const [connectionStatus, setConnectionStatus] = useState<string>('UNKNOWN');
 
     // Link student to default trader if not present in metadata
     const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
@@ -90,6 +91,48 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     };
 
     useEffect(() => { load(); }, [uid, view]);
+
+    // Subscribe to real-time connection status updates
+    useEffect(() => {
+        if (!uid) return;
+
+        // Fetch initial connection status
+        const fetchStatus = async () => {
+            const { data } = await (supabase as any)
+                .from('connection_status')
+                .select('mt5_status')
+                .eq('user_id', uid)
+                .maybeSingle();
+            
+            if (data?.mt5_status) {
+                setConnectionStatus(data.mt5_status);
+            }
+        };
+        
+        fetchStatus();
+
+        // Subscribe to real-time updates
+        const subscription = (supabase as any)
+            .channel('connection_status_changes')
+            .on('postgres_changes', 
+                { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'connection_status', 
+                    filter: `user_id=eq.${uid}` 
+                },
+                (payload: any) => {
+                    if (payload.new?.mt5_status) {
+                        setConnectionStatus(payload.new.mt5_status);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [uid]);
 
     // TechSupport staff dashboard
     if (isTechSupport) {
@@ -168,8 +211,30 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                             <div className="space-y-1">
                                 <p className="text-[10px] text-white/30 font-black tracking-widest leading-none uppercase">Login</p>
                                 <p className={`text-xl font-black tracking-tight ${mt5Login ? 'text-white' : 'text-white/10'}`}>{mt5Login || '---'}</p>
-                                <div className={`text-[10px] font-black uppercase tracking-widest mt-1 ${risk.pauseCopy ? 'text-red-500' : (mt5Login ? 'text-green-500' : 'text-red-500/30')}`}>
-                                    {risk.pauseCopy ? '○ Disconnected' : (mt5Login ? '● Connected' : '○ Standby')}
+                                <div className={`text-[10px] font-black uppercase tracking-widest mt-1 ${
+                                    risk.pauseCopy 
+                                        ? 'text-red-500' 
+                                        : (mt5Login 
+                                            ? (connectionStatus === 'CONNECTED' 
+                                                ? 'text-green-500' 
+                                                : connectionStatus === 'ERROR' 
+                                                    ? 'text-red-500' 
+                                                    : 'text-yellow-500')
+                                            : 'text-red-500/30')
+                                }`}>
+                                    {risk.pauseCopy 
+                                        ? '○ Disconnected' 
+                                        : (mt5Login 
+                                            ? (() => {
+                                                switch(connectionStatus) {
+                                                    case 'CONNECTED': return '● Connected';
+                                                    case 'ERROR': return '● Error';
+                                                    case 'UNKNOWN': return '◉ Verifying...';
+                                                    default: return '○ Standby';
+                                                }
+                                              })()
+                                            : '○ Standby')
+                                    }
                                 </div>
                             </div>
                         </div>

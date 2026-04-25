@@ -103,6 +103,14 @@ export const TerminalProtocol = ({
                 }
 
                 console.log('✅ Terminal provisioned:', provisionData.folder_path);
+                
+                // Mark connection status as UNKNOWN until worker actually connects
+                await (supabase as any).from('connection_status').upsert({
+                    user_id: uid,
+                    mt5_status: 'UNKNOWN',
+                    last_checked: new Date().toISOString(),
+                });
+
                 setShowVerifyModal(true); // Show verification modal
             }
 

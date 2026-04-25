@@ -89,6 +89,19 @@ export const AuthScreen = ({ onLogin }: Props) => {
         }
     };
 
+    const handleSocialLogin = async (provider: 'google') => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: window.location.origin,
+            },
+        });
+        if (error) {
+            setError(error.message);
+            setRError(error.message);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-6 animate-fade-in overflow-y-auto pt-safe pb-safe">
             <div className="w-full max-w-sm space-y-10">
@@ -104,10 +117,28 @@ export const AuthScreen = ({ onLogin }: Props) => {
                 </div>
 
                 <div className="space-y-6">
+                    {/* Social Login Option */}
+                    <div className="space-y-4">
+                        <button 
+                            type="button"
+                            onClick={() => handleSocialLogin('google')}
+                            className="w-full flex items-center justify-center gap-3 bg-[#161e31] hover:bg-[#1c263d] border border-white/5 py-4 rounded-2xl transition-all group"
+                        >
+                            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" alt="Google" />
+                            <span className="text-[10px] font-bold text-white/60 group-hover:text-white uppercase tracking-widest">Continue with Google</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center gap-4 px-2">
+                        <div className="h-[1px] flex-1 bg-white/5" />
+                        <span className="text-[9px] text-white/20 font-bold uppercase tracking-[0.2em]">Secure Email Protocol</span>
+                        <div className="h-[1px] flex-1 bg-white/5" />
+                    </div>
+
                     {/* Tab Controller */}
                     <div className="flex bg-[#161e31] p-1.5 rounded-2xl border border-white/5">
-                        <button onClick={() => switchTab('login')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-xl transition-all ${tab === 'login' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'}`}>Login</button>
-                        <button onClick={() => switchTab('register')} className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-xl transition-all ${tab === 'register' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'}`}>Register</button>
+                        <button onClick={() => switchTab('login')} className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${tab === 'login' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'}`}>Sign In</button>
+                        <button onClick={() => switchTab('register')} className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${tab === 'register' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'}`}>Create Account</button>
                     </div>
 
                     {/* Login Form */}

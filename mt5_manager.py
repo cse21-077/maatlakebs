@@ -16,7 +16,7 @@ import time
 import os
 import sys
 import signal
-from datetime import datetime
+from datetime import datetime, timezone
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,13 +93,22 @@ def update_connection_status(user_id: str, status: str, error_message: str = Non
         payload = {
             "user_id":       user_id,
             "mt5_status":    status,
-            "last_checked":  datetime.utcnow().isoformat(),
+            "last_checked":  datetime.now(timezone.utc).isoformat(),
             "error_message": error_message,
-            "updated_at":    datetime.utcnow().isoformat()
+            "updated_at":    datetime.now(timezone.utc).isoformat()
         }
-        url = f"{SUPABASE_URL}/rest/v1/connection_status"
-        headers = {**supabase_headers(), "Prefer": "resolution=merge-duplicates,return=minimal"}
-        resp = http_requests.post(url, json=payload, headers=headers, timeout=5)
+        
+        # 1. Try to UPDATE the existing record first
+        patch_url = f"{SUPABASE_URL}/rest/v1/connection_status?user_id=eq.{user_id}"
+        resp = http_requests.patch(patch_url, json=payload, headers=supabase_headers(), timeout=5)
+        
+        # 2. If 404 (doesn't exist) or 204 (no content - success), we check if we need to insert
+        # Most of the time 204 means success. If 404, we insert.
+        if resp.status_code == 404:
+            url = f"{SUPABASE_URL}/rest/v1/connection_status"
+            headers = {**supabase_headers(), "Prefer": "return=minimal"}
+            resp = http_requests.post(url, json=payload, headers=headers, timeout=5)
+            
         if resp.status_code not in (200, 201, 204):
             logger.error(f"Failed to update connection_status for {user_id}: {resp.status_code} {resp.text}")
     except Exception as e:
@@ -142,7 +151,7 @@ def assign_folder_to_student(user_id: str, folder_path: str) -> bool:
         )
         resp = http_requests.patch(
             url,
-            json={"folder_path": folder_path, "updated_at": datetime.utcnow().isoformat()},
+            json={"folder_path": folder_path, "updated_at": datetime.now(timezone.utc).isoformat()},
             headers=supabase_headers(),
             timeout=10
         )
@@ -190,7 +199,7 @@ def start_worker(user_id: str, login: str, password: str, server: str, folder_pa
                                 "login":   int(login),
                                 "server":  server,
                                 "user_id": user_id,
-                                "started": datetime.utcnow().isoformat()
+                                "started": datetime.now(timezone.utc).isoformat()
                             }
                         logger.info(f"Worker started | user={user_id} | login={login} | port={port}")
                         update_connection_status(user_id, "CONNECTED")
@@ -270,7 +279,7 @@ def forward_request(user_id: str, endpoint: str, data: dict) -> dict:
         resp = http_requests.post(
             f"http://127.0.0.1:{worker['port']}{endpoint}",
             json=data,
-            timeout=30
+            timeout=10 # Reduced from 30 to prevent manager freezing
         )
         return resp.json()
     except Exception as e:
@@ -357,7 +366,7 @@ def health():
         "status":  "ok",
         "workers": len(worker_info),
         "details": worker_info,
-        "time":    datetime.utcnow().isoformat()
+        "time":    datetime.now(timezone.utc).isoformat()
     })
 
 
@@ -437,6 +446,7 @@ def provision_student():
         logger.error(f"Failed to write folder_path to Supabase for {user_id}")
         return jsonify({"status": "failed", "error": "Failed to save slot assignment"}), 500
 
+    update_connection_status(user_id, "UNKNOWN")
     logger.info(f"Provisioned student {user_id} → {folder_path}")
 
     return jsonify({
@@ -446,10 +456,23 @@ def provision_student():
     })
 
 
-@app.route("/trade", methods=["POST"])
+@app.route("/trade", methods=["POST"], strict_slashes=False)
 def execute_trade():
-    data  = request.json
-    login = int(data.get("login", 0))
+    logger.info(f"Incoming /trade request from {request.remote_addr}")
+    data = request.json
+    if not data:
+        return jsonify({"status": "failed", "error": "Empty body"}), 400
+        
+    login_val = data.get("login")
+    if not login_val:
+        return jsonify({"status": "failed", "error": "login field required"}), 400
+        
+    try:
+        login = int(login_val)
+    except (ValueError, TypeError):
+        return jsonify({"status": "failed", "error": "login must be an integer"}), 400
+
+    logger.info(f"Target login for trade: {login}")
 
     user_id = None
     with workers_lock:
@@ -459,7 +482,13 @@ def execute_trade():
                 break
 
     if not user_id:
+        logger.error(f"No active worker found for login {login}")
         return jsonify({"status": "failed", "error": f"No worker for login {login}"}), 404
+
+    # Check worker health (uses its own lock internally)
+    if not is_worker_healthy(user_id):
+        logger.error(f"Worker {user_id} (login {login}) is found but unhealthy")
+        return jsonify({"status": "failed", "error": f"Worker unhealthy for {login}"}), 503
 
     result = forward_request(user_id, "/trade", data)
     code   = 200 if result.get("status") == "success" else 500

@@ -4,31 +4,47 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id, invoice_id, price_amount, price_currency, subscription_plan } = req.body;
+    const {
+      user_id,
+      invoice_id,
+      price_amount,
+      price_currency,
+      subscription_plan,
+      // new optional fields
+      payment_method = 'nowpayments',
+      payment_status = 'pending',
+      original_price,
+      discount_amount,
+      proof_of_payment_url,
+    } = req.body;
 
     if (!user_id || !invoice_id) {
       return res.status(400).json({ error: 'Missing required fields: user_id, invoice_id' });
     }
 
-    // Initialize Supabase with SERVICE KEY (bypasses RLS)
     const { createClient } = await import('@supabase/supabase-js');
     const supabase = createClient(
       process.env.VITE_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_KEY
     );
 
-    console.log('📦 Storing invoice in Supabase:', { user_id, invoice_id });
+    console.log('📦 Storing invoice in Supabase:', { user_id, invoice_id, payment_method });
 
-    const { data, error } = await supabase
-      .from('invoices')
-      .insert({
-        user_id,
-        invoice_id: String(invoice_id),
-        price_amount,
-        price_currency,
-        payment_status: 'pending',
-        subscription_plan,
-      });
+    const insertPayload = {
+      user_id,
+      invoice_id: String(invoice_id),
+      price_amount,
+      price_currency,
+      payment_status,
+      subscription_plan,
+      payment_method,
+    };
+
+    if (original_price !== undefined) insertPayload.original_price = original_price;
+    if (discount_amount !== undefined) insertPayload.discount_amount = discount_amount;
+    if (proof_of_payment_url) insertPayload.proof_of_payment_url = proof_of_payment_url;
+
+    const { data, error } = await supabase.from('invoices').insert(insertPayload);
 
     if (error) {
       console.error('❌ Failed to store invoice:', error);
@@ -37,7 +53,6 @@ export default async function handler(req, res) {
 
     console.log('✅ Invoice stored successfully');
     res.status(200).json({ success: true, data });
-
   } catch (error) {
     console.error('❌ Error:', error);
     res.status(500).json({ error: error.message });

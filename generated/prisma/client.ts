@@ -241,6 +241,11 @@ export type system_flags = Prisma.system_flagsModel
  */
 export type trade_logs = Prisma.trade_logsModel
 /**
+ * Model support_messages
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type support_messages = Prisma.support_messagesModel
+/**
  * Model public_users
  * This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

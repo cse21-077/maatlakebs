@@ -84,6 +84,7 @@ export const ModelName = {
   system_events: 'system_events',
   system_flags: 'system_flags',
   trade_logs: 'trade_logs',
+  support_messages: 'support_messages',
   public_users: 'public_users'
 } as const
 
@@ -548,6 +549,11 @@ export const InvoicesScalarFieldEnum = {
   payment_status: 'payment_status',
   subscription_plan: 'subscription_plan',
   paid_for_month: 'paid_for_month',
+  original_price: 'original_price',
+  discount_amount: 'discount_amount',
+  payment_method: 'payment_method',
+  proof_of_payment_url: 'proof_of_payment_url',
+  mentor_id: 'mentor_id',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -633,12 +639,25 @@ export const Trade_logsScalarFieldEnum = {
 export type Trade_logsScalarFieldEnum = (typeof Trade_logsScalarFieldEnum)[keyof typeof Trade_logsScalarFieldEnum]
 
 
+export const Support_messagesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  content: 'content',
+  is_admin: 'is_admin',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Support_messagesScalarFieldEnum = (typeof Support_messagesScalarFieldEnum)[keyof typeof Support_messagesScalarFieldEnum]
+
+
 export const Public_usersScalarFieldEnum = {
   id: 'id',
   email: 'email',
   role: 'role',
   full_name: 'full_name',
   trader_id: 'trader_id',
+  onboarding_completed: 'onboarding_completed',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const

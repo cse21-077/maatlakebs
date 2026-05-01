@@ -417,6 +417,7 @@ export const ModelName = {
   system_events: 'system_events',
   system_flags: 'system_flags',
   trade_logs: 'trade_logs',
+  support_messages: 'support_messages',
   public_users: 'public_users'
 } as const
 
@@ -433,7 +434,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "invoices" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "public_users"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "invoices" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "support_messages" | "public_users"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2879,6 +2880,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    support_messages: {
+      payload: Prisma.$support_messagesPayload<ExtArgs>
+      fields: Prisma.support_messagesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.support_messagesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.support_messagesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        findFirst: {
+          args: Prisma.support_messagesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.support_messagesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        findMany: {
+          args: Prisma.support_messagesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>[]
+        }
+        create: {
+          args: Prisma.support_messagesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        createMany: {
+          args: Prisma.support_messagesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.support_messagesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>[]
+        }
+        delete: {
+          args: Prisma.support_messagesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        update: {
+          args: Prisma.support_messagesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        deleteMany: {
+          args: Prisma.support_messagesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.support_messagesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.support_messagesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>[]
+        }
+        upsert: {
+          args: Prisma.support_messagesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$support_messagesPayload>
+        }
+        aggregate: {
+          args: Prisma.Support_messagesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSupport_messages>
+        }
+        groupBy: {
+          args: Prisma.support_messagesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Support_messagesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.support_messagesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Support_messagesCountAggregateOutputType> | number
+        }
+      }
+    }
     public_users: {
       payload: Prisma.$public_usersPayload<ExtArgs>
       fields: Prisma.public_usersFieldRefs
@@ -3437,6 +3512,11 @@ export const InvoicesScalarFieldEnum = {
   payment_status: 'payment_status',
   subscription_plan: 'subscription_plan',
   paid_for_month: 'paid_for_month',
+  original_price: 'original_price',
+  discount_amount: 'discount_amount',
+  payment_method: 'payment_method',
+  proof_of_payment_url: 'proof_of_payment_url',
+  mentor_id: 'mentor_id',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -3522,12 +3602,25 @@ export const Trade_logsScalarFieldEnum = {
 export type Trade_logsScalarFieldEnum = (typeof Trade_logsScalarFieldEnum)[keyof typeof Trade_logsScalarFieldEnum]
 
 
+export const Support_messagesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  content: 'content',
+  is_admin: 'is_admin',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Support_messagesScalarFieldEnum = (typeof Support_messagesScalarFieldEnum)[keyof typeof Support_messagesScalarFieldEnum]
+
+
 export const Public_usersScalarFieldEnum = {
   id: 'id',
   email: 'email',
   role: 'role',
   full_name: 'full_name',
   trader_id: 'trader_id',
+  onboarding_completed: 'onboarding_completed',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -4059,6 +4152,7 @@ export type GlobalOmitConfig = {
   system_events?: Prisma.system_eventsOmit
   system_flags?: Prisma.system_flagsOmit
   trade_logs?: Prisma.trade_logsOmit
+  support_messages?: Prisma.support_messagesOmit
   public_users?: Prisma.public_usersOmit
 }
 

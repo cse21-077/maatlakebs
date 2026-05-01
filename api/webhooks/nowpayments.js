@@ -101,27 +101,29 @@ export default async function handler(req, res) {
     const userId = invoiceData.user_id;
     console.log('📌 Found invoice for user:', userId);
 
-    // 2. Update invoice status to CONFIRMED
+    // 2. Update invoice status to confirmed
     const { error: updateInvoiceError } = await supabase
       .from('invoices')
       .update({
-        payment_status: 'CONFIRMED',
+        payment_status: 'confirmed',
         paid_for_month: new Date().toISOString(),
+        payment_method: 'crypto', // Ensure crypto payments are marked as such
       })
         .eq('invoice_id', String(invoice_id));
 
-    // 3. Update payment_status table: activate subscription + set next billing date
+    // 3. Update payment_status table: activate subscription + set next billing date (30 days)
     const nextDue = new Date();
-    nextDue.setMonth(nextDue.getMonth() + 1);
+    nextDue.setDate(nextDue.getDate() + 30);
 
     const { error: updatePaymentError } = await supabase
       .from('payment_status')
       .update({
-        subscription_status: 'active',
+        subscription_status: invoiceData.subscription_plan || 'active',
         last_paid: new Date().toISOString(),
         next_due: nextDue.toISOString(),
         amount_paid: price_amount,
         currency: price_currency,
+        updated_at: new Date().toISOString(),
       })
       .eq('user_id', userId);
 

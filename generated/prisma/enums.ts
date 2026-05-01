@@ -153,7 +153,8 @@ export type trade_status = (typeof trade_status)[keyof typeof trade_status]
 export const user_role = {
   student: 'student',
   trader: 'trader',
-  super_admin: 'super_admin'
+  super_admin: 'super_admin',
+  techsupport: 'techsupport'
 } as const
 
 export type user_role = (typeof user_role)[keyof typeof user_role]

@@ -75,7 +75,7 @@ export async function getEstimatedPrice(
 ) {
   try {
     const response = await axios.get(
-      `${NOW_PAYMENTS_API_URL}/estimate?amount=${amount}&from_currency=${from_currency}&to_currency=${to_currency}`
+      `${NOW_PAYMENTS_API_URL}/nowpayments-utils?action=estimate&amount=${amount}&from_currency=${from_currency}&to_currency=${to_currency}`
     );
 
     return response.data;
@@ -94,7 +94,7 @@ export async function getMinimumPaymentAmount(
 ) {
   try {
     const response = await axios.get(
-      `${NOW_PAYMENTS_API_URL}/min-amount?from_currency=${from_currency}&to_currency=${to_currency}`
+      `${NOW_PAYMENTS_API_URL}/nowpayments-utils?action=min-amount&from_currency=${from_currency}&to_currency=${to_currency}`
     );
 
     return response.data.min_amount;
@@ -110,7 +110,7 @@ export async function getMinimumPaymentAmount(
 export async function getAvailableCurrencies() {
   try {
     const response = await axios.get(
-      `${NOW_PAYMENTS_API_URL}/get-currencies`
+      `${NOW_PAYMENTS_API_URL}/nowpayments-utils?action=currencies`
     );
 
     return response.data.currencies;

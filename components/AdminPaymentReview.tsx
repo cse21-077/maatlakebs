@@ -45,7 +45,7 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
       setLoading(true);
       setError('');
 
-      const response = await fetch(`/api/admin/pending-payments?admin_id=${adminId}`);
+      const response = await fetch(`/api/admin/payments?admin_id=${adminId}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -66,7 +66,7 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
       setProcessing(invoiceId);
       setError('');
 
-      const response = await fetch('/api/admin/approve-payment', {
+      const response = await fetch('/api/admin/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,7 +101,7 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
       setProcessing(invoiceId);
       setError('');
 
-      const response = await fetch('/api/admin/approve-payment', {
+      const response = await fetch('/api/admin/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -29,9 +29,9 @@ export const TerminalProtocol = ({
     const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
     const [showVerifyModal, setShowVerifyModal] = useState(false);
     const [aggressiveness, setAggressiveness] = useState(riskState.aggressiveness || 1.0);
-    const [maxLot, setMaxLot] = useState(riskState.maxLot || 0.01);
-    const [maxDD, setMaxDD] = useState(riskState.maxDD || 15.0);
-    const [minBal, setMinBal] = useState(riskState.minBalance || 5.0);
+    const [maxLot, setMaxLot] = useState(riskState.maxLot || 50.0);
+    const [maxDD, setMaxDD] = useState(riskState.maxDD || 100.0);
+    const [minBal, setMinBal] = useState(riskState.minBalance || 1.0);
     const [pauseCopy, setPauseCopy] = useState(isUnpaid ? true : (riskState.pauseCopy || false));
     const [advanced, setAdvanced] = useState(riskState.advanced_options || { hedge: false });
 
@@ -41,9 +41,9 @@ export const TerminalProtocol = ({
             setPauseCopy(riskState.pauseCopy || false);
         }
         setAggressiveness(riskState.aggressiveness || 1.0);
-        setMaxLot(riskState.maxLot || 0.01);
-        setMaxDD(riskState.maxDD || 15.0);
-        setMinBal(riskState.minBalance || 5.0);
+        setMaxLot(riskState.maxLot || 50.0);
+        setMaxDD(riskState.maxDD || 100.0);
+        setMinBal(riskState.minBalance || 1.0);
         setAdvanced(riskState.advanced_options || { hedge: false });
     }, [riskState, isUnpaid]);
 
@@ -278,10 +278,17 @@ export const TerminalProtocol = ({
                     <div className="bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-10 space-y-10 shadow-2xl relative">
                         {/* Floating Badge Lock */}
                         <button 
-                            onClick={() => setIsLocked(!isLocked)} 
-                            className={`absolute -top-3 right-8 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-xl z-20 ${isLocked ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-primary text-dark shadow-primary/20'}`}
+                            onClick={() => {
+                                if (advanced?.settings_locked) return;
+                                setIsLocked(!isLocked);
+                            }} 
+                            className={`absolute -top-3 right-8 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-xl z-20 ${
+                                isLocked 
+                                    ? (advanced?.settings_locked ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-red-500 text-white shadow-red-500/20') 
+                                    : 'bg-primary text-dark shadow-primary/20'
+                            } ${advanced?.settings_locked ? 'cursor-default' : 'cursor-pointer'}`}
                         >
-                            {isLocked ? 'Click to Edit' : 'Edit Mode'}
+                            {isLocked ? (advanced?.settings_locked ? 'Mentor Set' : 'Click to Edit') : 'Edit Mode'}
                         </button>
 
                         <div className="flex justify-between items-center">
@@ -292,10 +299,10 @@ export const TerminalProtocol = ({
                         </div>
                         <div className="space-y-10 transition-all duration-500" style={{ opacity: isLocked ? 0.3 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
                             {[
-                                { label: 'Trade Size (Multiplied)', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 5.0, step: 0.1, unit: 'x' },
-                                { label: 'Lot Size Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 2.0, step: 0.01, unit: ' L' },
-                                { label: 'Loss Limit', val: maxDD, set: setMaxDD, min: 5, max: 80, step: 5, unit: '%' },
-                                { label: 'Minimum Equity', val: minBal, set: setMinBal, min: 5, max: 500, step: 5, unit: '$' }
+                                { label: 'Trade Size (Multiplied)', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 10.0, step: 0.1, unit: 'x' },
+                                { label: 'Lot Size Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 50.0, step: 0.01, unit: ' L' },
+                                { label: 'Loss Limit', val: maxDD, set: setMaxDD, min: 5, max: 100, step: 5, unit: '%' },
+                                { label: 'Minimum Equity', val: minBal, set: setMinBal, min: 0, max: 1000, step: 1, unit: '$' }
                             ].map((item, i) => (
                                 <div key={i} className="space-y-4">
                                     <div className="flex justify-between items-end"><p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{item.label}</p><p className="text-2xl font-black text-white tracking-tighter">{item.val}{item.unit}</p></div>

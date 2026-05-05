@@ -29,7 +29,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [showQR, setShowQR] = useState(false);
     const [mt5Login, setMt5Login] = useState('');
     const [paymentStatus, setPaymentStatus] = useState<UIPaymentStatus>('UNPAID');
-    const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false });
+    const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false, advanced_options: {} as any });
     const [supportMessage, setSupportMessage] = useState<string | undefined>();
     const [connectionStatus, setConnectionStatus] = useState<string>('UNKNOWN');
 
@@ -63,7 +63,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         try {
             // Fetch relevant data in parallel for speed
             const [acctRes, payRes, riskRes] = await Promise.all([
-                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).maybeSingle() as any,
+                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).eq('is_active', true).maybeSingle() as any,
                 supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle() as any,
             ]);
@@ -82,7 +82,8 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                     aggressiveness: Number(r.aggressiveness), 
                     maxLot: Number(r.max_lot), 
                     maxDD: Number(r.max_drawdown), 
-                    pauseCopy: r.pause_copy 
+                    pauseCopy: r.pause_copy,
+                    advanced_options: r.advanced_options
                 });
             }
         } catch (e) { 

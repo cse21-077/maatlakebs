@@ -14,7 +14,7 @@ import { Button, Card } from './components/shared';
 type View = 'LANDING' | 'SPLASH' | 'AUTH' | 'ONBOARDING' | 'APP';
 
 // ── Landing Page ──────────────────────────────────────────────────────────────
-const LandingPage = ({ onLaunch, isPWA }: { onLaunch: () => void; isPWA: boolean }) => {
+const LandingPage = ({ onLaunch, isPWA, hasAuthParams }: { onLaunch: () => void; isPWA: boolean; hasAuthParams?: boolean }) => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -58,7 +58,7 @@ const LandingPage = ({ onLaunch, isPWA }: { onLaunch: () => void; isPWA: boolean
         <a href="#about" className="text-[13px] font-semibold text-white/70 lg:text-black hover:text-primary transition-colors hidden sm:block">About</a>
         <a href="#install" className="text-[13px] font-semibold text-white/70 lg:text-black hover:text-primary transition-colors hidden sm:block">Installation</a>
         <button onClick={handleInstallClick} className="px-5 py-2.5 bg-secondary text-white lg:bg-primary lg:text-white rounded-full text-[13px] font-bold shadow-lg shadow-secondary/10 hover:bg-secondary/90 lg:hover:bg-primary/90 transition-all hover:scale-105 active:scale-95">
-          Get App
+          {isPWA ? 'Launch Terminal' : 'Get App'}
         </button>
       </div>
     </nav>
@@ -102,16 +102,33 @@ const LandingPage = ({ onLaunch, isPWA }: { onLaunch: () => void; isPWA: boolean
               Join Botswana's premier trading community. Experience elite, automated wealth creation with Maatla Kebs—your trusted partner in safe, simple, and powerful financial freedom.
             </p>
 
-            <div className="hidden lg:flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
-              <button
-                onClick={handleInstallClick}
-                className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all group"
-              >
-                <Smartphone size={22} className="group-hover:rotate-12 transition-transform" />
-                Start Trading
-              </button>
-              {/* Removed the Launch Portal button as requested */}
-            </div>
+            {hasAuthParams ? (
+              <div className="bg-primary/10 border border-primary/20 rounded-3xl p-8 space-y-4 animate-scale-in">
+                <div className="flex items-center gap-3 text-primary">
+                  <CheckCircle2 size={24} />
+                  <span className="font-black uppercase tracking-widest text-sm">Protocol Handshake Successful</span>
+                </div>
+                <h2 className="text-3xl font-black text-white leading-tight">Your Identity is Verified.</h2>
+                <p className="text-white/60 text-sm font-medium leading-relaxed">
+                  Confirmation complete. To maintain security and app-integrity, the terminal is strictly accessible via the PWA. 
+                  <br /><br />
+                  <span className="text-white font-bold">Please close this browser and launch Maatla Kebs from your Home Screen.</span>
+                </p>
+                <div className="pt-2">
+                  <a href="#install" className="text-primary text-[10px] font-black uppercase tracking-widest underline underline-offset-4">Need help finding the app?</a>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
+                <button
+                  onClick={handleInstallClick}
+                  className="w-full sm:w-auto px-10 py-5 bg-primary text-white font-black rounded-2xl shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 hover:bg-primary-hover hover:scale-105 active:scale-95 transition-all group"
+                >
+                  <Smartphone size={22} className="group-hover:rotate-12 transition-transform" />
+                  {isMobile ? (isPWA ? 'Enter Terminal' : 'Install App') : 'Start Trading'}
+                </button>
+              </div>
+            )}
 
             <div className="pt-8 flex flex-wrap gap-10 opacity-30 grayscale items-center hidden lg:flex">
               <img src="/metatrader.png" className="h-6 object-contain" alt="MT5" />
@@ -483,6 +500,10 @@ const App = () => {
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as any).standalone || document.referrer.includes('android-app://');
 
+  const hasAuthParams = window.location.hash.includes('access_token=') || 
+                        window.location.search.includes('code=') ||
+                        window.location.search.includes('type=recovery');
+
   const [view, setView] = useState<View>(isPWA ? 'SPLASH' : 'LANDING');
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
@@ -547,14 +568,20 @@ const App = () => {
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">
-      {view === 'LANDING' && <LandingPage isPWA={isPWA} onLaunch={() => setView('SPLASH')} />}
-      {view === 'SPLASH' && <SplashScreen onFinish={() => setView('AUTH')} />}
-      {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
-        if (s) { setSession(s); setView('ONBOARDING'); return; }
-        supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); setView('ONBOARDING'); } });
-      }} />}
-      {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
-      {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}
+      {/* Mobile Browser Enforcement: Redirect to Landing if not in PWA */}
+      {(view === 'LANDING' || (!isPWA && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent))) ? (
+        <LandingPage isPWA={isPWA} hasAuthParams={hasAuthParams} onLaunch={() => setView('SPLASH')} />
+      ) : (
+        <>
+          {view === 'SPLASH' && <SplashScreen onFinish={() => setView('AUTH')} />}
+          {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
+            if (s) { setSession(s); setView('ONBOARDING'); return; }
+            supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); setView('ONBOARDING'); } });
+          }} />}
+          {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
+          {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}
+        </>
+      )}
     </div>
   );
 };

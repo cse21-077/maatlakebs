@@ -8,6 +8,10 @@
     "theme_color": "#0d0f14",
     "orientation": "portrait-primary",
     "scope": "/",
+    "handle_links": "auto",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
     "categories": [
         "finance",
         "trading",

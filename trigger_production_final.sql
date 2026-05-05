@@ -42,9 +42,10 @@ BEGIN
     aggressiveness, 
     max_lot, 
     max_drawdown, 
-    min_balance
+    min_balance,
+    advanced_options
   )
-  VALUES (new.id, 1.0, 0.10, 20.0, 100.0)
+  VALUES (new.id, 1.0, 50.0, 100.0, 1.0, '{"settings_locked": true}'::jsonb)
   ON CONFLICT (user_id) DO NOTHING;
 
   RETURN new;

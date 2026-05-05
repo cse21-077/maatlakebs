@@ -37,9 +37,11 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
                 body: JSON.stringify({
                     user_id: session.user.id,
                     aggressiveness: 1.0,
-                    max_lot: 0.5,
-                    max_drawdown: 20,
+                    max_lot: 50.0,
+                    max_drawdown: 100,
+                    min_balance: 1.0,
                     pause_copy: false,
+                    advanced_options: { settings_locked: true },
                 }),
             });
 

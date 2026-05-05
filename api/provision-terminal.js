@@ -33,7 +33,19 @@ export default async function handler(req, res) {
 
     if (existingAccounts && existingAccounts.length > 0) {
       const existingFolder = existingAccounts[0].folder_path;
-      console.log('♻️  User already has folder, reusing:', existingFolder);
+      console.log('♻️  User already has folder, ensuring it is assigned to all their accounts:', existingFolder);
+      
+      // Update ALL accounts for this user to ensure the active one gets the folder
+      const { error: updateError } = await supabase
+        .from('student_accounts')
+        .update({ folder_path: existingFolder })
+        .eq('user_id', user_id);
+
+      if (updateError) {
+        console.error('❌ Failed to sync folder_path during reuse:', updateError);
+        // We continue anyway as the UI might retry or the path might already be there
+      }
+
       return res.status(200).json({
         success: true,
         folder_path: existingFolder,

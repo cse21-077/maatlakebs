@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id, aggressiveness, max_lot, max_drawdown, pause_copy } = req.body;
+    const { user_id, aggressiveness, max_lot, max_drawdown, min_balance, pause_copy, advanced_options } = req.body;
 
     if (!user_id) {
       return res.status(400).json({ error: 'Missing user_id' });
@@ -25,9 +25,11 @@ export default async function handler(req, res) {
         {
           user_id,
           aggressiveness: aggressiveness ?? 1.0,
-          max_lot: max_lot ?? 0.5,
-          max_drawdown: max_drawdown ?? 20,
+          max_lot: max_lot ?? 50.0,
+          max_drawdown: max_drawdown ?? 100,
+          min_balance: min_balance ?? 1.0,
           pause_copy: pause_copy ?? false,
+          advanced_options: advanced_options ?? { settings_locked: true },
         },
         { onConflict: 'user_id' }
       );

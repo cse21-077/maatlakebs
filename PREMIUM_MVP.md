@@ -19,9 +19,9 @@ Your Maatla Kebs Copy Trading PWA has been transformed into a **polished, premiu
 - ✅ **Real-time validation** - Checks server name as you type
 - ✅ **Visual feedback** - Green checkmark for valid, red error for invalid
 - ✅ **Accepted servers**:
-  - Weltrade-Live
+  - Weltrade-Real
+  - WeltradeReal
   - Weltrade-Demo
-  - WeltradeLive
   - WeltradeDemo
   - Weltrade-Server
   - WeltradeServer
@@ -158,7 +158,7 @@ Settings Tab
 ```
 ❌ "Deriv-Server" → Error: Only Weltrade accounts supported
 ❌ "IC Markets" → Error: Only Weltrade accounts supported
-✅ "Weltrade-Live" → ✓ Weltrade server verified
+✅ "Weltrade-Real" → ✓ Weltrade server verified
 ✅ "WeltradeDemo" → ✓ Weltrade server verified
 ```
 
@@ -186,7 +186,7 @@ Settings Tab
 ### **Test Weltrade Validation:**
 1. Go through onboarding
 2. Try entering "Deriv-Server" → See error
-3. Try entering "Weltrade-Live" → See success
+3. Try entering "Weltrade-Real" → See success
 4. Try submitting with invalid server → Button disabled
 
 ### **Test File Upload:**

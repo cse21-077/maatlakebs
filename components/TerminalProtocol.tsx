@@ -257,7 +257,7 @@ export const TerminalProtocol = ({
                                 <div className="relative">
                                     <select className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold appearance-none transition-all focus:border-primary" value={mt5.server} onChange={e => setMt5({ ...mt5, server: e.target.value })}>
                                         <option value="">Protocol Server</option>
-                                        <option value="Weltrade-Live">Weltrade-Live</option>
+                                        <option value="Weltrade-Real">Weltrade-Real</option>
                                         <option value="Weltrade-Demo">Weltrade-Demo</option>
                                     </select>
                                     <img src="/weltrade.png" className="absolute right-6 top-1/2 -translate-y-1/2 w-8 opacity-20" />

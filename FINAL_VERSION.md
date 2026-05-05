@@ -21,7 +21,7 @@ Your Maatla Kebs Copy Trading PWA is now **100% complete** and ready for product
   - ✅ Green checkmark for valid Weltrade servers
   - ❌ Red error for non-Weltrade brokers
 - ✅ **Submit disabled** until valid Weltrade server entered
-- ✅ **Accepted servers**: Weltrade-Live, Weltrade-Demo, WeltradeLive, WeltradeDemo, etc.
+- ✅ **Accepted servers**: Weltrade-Real, Weltrade-Demo, WeltradeReal, WeltradeDemo, etc.
 
 ### 3. **Real File Upload System** 📤
 - ✅ **Browse and select** files from device
@@ -96,7 +96,7 @@ Your Maatla Kebs Copy Trading PWA is now **100% complete** and ready for product
    → Error: "⚠️ Only Weltrade broker accounts are supported"
    → Submit button disabled
 
-✅ User types: "Weltrade-Live"
+✅ User types: "Weltrade-Real"
    → Success: "✓ Weltrade server verified"
    → Submit button enabled
 
@@ -148,7 +148,7 @@ Your Maatla Kebs Copy Trading PWA is now **100% complete** and ready for product
 ### **Connection Info Card**
 - Weltrade account details
 - MT5 Login ID
-- Server name (Weltrade-Live/Demo)
+- Server name (Weltrade-Real/Demo)
 - Connection status
 - Disconnect button
 

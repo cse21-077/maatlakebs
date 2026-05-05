@@ -93,7 +93,7 @@ LANDING → (user installs / launches) → SPLASH → AUTH → ONBOARDING → AP
 - "Accept & Continue" CTA
 
 ### Step 1 — MT5 Account Setup
-- **Weltrade-exclusive enforcement** — only Weltrade-Live and Weltrade-Demo servers accepted (dropdown)
+- **Weltrade-exclusive enforcement** — only Weltrade-Real and Weltrade-Demo servers accepted (dropdown)
 - Weltrade logo + broker info banner
 - Fields: Login ID (numeric), Server (dropdown), Trading Password
 - Inline server confirmation tick (green `CheckCircle` + message) when a valid server is selected

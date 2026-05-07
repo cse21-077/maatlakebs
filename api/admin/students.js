@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
     const { data, error } = await supabase
       .from('users')
-      .select('id, role, is_admin')
+      .select('id, role')
       .eq('id', adminId)
       .maybeSingle();
 
@@ -45,9 +45,9 @@ export default async function handler(req, res) {
       return { ok: false, reason: 'user_not_found' };
     }
 
-    const isAdmin = data?.role === 'super_admin' || data?.is_admin === true;
+    const isAdmin = data?.role === 'super_admin';
     if (!isAdmin) {
-      console.warn(`⚠️ verifyAdmin: user ${adminId} has role=${data?.role}, is_admin=${data?.is_admin}`);
+      console.warn(`⚠️ verifyAdmin: user ${adminId} has role=${data?.role}`);
       return { ok: false, reason: 'not_admin', role: data?.role };
     }
 

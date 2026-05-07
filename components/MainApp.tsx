@@ -33,13 +33,14 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false, advanced_options: {} as any });
     const [supportMessage, setSupportMessage] = useState<string | undefined>();
     const [connectionStatus, setConnectionStatus] = useState<string>('UNKNOWN');
+    const [dbRole, setDbRole] = useState<string>('student');
 
     // Link student to default trader if not present in metadata
     const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
 
     const uid = session.user.id;
     const fullName = session.user.user_metadata?.full_name ?? 'Trader';
-    const userRole = session.user.user_metadata?.role || 'user';
+    const userRole = dbRole;
     const isTechSupport = userRole === 'techsupport';
     const isSuperAdmin = userRole === 'super_admin';
     const initialAvatar = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${fullName}`;
@@ -64,11 +65,16 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
         try {
             // Fetch relevant data in parallel for speed
-            const [acctRes, payRes, riskRes] = await Promise.all([
+            const [acctRes, payRes, riskRes, userRes] = await Promise.all([
                 supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).eq('is_active', true).maybeSingle() as any,
                 supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle() as any,
+                supabase.from('users').select('role').eq('id', uid).maybeSingle() as any,
             ]);
+
+            if (userRes.data?.role) {
+                setDbRole(userRes.data.role);
+            }
 
             if (acctRes.data) {
                 setMt5Login(acctRes.data.mt5_login);

@@ -500,6 +500,10 @@ const App = () => {
   const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as any).standalone || document.referrer.includes('android-app://');
 
+  // Dev bypass for admin testing on desktop web
+  const isDev = new URLSearchParams(window.location.search).get('dev') === '1' ||
+    localStorage.getItem('mk_dev') === '1';
+
   const hasAuthParams = window.location.hash.includes('access_token=') || 
                         window.location.search.includes('code=') ||
                         window.location.search.includes('type=recovery');
@@ -568,11 +572,13 @@ const App = () => {
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">
-      {/* Mobile Browser Enforcement: Redirect to Landing if not in PWA */}
-      {(view === 'LANDING' || (!isPWA && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent))) ? (
-        <LandingPage isPWA={isPWA} hasAuthParams={hasAuthParams} onLaunch={() => setView('SPLASH')} />
+      {/* Strict PWA Enforcement: block all non-PWA access (desktop + mobile).
+          Only dev bypass (?dev=1 or localStorage mk_dev=1) can access on web. */}
+      {(!isPWA && !isDev) ? (
+        <LandingPage isPWA={false} hasAuthParams={hasAuthParams} onLaunch={() => {}} />
       ) : (
         <>
+          {view === 'LANDING' && <LandingPage isPWA={isPWA} hasAuthParams={hasAuthParams} onLaunch={() => setView('SPLASH')} />}
           {view === 'SPLASH' && <SplashScreen onFinish={() => setView('AUTH')} />}
           {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
             if (s) { setSession(s); setView('ONBOARDING'); return; }

@@ -1,21 +1,44 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  // Initialize Supabase with SERVICE KEY (bypasses RLS)
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
 
   try {
+    // ── DELETE: permanently remove a saved account ──
+    if (req.method === 'DELETE') {
+      const { user_id, mt5_login } = req.body;
+      if (!user_id || !mt5_login) {
+        return res.status(400).json({ error: 'Missing user_id or mt5_login' });
+      }
+
+      const { error } = await supabase
+        .from('student_accounts')
+        .delete()
+        .eq('user_id', user_id)
+        .eq('mt5_login', mt5_login);
+
+      if (error) {
+        console.error('❌ Failed to delete student account:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      console.log('🗑️ Deleted student account:', { user_id, mt5_login });
+      return res.status(200).json({ success: true });
+    }
+
+    // ── POST: upsert / link / switch account ──
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const { user_id, mt5_login, mt5_server, encrypted_password, trader_id, is_active } = req.body;
 
     if (!user_id || !mt5_login || !mt5_server) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-
-    // Initialize Supabase with SERVICE KEY (bypasses RLS)
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY
-    );
 
     console.log('📝 Upserting student account:', { user_id, mt5_login, mt5_server });
 

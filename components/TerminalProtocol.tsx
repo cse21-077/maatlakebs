@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     ChevronLeft, Lock, Unlock, Zap, ShieldAlert,
-    Eye, EyeOff
+    Eye, EyeOff, Trash2
 } from 'lucide-react';
 import { Button } from './shared';
 import { supabase } from '../lib/supabase';
@@ -57,6 +57,8 @@ export const TerminalProtocol = ({
     const [err, setErr] = useState('');
     const [userAccounts, setUserAccounts] = useState<any[]>([]);
     const [showAddNew, setShowAddNew] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [accountToDelete, setAccountToDelete] = useState<{login: string, server: string} | null>(null);
 
     // Local override for mt5Login to ensure UI responsiveness after unlink
     const [localMt5Login, setLocalMt5Login] = useState(mt5Login);
@@ -204,6 +206,30 @@ export const TerminalProtocol = ({
         finally { setLoading(false); }
     };
 
+    const handleDeleteAccount = async () => {
+        if (!accountToDelete) return;
+        setErr(''); setLoading(true);
+        try {
+            const res = await fetch('/api/upsert-student-account', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: uid,
+                    mt5_login: accountToDelete.login,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to delete account');
+
+            setShowDeleteConfirm(false);
+            setAccountToDelete(null);
+
+            if (onAccountChanged) await onAccountChanged();
+            else onRefresh();
+        } catch (e: any) { setErr(e.message); }
+        finally { setLoading(false); }
+    };
+
     return (
         <>
         {showVerifyModal && (
@@ -263,6 +289,29 @@ export const TerminalProtocol = ({
                 </div>
             </div>
         )}
+        {showDeleteConfirm && accountToDelete && (
+            <div className="fixed inset-0 bg-dark/95 z-[500] flex items-center justify-center p-8 animate-fade-in backdrop-blur-md">
+                <div className="w-full max-w-xs bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-8 space-y-8 shadow-2xl animate-slide-up">
+                    <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto">
+                        <Trash2 size={32} />
+                    </div>
+                    <div className="text-center space-y-2">
+                        <h3 className="text-xl font-black text-white uppercase tracking-tighter">Delete Account?</h3>
+                        <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest leading-relaxed">
+                            This will permanently remove account <span className="text-white font-black">{accountToDelete.login}</span> from your saved accounts. You will need to re-enter the password to link it again.
+                        </p>
+                    </div>
+                    <div className="space-y-3">
+                        <Button loading={loading} onClick={handleDeleteAccount} className="w-full py-5 bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs tracking-widest border-none">
+                            Permanently Delete
+                        </Button>
+                        <button onClick={() => { setShowDeleteConfirm(false); setAccountToDelete(null); }} className="w-full py-4 text-[10px] font-black text-white/20 uppercase tracking-widest hover:text-white transition-all">
+                            Keep Saved Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
 
         <div className="absolute inset-0 bg-[#0d0f14] z-[300] flex flex-col pt-12 animate-slide-up overflow-y-auto pb-24">
             <header className="px-8 flex items-center justify-between sticky top-0 z-[310] bg-[#0d0f14]/80 backdrop-blur-xl shrink-0 pt-4 pb-4">
@@ -305,38 +354,56 @@ export const TerminalProtocol = ({
                         {/* Saved Accounts List */}
                         {userAccounts.length > 0 && (
                             <div className="space-y-3">
-                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
-                                    {userAccounts.length > 1 ? 'All Accounts' : 'Account History'}
+                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Saved Accounts</p>
+                                <p className="text-[9px] text-white/20 font-bold leading-relaxed">
+                                    Only one account can be active at a time. Switching deactivates the current account.
                                 </p>
-                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).map((acct) => (
+                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).slice(0, 3).map((acct) => (
                                     <div key={acct.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
                                         <div>
                                             <p className="text-lg font-black text-white tracking-tight">{acct.mt5_login}</p>
                                             <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">{acct.mt5_server || 'Unknown Server'}</p>
                                         </div>
-                                        <Button
-                                            onClick={() => handleSwitchAccount(acct.mt5_login, acct.mt5_server)}
-                                            loading={loading}
-                                            className="px-4 py-2 text-[9px] uppercase font-black tracking-[0.2em]"
-                                        >
-                                            Switch →
-                                        </Button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setAccountToDelete({ login: acct.mt5_login, server: acct.mt5_server });
+                                                    setShowDeleteConfirm(true);
+                                                }}
+                                                className="p-2 text-white/10 hover:text-red-500 transition-all"
+                                                title="Delete account"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                            <Button
+                                                onClick={() => handleSwitchAccount(acct.mt5_login, acct.mt5_server)}
+                                                loading={loading}
+                                                className="px-4 py-2 text-[9px] uppercase font-black tracking-[0.2em]"
+                                            >
+                                                Switch →
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
+                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).length > 3 && (
+                                    <p className="text-[9px] text-white/20 font-black uppercase tracking-widest text-center">
+                                        +{userAccounts.filter(a => a.mt5_login !== localMt5Login).length - 3} more saved accounts
+                                    </p>
+                                )}
                             </div>
                         )}
 
-                        {/* Add New Account Toggle */}
+                        {/* Link Different Account Toggle */}
                         {(!localMt5Login || userAccounts.length > 0) && (
                             <button
                                 onClick={() => setShowAddNew(!showAddNew)}
                                 className="w-full py-4 border border-white/10 rounded-2xl text-[10px] font-black text-white/30 hover:text-primary hover:border-primary/30 uppercase tracking-[0.3em] transition-all"
                             >
-                                {showAddNew ? '← Cancel' : '+ Add New Account'}
+                                {showAddNew ? '← Cancel' : '+ Link Different Account'}
                             </button>
                         )}
 
-                        {/* Add New Account Form */}
+                        {/* Link Different Account Form */}
                         {showAddNew && (
                             <div className="space-y-4 pt-4 border-t border-white/5">
                                 <input type="number" placeholder="MT5 Login ID" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold" value={mt5.login} onChange={e => setMt5({ ...mt5, login: e.target.value })} />

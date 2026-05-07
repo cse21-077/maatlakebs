@@ -33,6 +33,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [risk, setRisk] = useState({ aggressiveness: 1.0, maxLot: 0.5, maxDD: 20, pauseCopy: false, advanced_options: {} as any });
     const [supportMessage, setSupportMessage] = useState<string | undefined>();
     const [connectionStatus, setConnectionStatus] = useState<string>('UNKNOWN');
+    const [connectionLastChecked, setConnectionLastChecked] = useState<string | null>(null);
     const [dbRole, setDbRole] = useState<string>('student');
 
     // Link student to default trader if not present in metadata
@@ -108,6 +109,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             const data = await response.json();
             if (response.ok && data.status) {
                 setConnectionStatus(data.status);
+                setConnectionLastChecked(data.last_checked || null);
             }
         } catch (e) {
             console.error('Connection status fetch error:', e);
@@ -137,6 +139,9 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                 (payload: any) => {
                     if (payload.new?.mt5_status) {
                         setConnectionStatus(payload.new.mt5_status);
+                    }
+                    if (payload.new?.last_checked) {
+                        setConnectionLastChecked(payload.new.last_checked);
                     }
                 }
             )
@@ -240,9 +245,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                             : (mt5Login 
                                                 ? (connectionStatus === 'CONNECTED' 
                                                     ? 'text-green-500' 
-                                                    : connectionStatus === 'ERROR' 
-                                                        ? 'text-red-500' 
-                                                        : 'text-yellow-500')
+                                                    : 'text-yellow-500')
                                                 : 'text-red-500/30')
                                     }`}>
                                         {risk.pauseCopy 
@@ -251,7 +254,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                                 ? (() => {
                                                     switch(connectionStatus) {
                                                         case 'CONNECTED': return '● Connected';
-                                                        case 'ERROR': return '● Error';
+                                                        case 'ERROR': return '◉ Checking...';
                                                         case 'UNKNOWN': return '◉ Verifying...';
                                                         default: return '○ Standby';
                                                     }
@@ -265,7 +268,10 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                                 try {
                                                     const res = await fetch(`/api/connection-status?user_id=${uid}`);
                                                     const data = await res.json();
-                                                    if (res.ok && data.status) setConnectionStatus(data.status);
+                                                    if (res.ok && data.status) {
+                                                        setConnectionStatus(data.status);
+                                                        setConnectionLastChecked(data.last_checked || null);
+                                                    }
                                                 } catch (e) { console.error(e); }
                                             }}
                                             className="text-white/20 hover:text-white/60 transition-all"
@@ -275,6 +281,11 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                         </button>
                                     )}
                                 </div>
+                                {mt5Login && connectionLastChecked && (
+                                    <p className="text-[8px] text-white/10 font-black uppercase tracking-widest mt-0.5">
+                                        Checked {new Date(connectionLastChecked).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

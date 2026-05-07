@@ -38,6 +38,23 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: error.message });
     }
 
+    // Enforce one active account per user: deactivate all other accounts
+    // for this user except the one we just upserted
+    if (is_active !== false) {
+      const { error: deactivateError } = await supabase
+        .from('student_accounts')
+        .update({ is_active: false, encrypted_password: '' })
+        .eq('user_id', user_id)
+        .neq('mt5_login', mt5_login);
+
+      if (deactivateError) {
+        console.warn('⚠️ Failed to deactivate old accounts:', deactivateError.message);
+        // Non-fatal — the upsert succeeded
+      } else {
+        console.log('✅ Deactivated old accounts for user:', user_id);
+      }
+    }
+
     console.log('✅ Student account upserted successfully');
     res.status(200).json({ success: true, data });
 

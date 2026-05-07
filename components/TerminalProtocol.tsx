@@ -136,14 +136,15 @@ export const TerminalProtocol = ({
         try {
             // If it's the guest account, just simulate the unlink locally
             if (uid !== '00000000-0000-4000-a000-000000000000') {
-                // Deactivate instead of delete — preserve folder_path for reuse
+                // Deactivate ONLY the currently linked account — not all accounts for the user
                 const { error } = await (supabase as any)
                     .from('student_accounts')
                     .update({ 
                         is_active: false,
                         encrypted_password: ''
                     })
-                    .eq('user_id', uid);
+                    .eq('user_id', uid)
+                    .eq('mt5_login', localMt5Login);
                 if (error) throw error;
             }
             

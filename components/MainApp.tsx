@@ -5,7 +5,7 @@ import {
     LogOut as LogOutIcon, ShieldAlert, CreditCard, Clock,
     CheckCircle, QrCode, X, WifiOff, Wifi, ChevronRight,
     MessageSquare, HelpCircle, Lock, Unlock, ChevronLeft,
-    TrendingUp, User as UserIcon, LifeBuoy
+    TrendingUp, User as UserIcon, LifeBuoy, RefreshCw
 } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -101,26 +101,29 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
     useEffect(() => { load(); }, [uid, view]);
 
-    // Subscribe to real-time connection status updates
+    // Fetch connection status from backend API (bypasses RLS) + real-time fallback
     useEffect(() => {
         if (!uid) return;
 
-        // Fetch initial connection status
         const fetchStatus = async () => {
-            const { data } = await (supabase as any)
-                .from('connection_status')
-                .select('mt5_status')
-                .eq('user_id', uid)
-                .maybeSingle();
-            
-            if (data?.mt5_status) {
-                setConnectionStatus(data.mt5_status);
+            try {
+                const response = await fetch(`/api/connection-status?user_id=${uid}`);
+                const data = await response.json();
+                if (response.ok && data.status) {
+                    setConnectionStatus(data.status);
+                }
+            } catch (e) {
+                console.error('Connection status fetch error:', e);
             }
         };
-        
+
+        // Immediate fetch
         fetchStatus();
 
-        // Subscribe to real-time updates
+        // Poll every 10 seconds as fallback in case real-time fails
+        const pollInterval = setInterval(fetchStatus, 10000);
+
+        // Subscribe to real-time updates for instant feedback
         const subscription = (supabase as any)
             .channel('connection_status_changes')
             .on('postgres_changes', 
@@ -139,6 +142,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             .subscribe();
 
         return () => {
+            clearInterval(pollInterval);
             subscription.unsubscribe();
         };
     }, [uid]);
@@ -229,30 +233,47 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                             <div className="space-y-1">
                                 <p className="text-[10px] text-white/30 font-black tracking-widest leading-none uppercase">Login</p>
                                 <p className={`text-xl font-black tracking-tight ${mt5Login ? 'text-white' : 'text-white/10'}`}>{mt5Login || '---'}</p>
-                                <div className={`text-[10px] font-black uppercase tracking-widest mt-1 ${
-                                    risk.pauseCopy 
-                                        ? 'text-red-500' 
-                                        : (mt5Login 
-                                            ? (connectionStatus === 'CONNECTED' 
-                                                ? 'text-green-500' 
-                                                : connectionStatus === 'ERROR' 
-                                                    ? 'text-red-500' 
-                                                    : 'text-yellow-500')
-                                            : 'text-red-500/30')
-                                }`}>
-                                    {risk.pauseCopy 
-                                        ? '○ Disconnected' 
-                                        : (mt5Login 
-                                            ? (() => {
-                                                switch(connectionStatus) {
-                                                    case 'CONNECTED': return '● Connected';
-                                                    case 'ERROR': return '● Error';
-                                                    case 'UNKNOWN': return '◉ Verifying...';
-                                                    default: return '○ Standby';
-                                                }
-                                              })()
-                                            : '○ Standby')
-                                    }
+                                <div className="flex items-center justify-end gap-2 mt-1">
+                                    <div className={`text-[10px] font-black uppercase tracking-widest ${
+                                        risk.pauseCopy 
+                                            ? 'text-red-500' 
+                                            : (mt5Login 
+                                                ? (connectionStatus === 'CONNECTED' 
+                                                    ? 'text-green-500' 
+                                                    : connectionStatus === 'ERROR' 
+                                                        ? 'text-red-500' 
+                                                        : 'text-yellow-500')
+                                                : 'text-red-500/30')
+                                    }`}>
+                                        {risk.pauseCopy 
+                                            ? '○ Disconnected' 
+                                            : (mt5Login 
+                                                ? (() => {
+                                                    switch(connectionStatus) {
+                                                        case 'CONNECTED': return '● Connected';
+                                                        case 'ERROR': return '● Error';
+                                                        case 'UNKNOWN': return '◉ Verifying...';
+                                                        default: return '○ Standby';
+                                                    }
+                                                  })()
+                                                : '○ Standby')
+                                        }
+                                    </div>
+                                    {mt5Login && (
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    const res = await fetch(`/api/connection-status?user_id=${uid}`);
+                                                    const data = await res.json();
+                                                    if (res.ok && data.status) setConnectionStatus(data.status);
+                                                } catch (e) { console.error(e); }
+                                            }}
+                                            className="text-white/20 hover:text-white/60 transition-all"
+                                            title="Check connection"
+                                        >
+                                            <RefreshCw size={12} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

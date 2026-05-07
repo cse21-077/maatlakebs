@@ -17,11 +17,12 @@ export default async function handler(req, res) {
   async function verifyAdmin(adminId) {
     if (!adminId) return false;
     const { data, error } = await supabase
-      .from('public_users')
-      .select('id, is_admin')
+      .from('users')
+      .select('id, role, is_admin')
       .eq('id', adminId)
       .single();
-    return !error && data?.is_admin === true;
+    if (error) return false;
+    return data?.role === 'super_admin' || data?.is_admin === true;
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -59,12 +60,21 @@ export default async function handler(req, res) {
       const enrichedInvoices = [];
       for (const invoice of invoices) {
         const { data: user } = await supabase
-          .from('public_users')
-          .select('id, email, first_name, last_name')
+          .from('users')
+          .select('id, email, full_name')
           .eq('id', invoice.user_id)
           .single();
 
-        enrichedInvoices.push({ ...invoice, user: user || null });
+        enrichedInvoices.push({
+          ...invoice,
+          user: user
+            ? {
+                ...user,
+                first_name: user.full_name?.split(' ')[0] || '',
+                last_name: user.full_name?.split(' ').slice(1).join(' ') || '',
+              }
+            : null,
+        });
       }
 
       console.log(`✅ Retrieved ${enrichedInvoices.length} pending mentor payments`);

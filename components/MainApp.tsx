@@ -17,6 +17,7 @@ import { TerminalProtocol } from './TerminalProtocol';
 import { MembershipProtocol } from './MembershipProtocol';
 import { SupportProtocol } from './SupportProtocol';
 import { TechSupportDashboard } from './TechSupportDashboard';
+import { AdminDashboard } from './AdminDashboard';
 
 type AppView = 'HOME' | 'CONFIG' | 'BILLING' | 'SUPPORT';
 type UIPaymentStatus = 'UNPAID' | 'CONFIRMED';
@@ -40,6 +41,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const fullName = session.user.user_metadata?.full_name ?? 'Trader';
     const userRole = session.user.user_metadata?.role || 'user';
     const isTechSupport = userRole === 'techsupport';
+    const isSuperAdmin = userRole === 'super_admin';
     const initialAvatar = session.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/big-ears-neutral/svg?seed=${fullName}`;
     const [avatarUrl, setAvatarUrl] = useState(initialAvatar);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -141,6 +143,15 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             <div className="min-h-screen bg-[#0d0f14]">
                 {view === 'HOME' && <TechSupportDashboard uid={uid} onBack={() => setView('HOME')} />}
                 {view !== 'HOME' && <TechSupportDashboard uid={uid} onBack={() => setView('HOME')} />}
+            </div>
+        );
+    }
+
+    // Super Admin dashboard
+    if (isSuperAdmin) {
+        return (
+            <div className="min-h-screen bg-[#0d0f14]">
+                <AdminDashboard adminId={uid} onBack={() => { /* admin stays in dashboard */ }} />
             </div>
         );
     }

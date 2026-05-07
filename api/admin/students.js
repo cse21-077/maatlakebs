@@ -119,9 +119,18 @@ export default async function handler(req, res) {
 
       // Build lookup maps
       const accountsByUser = {};
+      const ghostOnlyUsers = new Set();
       for (const acct of accounts || []) {
         if (!accountsByUser[acct.user_id]) accountsByUser[acct.user_id] = [];
         accountsByUser[acct.user_id].push(acct);
+      }
+      // Identify users whose only accounts are ghost accounts
+      for (const userId of Object.keys(accountsByUser)) {
+        const userAccounts = accountsByUser[userId];
+        const hasRealAccount = userAccounts.some(a => !a.is_ghost);
+        if (!hasRealAccount) {
+          ghostOnlyUsers.add(userId);
+        }
       }
 
       const paymentByUser = {};
@@ -135,24 +144,26 @@ export default async function handler(req, res) {
         invoicesByUser[inv.user_id].push(inv);
       }
 
-      // Enrich students
-      const enriched = (students || []).map((student) => {
-        const studentAccounts = accountsByUser[student.id] || [];
-        const liveAccounts = studentAccounts.filter(a => a.mt5_server?.toLowerCase().includes('real'));
-        const demoAccounts = studentAccounts.filter(a => a.mt5_server?.toLowerCase().includes('demo'));
+      // Enrich students — hide ghost-only users and filter out ghost accounts
+      const enriched = (students || [])
+        .filter(student => !ghostOnlyUsers.has(student.id))
+        .map((student) => {
+          const studentAccounts = (accountsByUser[student.id] || []).filter(a => !a.is_ghost);
+          const liveAccounts = studentAccounts.filter(a => a.mt5_server?.toLowerCase().includes('real'));
+          const demoAccounts = studentAccounts.filter(a => a.mt5_server?.toLowerCase().includes('demo'));
 
-        return {
-          ...student,
-          accounts: studentAccounts,
-          live_accounts: liveAccounts,
-          demo_accounts: demoAccounts,
-          payment_status: paymentByUser[student.id] || null,
-          pending_invoices: invoicesByUser[student.id] || [],
-          has_proof_submitted: (invoicesByUser[student.id] || []).some(i => i.payment_status === 'proof_submitted' && i.proof_of_payment_url),
-        };
-      });
+          return {
+            ...student,
+            accounts: studentAccounts,
+            live_accounts: liveAccounts,
+            demo_accounts: demoAccounts,
+            payment_status: paymentByUser[student.id] || null,
+            pending_invoices: invoicesByUser[student.id] || [],
+            has_proof_submitted: (invoicesByUser[student.id] || []).some(i => i.payment_status === 'proof_submitted' && i.proof_of_payment_url),
+          };
+        });
 
-      console.log(`✅ Retrieved ${enriched.length} students`);
+      console.log(`✅ Retrieved ${enriched.length} students (excluded ${ghostOnlyUsers.size} ghost-only users)`);
       return res.status(200).json({
         success: true,
         count: enriched.length,

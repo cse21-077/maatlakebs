@@ -55,11 +55,27 @@ export const TerminalProtocol = ({
     const [loading, setLoading] = useState(false);
     const [seePw, setSeePw] = useState(false);
     const [err, setErr] = useState('');
+    const [userAccounts, setUserAccounts] = useState<any[]>([]);
+    const [showAddNew, setShowAddNew] = useState(false);
 
     // Local override for mt5Login to ensure UI responsiveness after unlink
     const [localMt5Login, setLocalMt5Login] = useState(mt5Login);
 
     useEffect(() => { setLocalMt5Login(mt5Login); }, [mt5Login]);
+
+    // Fetch all linked accounts for this user
+    useEffect(() => {
+        if (!uid || uid === '00000000-0000-4000-a000-000000000000') return;
+        const fetchAccounts = async () => {
+            const { data, error } = await (supabase as any)
+                .from('student_accounts')
+                .select('id, mt5_login, mt5_server, is_active, folder_path')
+                .eq('user_id', uid)
+                .order('created_at', { ascending: false });
+            if (!error) setUserAccounts(data || []);
+        };
+        fetchAccounts();
+    }, [uid, localMt5Login, loading]);
 
     const handleSave = async () => {
         setErr(''); setLoading(true);
@@ -134,25 +150,54 @@ export const TerminalProtocol = ({
     const handleUnlink = async () => {
         setLoading(true);
         try {
-            // If it's the guest account, just simulate the unlink locally
             if (uid !== '00000000-0000-4000-a000-000000000000') {
-                // Deactivate ONLY the currently linked account — not all accounts for the user
                 const { error } = await (supabase as any)
                     .from('student_accounts')
-                    .update({ 
-                        is_active: false,
-                        encrypted_password: ''
-                    })
+                    .update({ is_active: false })
                     .eq('user_id', uid)
                     .eq('mt5_login', localMt5Login);
                 if (error) throw error;
             }
-            
-            setLocalMt5Login(''); 
-            setMt5({ login: '', server: '', password: '' });
+            setLocalMt5Login('');
             setShowUnlinkConfirm(false);
-            
-            // Notify parent to refresh account data from database
+            if (onAccountChanged) await onAccountChanged();
+            else onRefresh();
+        } catch (e: any) { setErr(e.message); }
+        finally { setLoading(false); }
+    };
+
+    const handleSwitchAccount = async (login: string, server: string) => {
+        setErr(''); setLoading(true);
+        try {
+            const res = await fetch('/api/upsert-student-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: uid,
+                    mt5_login: login,
+                    mt5_server: server,
+                    is_active: true,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to switch account');
+
+            setLocalMt5Login(login);
+            setShowAddNew(false);
+
+            // Provision terminal for the switched account
+            await fetch('/api/provision-terminal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid }),
+            });
+
+            await (supabase as any).from('connection_status').upsert({
+                user_id: uid,
+                mt5_status: 'UNKNOWN',
+                last_checked: new Date().toISOString(),
+            });
+
             if (onAccountChanged) await onAccountChanged();
             else onRefresh();
         } catch (e: any) { setErr(e.message); }
@@ -238,22 +283,86 @@ export const TerminalProtocol = ({
                             <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Account</h3>
                         </div>
 
-                        {localMt5Login ? (
-                            <div className="space-y-6">
-                                <div className="p-6 bg-white/5 rounded-3xl border border-white/5 flex flex-col gap-4">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="text-[10px] text-primary font-black uppercase tracking-widest leading-none">Login ID</p>
-                                            <p className="mt-2 text-3xl font-black text-white tracking-tighter">{localMt5Login}</p>
-                                        </div>
+                        {err && <p className="text-xs text-red-500 font-bold bg-red-500/10 p-4 rounded-xl">{err}</p>}
+
+                        {/* Active Account Card */}
+                        {localMt5Login && (
+                            <div className="p-6 bg-green-500/5 rounded-3xl border border-green-500/20 flex flex-col gap-4">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[10px] text-green-400 font-black uppercase tracking-widest leading-none">Active Login</p>
+                                        <p className="mt-2 text-3xl font-black text-white tracking-tighter">{localMt5Login}</p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1">
                                         <img src="/weltrade.png" alt="Weltrade" className="w-10 h-10 object-contain" />
+                                        <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em]">Connected</span>
                                     </div>
                                 </div>
                                 <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all">Disconnect Account →</button>
                             </div>
-                        ) : (
+                        )}
+
+                        {/* Saved Accounts List */}
+                        {userAccounts.length > 0 && (
+                            <div className="space-y-3">
+                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">
+                                    {userAccounts.length > 1 ? 'All Accounts' : 'Account History'}
+                                </p>
+                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).map((acct) => (
+                                    <div key={acct.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div>
+                                            <p className="text-lg font-black text-white tracking-tight">{acct.mt5_login}</p>
+                                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">{acct.mt5_server || 'Unknown Server'}</p>
+                                        </div>
+                                        <Button
+                                            onClick={() => handleSwitchAccount(acct.mt5_login, acct.mt5_server)}
+                                            loading={loading}
+                                            className="px-4 py-2 text-[9px] uppercase font-black tracking-[0.2em]"
+                                        >
+                                            Switch →
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Add New Account Toggle */}
+                        {(!localMt5Login || userAccounts.length > 0) && (
+                            <button
+                                onClick={() => setShowAddNew(!showAddNew)}
+                                className="w-full py-4 border border-white/10 rounded-2xl text-[10px] font-black text-white/30 hover:text-primary hover:border-primary/30 uppercase tracking-[0.3em] transition-all"
+                            >
+                                {showAddNew ? '← Cancel' : '+ Add New Account'}
+                            </button>
+                        )}
+
+                        {/* Add New Account Form */}
+                        {showAddNew && (
+                            <div className="space-y-4 pt-4 border-t border-white/5">
+                                <input type="number" placeholder="MT5 Login ID" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold" value={mt5.login} onChange={e => setMt5({ ...mt5, login: e.target.value })} />
+                                <div className="relative">
+                                    <select className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold appearance-none transition-all focus:border-primary" value={mt5.server} onChange={e => setMt5({ ...mt5, server: e.target.value })}>
+                                        <option value="">Protocol Server</option>
+                                        <option value="Weltrade-Real">Weltrade-Real</option>
+                                        <option value="Weltrade-Demo">Weltrade-Demo</option>
+                                    </select>
+                                    <img src="/weltrade.png" className="absolute right-6 top-1/2 -translate-y-1/2 w-8 opacity-20" />
+                                </div>
+                                <div className="relative">
+                                    <input type={seePw ? "text" : "password"} placeholder="Passphrase" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold pr-14" value={mt5.password} onChange={e => setMt5({ ...mt5, password: e.target.value })} />
+                                    <button onClick={() => setSeePw(!seePw)} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-all">
+                                        {seePw ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
+                                </div>
+                                <Button loading={loading} onClick={handleSave} className="w-full py-5 text-xs uppercase font-black tracking-[0.2em] shadow-2xl shadow-primary/20">
+                                    Connect →
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* No accounts at all — show default form */}
+                        {!localMt5Login && userAccounts.length === 0 && !showAddNew && (
                             <div className="space-y-4">
-                                {err && <p className="text-xs text-red-500 font-bold bg-red-500/10 p-4 rounded-xl">{err}</p>}
                                 <input type="number" placeholder="MT5 Login ID" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold" value={mt5.login} onChange={e => setMt5({ ...mt5, login: e.target.value })} />
                                 <div className="relative">
                                     <select className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold appearance-none transition-all focus:border-primary" value={mt5.server} onChange={e => setMt5({ ...mt5, server: e.target.value })}>

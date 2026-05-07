@@ -85,11 +85,10 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: studentsError.message });
       }
 
-      // Fetch only ACTIVE student accounts (one per user enforced by upsert logic)
+      // Fetch ALL student accounts so admin can see every linked account
       const { data: accounts, error: accountsError } = await supabase
         .from('student_accounts')
-        .select('id, user_id, mt5_login, mt5_server, is_active, is_ghost, folder_path, trader_id, created_at, updated_at')
-        .eq('is_active', true);
+        .select('id, user_id, mt5_login, mt5_server, is_active, is_ghost, folder_path, trader_id, created_at, updated_at');
 
       if (accountsError) {
         console.error('❌ Failed to fetch accounts:', accountsError);

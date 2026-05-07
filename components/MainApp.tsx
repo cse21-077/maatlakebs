@@ -97,33 +97,34 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         } catch (e) { 
             console.error('Load Error:', e); 
         }
+        // Refresh connection status after any account change
+        await fetchStatus();
+    };
+
+    const fetchStatus = async () => {
+        if (!uid) return;
+        try {
+            const response = await fetch(`/api/connection-status?user_id=${uid}`);
+            const data = await response.json();
+            if (response.ok && data.status) {
+                setConnectionStatus(data.status);
+            }
+        } catch (e) {
+            console.error('Connection status fetch error:', e);
+        }
     };
 
     useEffect(() => { load(); }, [uid, view]);
 
-    // Fetch connection status from backend API (bypasses RLS) + real-time fallback
+    // Fetch connection status on mount / uid change + real-time subscription
     useEffect(() => {
         if (!uid) return;
 
-        const fetchStatus = async () => {
-            try {
-                const response = await fetch(`/api/connection-status?user_id=${uid}`);
-                const data = await response.json();
-                if (response.ok && data.status) {
-                    setConnectionStatus(data.status);
-                }
-            } catch (e) {
-                console.error('Connection status fetch error:', e);
-            }
-        };
-
-        // Immediate fetch
+        // Immediate fetch on mount / uid change
         fetchStatus();
 
-        // Poll every 10 seconds as fallback in case real-time fails
-        const pollInterval = setInterval(fetchStatus, 10000);
-
         // Subscribe to real-time updates for instant feedback
+        // Polling removed — status only changes on link/unlink/server events
         const subscription = (supabase as any)
             .channel('connection_status_changes')
             .on('postgres_changes', 
@@ -142,7 +143,6 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             .subscribe();
 
         return () => {
-            clearInterval(pollInterval);
             subscription.unsubscribe();
         };
     }, [uid]);

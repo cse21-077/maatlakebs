@@ -19,19 +19,18 @@ export default async function handler(req, res) {
 
     console.log('📝 Upserting student account:', { user_id, mt5_login, mt5_server });
 
+    const upsertData = {
+      user_id,
+      mt5_login,
+      mt5_server,
+      is_active: is_active ?? true,
+    };
+    if (encrypted_password !== undefined) upsertData.encrypted_password = encrypted_password;
+    if (trader_id !== undefined) upsertData.trader_id = trader_id;
+
     const { data, error } = await supabase
       .from('student_accounts')
-      .upsert(
-        {
-          user_id,
-          mt5_login,
-          mt5_server,
-          encrypted_password,
-          trader_id,
-          is_active: is_active ?? true,
-        },
-        { onConflict: 'mt5_login,mt5_server' }
-      );
+      .upsert(upsertData, { onConflict: 'mt5_login,mt5_server' });
 
     if (error) {
       console.error('❌ Failed to upsert student account:', error);
@@ -39,11 +38,12 @@ export default async function handler(req, res) {
     }
 
     // Enforce one active account per user: deactivate all other accounts
-    // for this user except the one we just upserted
+    // for this user except the one we just upserted. Preserve passwords so
+    // users can switch back to previous accounts without re-entering credentials.
     if (is_active !== false) {
       const { error: deactivateError } = await supabase
         .from('student_accounts')
-        .update({ is_active: false, encrypted_password: '' })
+        .update({ is_active: false })
         .eq('user_id', user_id)
         .neq('mt5_login', mt5_login);
 

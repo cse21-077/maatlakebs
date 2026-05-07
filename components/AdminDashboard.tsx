@@ -3,7 +3,7 @@ import {
   ChevronDown, ChevronUp, Users, CreditCard, AlertCircle,
   CheckCircle, Loader, Eye, ExternalLink, Search, ShieldCheck,
   Monitor, Smartphone, Clock, XCircle, RefreshCw, Filter,
-  TrendingUp, Wallet
+  TrendingUp, Wallet, LogOut
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Button } from './shared';
@@ -143,6 +143,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'active': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
@@ -155,11 +159,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
   const getStatusIcon = (status?: string) => {
     switch (status) {
-      case 'active': return <CheckCircle size={14} />;
-      case 'trial': return <Clock size={14} />;
-      case 'overdue': return <AlertCircle size={14} />;
-      case 'cancelled': return <XCircle size={14} />;
-      default: return <Clock size={14} />;
+      case 'active': return <CheckCircle size={12} />;
+      case 'trial': return <Clock size={12} />;
+      case 'overdue': return <AlertCircle size={12} />;
+      case 'cancelled': return <XCircle size={12} />;
+      default: return <Clock size={12} />;
     }
   };
 
@@ -171,25 +175,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
   // ── Proof Preview Modal ───────────────────────────────────────────────────
   if (previewProof) {
     return (
-      <div className="fixed inset-0 bg-[#0d0f14]/95 z-[600] flex flex-col p-6 animate-fade-in overflow-y-auto">
-        <div className="max-w-2xl mx-auto w-full space-y-6">
+      <div className="fixed inset-0 bg-[#0d0f14]/95 z-[600] flex flex-col p-4 sm:p-6 animate-fade-in overflow-y-auto safe-top">
+        <div className="max-w-2xl mx-auto w-full space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-white tracking-tighter">Payment Proof</h2>
+            <h2 className="text-lg sm:text-xl font-black text-white tracking-tighter">Payment Proof</h2>
             <button onClick={() => setPreviewProof(null)} className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
               ✕
             </button>
           </div>
 
-          <div className="bg-[#1a1c22] border border-white/5 rounded-3xl p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Invoice ID</p><p className="text-white font-bold">{previewProof.invoice_id}</p></div>
-              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Amount</p><p className="text-white font-bold">${previewProof.price_amount} {previewProof.price_currency}</p></div>
-              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Plan</p><p className="text-white font-bold capitalize">{previewProof.subscription_plan}</p></div>
-              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Method</p><p className="text-white font-bold capitalize">{previewProof.payment_method}</p></div>
+          <div className="bg-[#1a1c22] border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
+              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Invoice ID</p><p className="text-white font-bold text-xs sm:text-sm">{previewProof.invoice_id}</p></div>
+              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Amount</p><p className="text-white font-bold text-xs sm:text-sm">${previewProof.price_amount} {previewProof.price_currency}</p></div>
+              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Plan</p><p className="text-white font-bold text-xs sm:text-sm capitalize">{previewProof.subscription_plan}</p></div>
+              <div><p className="text-white/30 text-[10px] font-black uppercase tracking-widest">Method</p><p className="text-white font-bold text-xs sm:text-sm capitalize">{previewProof.payment_method}</p></div>
             </div>
           </div>
 
-          <div className="bg-[#1a1c22] border border-white/5 rounded-3xl p-6">
+          <div className="bg-[#1a1c22] border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
             {previewProof.proof_of_payment_url?.endsWith('.pdf') ? (
               <div className="text-center space-y-4">
                 <p className="text-sm text-white/60">PDF Document</p>
@@ -199,7 +203,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                 </a>
               </div>
             ) : (
-              <img src={previewProof.proof_of_payment_url} alt="Proof of payment" className="max-w-full rounded-2xl" />
+              <img src={previewProof.proof_of_payment_url} alt="Proof of payment" className="max-w-full rounded-xl sm:rounded-2xl" />
             )}
           </div>
 
@@ -214,27 +218,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
   // ── Payment Reviews Tab ───────────────────────────────────────────────────
   if (activeTab === 'payments') {
     return (
-      <div className="min-h-screen bg-[#0d0f14] flex flex-col">
+      <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
         {/* Header */}
-        <header className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-white/5">
-          <div className="flex items-center gap-3">
+        <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between shrink-0 border-b border-white/5">
+          <div className="flex items-center gap-2 sm:gap-3">
             {onBack && (
-              <button onClick={onBack} className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
+              <button onClick={onBack} className="w-9 h-9 sm:w-10 sm:h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
                 ✕
               </button>
             )}
             <div>
               <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Admin</p>
-              <h1 className="text-xl font-black text-white tracking-tighter">Dashboard</h1>
+              <h1 className="text-lg sm:text-xl font-black text-white tracking-tighter">Dashboard</h1>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
-            <button onClick={() => setActiveTab('students')} className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
-            <button onClick={() => setActiveTab('payments')} className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Payments</button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
+              <button onClick={() => setActiveTab('students')} className="px-3 sm:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
+              <button onClick={() => setActiveTab('payments')} className="px-3 sm:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Payments</button>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </header>
 
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           <AdminPaymentReview adminId={adminId} onClose={() => setActiveTab('students')} />
         </main>
       </div>
@@ -243,48 +256,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
   // ── Students Tab ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0d0f14] flex flex-col">
+    <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
       {/* Header */}
-      <header className="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-white/5">
-        <div className="flex items-center gap-3">
+      <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex items-center justify-between shrink-0 border-b border-white/5">
+        <div className="flex items-center gap-2 sm:gap-3">
           {onBack && (
-            <button onClick={onBack} className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
+            <button onClick={onBack} className="w-9 h-9 sm:w-10 sm:h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
               ✕
             </button>
           )}
           <div>
             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Admin</p>
-            <h1 className="text-xl font-black text-white tracking-tighter">Dashboard</h1>
+            <h1 className="text-lg sm:text-xl font-black text-white tracking-tighter">Dashboard</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
-          <button onClick={() => setActiveTab('students')} className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Students</button>
-          <button onClick={() => setActiveTab('payments')} className="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
+            <button onClick={() => setActiveTab('students')} className="px-3 sm:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Students</button>
+            <button onClick={() => setActiveTab('payments')} className="px-3 sm:px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
+            title="Logout"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </header>
 
       {/* Stats Bar */}
-      <div className="px-6 py-4 grid grid-cols-4 gap-3 shrink-0">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 shrink-0">
         {[
           { label: 'Total', value: students.length, icon: Users, color: 'text-blue-400' },
           { label: 'Active', value: students.filter(s => s.payment_status?.subscription_status === 'active').length, icon: ShieldCheck, color: 'text-emerald-400' },
           { label: 'Trial', value: students.filter(s => s.payment_status?.subscription_status === 'trial').length, icon: Clock, color: 'text-blue-400' },
           { label: 'Overdue', value: students.filter(s => s.payment_status?.subscription_status === 'overdue' || isOverdue(s)).length, icon: AlertCircle, color: 'text-red-400' },
         ].map((stat, i) => (
-          <div key={i} className="bg-[#1a1c22] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${stat.color}`}>
-              <stat.icon size={18} />
+          <div key={i} className="bg-[#1a1c22] border border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/5 flex items-center justify-center ${stat.color}`}>
+              <stat.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
             </div>
             <div>
-              <p className="text-lg font-black text-white leading-none">{stat.value}</p>
-              <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-1">{stat.label}</p>
+              <p className="text-base sm:text-lg font-black text-white leading-none">{stat.value}</p>
+              <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-0.5 sm:mt-1">{stat.label}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="px-6 pb-4 flex items-center gap-3 shrink-0">
+      <div className="px-4 sm:px-6 pb-3 sm:pb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 shrink-0">
         <div className="flex-1 relative">
           <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
           <input
@@ -295,39 +317,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
             className="w-full bg-[#1a1c22] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm text-white font-bold placeholder:text-white/20 focus:border-primary/50 transition-all outline-none"
           />
         </div>
-        <div className="relative">
-          <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#1a1c22] border border-white/5 rounded-xl py-3 pl-9 pr-8 text-sm text-white font-bold appearance-none focus:border-primary/50 transition-all outline-none cursor-pointer"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="trial">Trial</option>
-            <option value="overdue">Overdue</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-auto bg-[#1a1c22] border border-white/5 rounded-xl py-3 pl-9 pr-8 text-sm text-white font-bold appearance-none focus:border-primary/50 transition-all outline-none cursor-pointer"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="trial">Trial</option>
+              <option value="overdue">Overdue</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <button onClick={fetchStudents} className="w-11 h-11 bg-[#1a1c22] border border-white/5 rounded-xl flex items-center justify-center text-white/40 hover:text-white hover:border-primary/50 transition-all shrink-0">
+            <RefreshCw size={16} />
+          </button>
         </div>
-        <button onClick={fetchStudents} className="w-11 h-11 bg-[#1a1c22] border border-white/5 rounded-xl flex items-center justify-center text-white/40 hover:text-white hover:border-primary/50 transition-all">
-          <RefreshCw size={16} />
-        </button>
       </div>
 
       {/* Alerts */}
       {successMsg && (
-        <div className="mx-6 mb-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-sm font-bold flex items-center gap-2 animate-fade-in">
+        <div className="mx-4 sm:mx-6 mb-3 sm:mb-4 p-3 sm:p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl sm:rounded-2xl text-emerald-400 text-xs sm:text-sm font-bold flex items-center gap-2 animate-fade-in">
           <CheckCircle size={16} /> {successMsg}
         </div>
       )}
       {error && (
-        <div className="mx-6 mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-bold flex items-center gap-2 animate-fade-in">
+        <div className="mx-4 sm:mx-6 mb-3 sm:mb-4 p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-xl sm:rounded-2xl text-red-400 text-xs sm:text-sm font-bold flex items-center gap-2 animate-fade-in">
           <AlertCircle size={16} /> {error}
         </div>
       )}
 
       {/* Student List */}
-      <main className="flex-1 overflow-y-auto px-6 pb-10 custom-scrollbar">
+      <main className="flex-1 overflow-y-auto px-4 sm:px-6 pb-10 custom-scrollbar">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader className="w-8 h-8 animate-spin text-primary mb-3" />
@@ -347,49 +371,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
               const displayStatus = overdue && status !== 'overdue' ? 'overdue' : status;
 
               return (
-                <div key={student.id} className={`bg-[#1a1c22] border rounded-2xl overflow-hidden transition-all ${isExpanded ? 'border-primary/30' : 'border-white/5 hover:border-white/10'}`}>
+                <div key={student.id} className={`bg-[#1a1c22] border rounded-xl sm:rounded-2xl overflow-hidden transition-all ${isExpanded ? 'border-primary/30' : 'border-white/5 hover:border-white/10'}`}>
                   {/* Student Row Header */}
                   <button
                     onClick={() => setExpandedStudent(isExpanded ? null : student.id)}
-                    className="w-full p-5 flex items-center gap-4 text-left"
+                    className="w-full p-3 sm:p-5 flex items-center gap-3 sm:gap-4 text-left"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
                       <span className="text-sm font-black text-white/60">{student.full_name?.charAt(0)?.toUpperCase() || student.email?.charAt(0)?.toUpperCase() || '?'}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-black text-white tracking-tight truncate">{student.full_name || 'Unnamed Student'}</h3>
+                        <h3 className="text-xs sm:text-sm font-black text-white tracking-tight truncate">{student.full_name || 'Unnamed Student'}</h3>
                         {student.has_proof_submitted && (
-                          <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8px] font-black uppercase tracking-wider rounded-md border border-amber-500/20">Proof</span>
+                          <span className="hidden sm:inline-flex px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8px] font-black uppercase tracking-wider rounded-md border border-amber-500/20">Proof</span>
                         )}
                       </div>
-                      <p className="text-[10px] text-white/30 mt-1 truncate">{student.email}</p>
+                      <p className="text-[10px] text-white/30 mt-0.5 sm:mt-1 truncate">{student.email}</p>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${getStatusColor(displayStatus)}`}>
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                      <div className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-[9px] sm:text-[10px] font-black uppercase tracking-wider ${getStatusColor(displayStatus)}`}>
                         {getStatusIcon(displayStatus)}
-                        {displayStatus}
+                        <span className="hidden sm:inline">{displayStatus}</span>
                       </div>
-                      <div className="text-right hidden sm:block">
-                        <p className="text-[10px] text-white/20">{student.live_accounts.length} live · {student.demo_accounts.length} demo</p>
-                      </div>
-                      {isExpanded ? <ChevronUp size={18} className="text-white/40" /> : <ChevronDown size={18} className="text-white/40" />}
+                      {isExpanded ? <ChevronUp size={16} className="text-white/40 sm:w-[18px] sm:h-[18px]" /> : <ChevronDown size={16} className="text-white/40 sm:w-[18px] sm:h-[18px]" />}
                     </div>
                   </button>
 
                   {/* Expanded Details */}
                   {isExpanded && (
-                    <div className="px-5 pb-5 border-t border-white/5 animate-fade-in">
-                      <div className="pt-4 space-y-5">
+                    <div className="px-3 sm:px-5 pb-3 sm:pb-5 border-t border-white/5 animate-fade-in">
+                      <div className="pt-3 sm:pt-4 space-y-4 sm:space-y-5">
                         {/* Accounts Section */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] flex items-center gap-2">
                             <Monitor size={12} /> Accounts
                           </p>
 
                           {/* Live Accounts */}
-                          <div className="bg-dark/50 rounded-xl p-4 border border-white/5">
-                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                          <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
+                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-1.5">
                               <TrendingUp size={10} /> Live Accounts ({student.live_accounts.length})
                             </p>
                             {student.live_accounts.length === 0 ? (
@@ -397,7 +418,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                             ) : (
                               <div className="space-y-2">
                                 {student.live_accounts.map(acct => (
-                                  <div key={acct.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2.5">
+                                  <div key={acct.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
                                     <div className="flex items-center gap-3">
                                       <div className={`w-2 h-2 rounded-full ${acct.is_active ? 'bg-emerald-400' : 'bg-white/10'}`} />
                                       <div>
@@ -413,8 +434,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                           </div>
 
                           {/* Demo Accounts */}
-                          <div className="bg-dark/50 rounded-xl p-4 border border-white/5">
-                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                          <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
+                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-1.5">
                               <Smartphone size={10} /> Demo Accounts ({student.demo_accounts.length})
                             </p>
                             {student.demo_accounts.length === 0 ? (
@@ -422,7 +443,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                             ) : (
                               <div className="space-y-2">
                                 {student.demo_accounts.map(acct => (
-                                  <div key={acct.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2.5">
+                                  <div key={acct.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
                                     <div className="flex items-center gap-3">
                                       <div className={`w-2 h-2 rounded-full ${acct.is_active ? 'bg-blue-400' : 'bg-white/10'}`} />
                                       <div>
@@ -439,15 +460,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                         </div>
 
                         {/* Payment Status Section */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] flex items-center gap-2">
                             <Wallet size={12} /> Payment Status
                           </p>
-                          <div className="bg-dark/50 rounded-xl p-4 border border-white/5">
+                          <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
                             {student.payment_status ? (
                               <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-wider ${getStatusColor(displayStatus)}`}>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                  <div className={`inline-flex self-start items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-wider ${getStatusColor(displayStatus)}`}>
                                     {getStatusIcon(displayStatus)}
                                     {displayStatus}
                                   </div>
@@ -457,22 +478,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                     </p>
                                   )}
                                 </div>
-                                <div className="grid grid-cols-3 gap-3">
-                                  <div className="bg-white/[0.03] rounded-lg p-3">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                                  <div className="bg-white/[0.03] rounded-lg p-2 sm:p-3">
                                     <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">Last Paid</p>
-                                    <p className="text-xs font-bold text-white mt-1">
+                                    <p className="text-[10px] sm:text-xs font-bold text-white mt-1">
                                       {student.payment_status.last_paid ? new Date(student.payment_status.last_paid).toLocaleDateString() : 'Never'}
                                     </p>
                                   </div>
-                                  <div className="bg-white/[0.03] rounded-lg p-3">
+                                  <div className="bg-white/[0.03] rounded-lg p-2 sm:p-3">
                                     <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">Amount</p>
-                                    <p className="text-xs font-bold text-white mt-1">
+                                    <p className="text-[10px] sm:text-xs font-bold text-white mt-1">
                                       {student.payment_status.amount_paid ? `$${student.payment_status.amount_paid}` : '-'}
                                     </p>
                                   </div>
-                                  <div className="bg-white/[0.03] rounded-lg p-3">
+                                  <div className="bg-white/[0.03] rounded-lg p-2 sm:p-3">
                                     <p className="text-[8px] text-white/20 font-black uppercase tracking-widest">Currency</p>
-                                    <p className="text-xs font-bold text-white mt-1">{student.payment_status.currency || 'USD'}</p>
+                                    <p className="text-[10px] sm:text-xs font-bold text-white mt-1">{student.payment_status.currency || 'USD'}</p>
                                   </div>
                                 </div>
                               </div>
@@ -484,18 +505,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
                         {/* Pending Invoices / Mark as Paid */}
                         {student.pending_invoices.length > 0 && (
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] flex items-center gap-2">
                               <CreditCard size={12} /> Pending Invoices
                             </p>
                             {student.pending_invoices.map(inv => (
-                              <div key={inv.id} className="bg-dark/50 rounded-xl p-4 border border-white/5 space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="text-xs font-bold text-white">{inv.invoice_id}</p>
+                              <div key={inv.id} className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5 space-y-2 sm:space-y-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-bold text-white truncate">{inv.invoice_id}</p>
                                     <p className="text-[10px] text-white/30 mt-0.5">{inv.subscription_plan} · ${inv.price_amount} {inv.price_currency}</p>
                                   </div>
-                                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wider border ${
+                                  <span className={`shrink-0 px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-wider border ${
                                     inv.payment_status === 'proof_submitted'
                                       ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                       : 'bg-white/5 text-white/40 border-white/10'
@@ -526,7 +547,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                 <Button
                                   onClick={() => handleMarkAsPaid(student.id)}
                                   disabled={markingPaid === student.id}
-                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 text-white"
+                                  className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 text-white text-xs sm:text-sm"
                                 >
                                   {markingPaid === student.id ? (
                                     <><Loader className="w-4 h-4 animate-spin mr-2" /> Processing...</>
@@ -541,12 +562,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
                         {/* Quick Mark as Paid for overdue / no pending invoices */}
                         {student.pending_invoices.length === 0 && (overdue || status === 'trial' || status === 'cancelled') && (
-                          <div className="bg-dark/50 rounded-xl p-4 border border-white/5">
-                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mb-3">Admin Override</p>
+                          <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
+                            <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mb-2 sm:mb-3">Admin Override</p>
                             <Button
                               onClick={() => handleMarkAsPaid(student.id)}
                               disabled={markingPaid === student.id}
-                              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 text-white"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 text-white text-xs sm:text-sm"
                             >
                               {markingPaid === student.id ? (
                                 <><Loader className="w-4 h-4 animate-spin mr-2" /> Processing...</>

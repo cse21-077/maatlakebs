@@ -142,6 +142,25 @@
             opacity: 0.1;
         }
 
+        .safe-top {
+            padding-top: max(env(safe-area-inset-top), 24px);
+        }
+
+        .safe-top-header {
+            padding-top: max(env(safe-area-inset-top), 12px);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
     </style>
     <script type="importmap">
 {

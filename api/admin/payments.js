@@ -8,21 +8,50 @@
 
 export default async function handler(req, res) {
   const { createClient } = await import('@supabase/supabase-js');
-  const supabase = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-  );
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing env vars: VITE_SUPABASE_URL or SUPABASE_SERVICE_KEY');
+    return res.status(500).json({
+      error: 'Server misconfiguration: missing Supabase credentials',
+      debug: { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey },
+    });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   // ── Shared admin verification ──────────────────────────────────────────────
   async function verifyAdmin(adminId) {
-    if (!adminId) return false;
+    if (!adminId) {
+      console.warn('⚠️ verifyAdmin called with empty adminId');
+      return { ok: false, reason: 'empty adminId' };
+    }
+
     const { data, error } = await supabase
       .from('users')
       .select('id, role, is_admin')
       .eq('id', adminId)
-      .single();
-    if (error) return false;
-    return data?.role === 'super_admin' || data?.is_admin === true;
+      .maybeSingle();
+
+    if (error) {
+      console.error('❌ verifyAdmin query error:', error);
+      return { ok: false, reason: 'query_error', details: error.message };
+    }
+
+    if (!data) {
+      console.warn(`⚠️ verifyAdmin: no user found with id ${adminId}`);
+      return { ok: false, reason: 'user_not_found' };
+    }
+
+    const isAdmin = data?.role === 'super_admin' || data?.is_admin === true;
+    if (!isAdmin) {
+      console.warn(`⚠️ verifyAdmin: user ${adminId} has role=${data?.role}, is_admin=${data?.is_admin}`);
+      return { ok: false, reason: 'not_admin', role: data?.role };
+    }
+
+    return { ok: true };
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -35,10 +64,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameter: admin_id' });
     }
 
-    const isAdmin = await verifyAdmin(admin_id);
-    if (!isAdmin) {
-      console.warn(`⚠️  Unauthorized admin access attempt by ${admin_id}`);
-      return res.status(403).json({ error: 'Not authorized as admin' });
+    const adminCheck = await verifyAdmin(admin_id);
+    if (!adminCheck.ok) {
+      return res.status(403).json({
+        error: 'Not authorized as admin',
+        debug: adminCheck,
+      });
     }
 
     try {
@@ -63,7 +94,7 @@ export default async function handler(req, res) {
           .from('users')
           .select('id, email, full_name')
           .eq('id', invoice.user_id)
-          .single();
+          .maybeSingle();
 
         enrichedInvoices.push({
           ...invoice,
@@ -106,10 +137,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'action must be "approve" or "reject"' });
     }
 
-    const isAdmin = await verifyAdmin(admin_id);
-    if (!isAdmin) {
-      console.warn(`⚠️  Unauthorized admin attempt by ${admin_id}`);
-      return res.status(403).json({ error: 'Not authorized as admin' });
+    const adminCheck = await verifyAdmin(admin_id);
+    if (!adminCheck.ok) {
+      return res.status(403).json({
+        error: 'Not authorized as admin',
+        debug: adminCheck,
+      });
     }
 
     try {
@@ -118,7 +151,7 @@ export default async function handler(req, res) {
         .from('invoices')
         .select('*')
         .eq('id', invoice_id)
-        .single();
+        .maybeSingle();
 
       if (invoiceError || !invoice) {
         return res.status(404).json({ error: 'Invoice not found' });
@@ -150,9 +183,9 @@ export default async function handler(req, res) {
           .from('payment_status')
           .select('id')
           .eq('user_id', invoice.user_id)
-          .single();
+          .maybeSingle();
 
-        if (fetchStatusError?.code === 'PGRST116') {
+        if (!existingStatus) {
           // No record yet — insert
           const { error: createError } = await supabase.from('payment_status').insert({
             user_id: invoice.user_id,

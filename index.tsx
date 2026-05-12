@@ -443,15 +443,16 @@ const LandingPage = ({ onLaunch, isPWA, hasAuthParams }: { onLaunch: () => void;
 
 // ── Splash Screen ─────────────────────────────────────────────────────────────
 
-const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
+const SplashScreen = ({ onFinish, duration = 3000 }: { onFinish: () => void; duration?: number | null }) => {
   useEffect(() => {
     // Technical Pre-load Node: Ensures all assets are cached before terminal handshake
     const assets = ['/kebs.jpg', '/support.jpg', '/MK Logo.png', '/weltrade.png', '/metatrader.png'];
     assets.forEach(src => { const img = new Image(); img.src = src; });
 
-    const t = setTimeout(onFinish, 3000);
+    if (duration === null) return;
+    const t = setTimeout(onFinish, duration);
     return () => clearTimeout(t);
-  }, [onFinish]);
+  }, [onFinish, duration]);
 
   return (
     <div className="fixed inset-0 bg-[#0d0f14] z-[99999] flex flex-col items-center justify-center overflow-hidden animate-fade-in text-center h-[100vh] w-full pt-safe pb-safe">
@@ -564,11 +565,7 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (booting) return (
-    <div className="min-h-screen bg-dark flex items-center justify-center">
-      <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-    </div>
-  );
+  if (booting) return <SplashScreen onFinish={() => {}} duration={null} />;
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">

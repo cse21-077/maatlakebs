@@ -232,7 +232,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
             {/* Top Navigation */}
             <header className="px-8 pt-6 flex justify-between items-center h-24 shrink-0">
-                <div><h1 className="text-3xl font-black text-white tracking-tighter">Hi {firstName}</h1><p className="text-xs text-white/30 font-bold uppercase tracking-widest mt-0.5">Welcome back</p></div>
+                <div><h1 className="text-3xl font-black text-white tracking-tighter">Hi&nbsp;{firstName}</h1><p className="text-xs text-white/30 font-bold uppercase tracking-widest mt-0.5">Welcome back</p></div>
                 <div className="w-14 h-14 rounded-2xl border border-white/10 relative overflow-hidden active:scale-95 transition-all shadow-2xl" onClick={() => setShowProfileMenu(true)}>
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                     <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0d0f14]" />

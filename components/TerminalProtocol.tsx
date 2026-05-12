@@ -465,7 +465,7 @@ export const TerminalProtocol = ({
                                     : 'bg-primary text-dark shadow-primary/20'
                             } ${advanced?.settings_locked ? 'cursor-default' : 'cursor-pointer'}`}
                         >
-                            {isLocked ? (advanced?.settings_locked ? 'Mentor Set' : 'Click to Edit') : 'Edit Mode'}
+                            {isLocked ? (advanced?.settings_locked ? 'Mentor Set' : 'Mentor Override') : 'Edit Mode'}
                         </button>
 
                         <div className="flex justify-between items-center">

@@ -453,20 +453,16 @@ export const TerminalProtocol = ({
                     </div>
 
                     <div className="bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-10 space-y-10 shadow-2xl relative">
-                        {/* Floating Badge Lock */}
-                        <button 
-                            onClick={() => {
-                                if (advanced?.settings_locked) return;
-                                setIsLocked(!isLocked);
-                            }} 
-                            className={`absolute -top-3 right-8 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-xl z-20 ${
-                                isLocked 
-                                    ? (advanced?.settings_locked ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-red-500 text-white shadow-red-500/20') 
-                                    : 'bg-primary text-dark shadow-primary/20'
-                            } ${advanced?.settings_locked ? 'cursor-default' : 'cursor-pointer'}`}
+                        {/* Floating Badge Lock — Mentor Override: users cannot edit risk settings */}
+                        <div 
+                            className={`absolute -top-3 right-8 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-xl z-20 cursor-default ${
+                                advanced?.settings_locked 
+                                    ? 'bg-blue-600 text-white shadow-blue-500/20' 
+                                    : 'bg-red-500 text-white shadow-red-500/20'
+                            }`}
                         >
-                            {isLocked ? (advanced?.settings_locked ? 'Mentor Set' : 'Mentor Override') : 'Edit Mode'}
-                        </button>
+                            {advanced?.settings_locked ? 'Mentor Set' : 'Mentor Override'}
+                        </div>
 
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
@@ -474,7 +470,7 @@ export const TerminalProtocol = ({
                                <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Risk Management</h3>
                             </div>
                         </div>
-                        <div className="space-y-10 transition-all duration-500" style={{ opacity: isLocked ? 0.3 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
+                        <div className="space-y-10 transition-all duration-500" style={{ opacity: 0.3, pointerEvents: 'none' }}>
                             {[
                                 { label: 'Trade Size (Multiplied)', val: aggressiveness, set: setAggressiveness, min: 0.1, max: 10.0, step: 0.1, unit: 'x' },
                                 { label: 'Lot Size Cap', val: maxLot, set: setMaxLot, min: 0.01, max: 50.0, step: 0.01, unit: ' L' },
@@ -498,7 +494,7 @@ export const TerminalProtocol = ({
                                 </button>
                             </div>
                         </div>
-                        {!isLocked && <Button loading={loading} onClick={handleSave} className="w-full py-5 text-xs uppercase font-black tracking-[0.2em]">Sync →</Button>}
+                        {/* Risk settings are mentor-controlled; save button hidden from users */}
                     </div>
                 </div>
 

@@ -15,6 +15,7 @@ interface SupportTicket {
   created_at: string;
   updated_at: string;
   last_message?: string;
+  last_message_from_admin?: boolean;
 }
 
 interface Message {
@@ -38,48 +39,30 @@ export const AdminSupportPanel: React.FC<AdminSupportPanelProps> = ({ adminId })
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load all support tickets
+  // Load all support tickets via API (includes user names/emails)
   const loadTickets = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('support_messages' as any)
-        .select('*')
-        .order('created_at', { ascending: false }) as { data: Message[] | null; error: any };
+      const res = await fetch(`/api/admin/support?admin_id=${adminId}`);
+      const data = await res.json();
 
-      if (error) {
-        console.error('Failed to load tickets:', error);
+      if (!res.ok) {
+        console.error('Failed to load tickets:', data.error);
         return;
       }
 
-      if (data) {
-        const ticketMap = new Map<string, SupportTicket>();
-        
-        for (const msg of data) {
-          if (!ticketMap.has(msg.user_id)) {
-            const { data: userData } = await supabase.auth.admin.getUserById(msg.user_id);
-            ticketMap.set(msg.user_id, {
-              id: msg.user_id,
-              user_id: msg.user_id,
-              user_name: userData?.user?.user_metadata?.full_name || 'Unknown',
-              user_email: userData?.user?.email || '',
-              status: 'open',
-              created_at: msg.created_at,
-              updated_at: msg.created_at,
-              last_message: msg.content
-            });
-          } else {
-            const existing = ticketMap.get(msg.user_id)!;
-            if (msg.created_at > existing.updated_at) {
-              existing.updated_at = msg.created_at;
-              existing.last_message = msg.content;
-            }
-          }
-        }
-        
-        setTickets(Array.from(ticketMap.values()).sort((a, b) => 
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        ));
+      if (data.tickets) {
+        setTickets(data.tickets.map((t: any) => ({
+          id: t.user_id,
+          user_id: t.user_id,
+          user_name: t.user_name,
+          user_email: t.user_email,
+          status: t.status,
+          created_at: t.created_at,
+          updated_at: t.updated_at,
+          last_message: t.last_message,
+          last_message_from_admin: t.last_message_from_admin,
+        })));
       }
     } finally {
       setLoading(false);
@@ -134,25 +117,28 @@ export const AdminSupportPanel: React.FC<AdminSupportPanelProps> = ({ adminId })
     setSending(true);
     const content = input.trim();
     try {
-      const { error } = await (supabase.from('support_messages' as any) as any).insert({
-        user_id: selectedTicketId,
-        content,
-        is_admin: true,
-        created_at: new Date().toISOString()
-      });
-      if (error) throw error;
-      setInput('');
-      // Trigger push notification to the user
-      await fetch('/api/send-push', {
+      const res = await fetch('/api/admin/support', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: selectedTicketId,
-          title: 'Support Reply',
-          body: content.length > 80 ? content.slice(0, 77) + '...' : content,
-          url: '/'
-        })
+          content,
+          admin_id: adminId,
+        }),
       });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setInput('');
+      // Optimistically add message to UI
+      setMessages(prev => [...prev, {
+        id: data.message?.id || `temp_${Date.now()}`,
+        user_id: selectedTicketId,
+        content,
+        is_admin: true,
+        created_at: new Date().toISOString(),
+      }]);
     } catch (e: any) {
       console.error('Error sending message:', e);
     } finally {
@@ -254,30 +240,49 @@ export const AdminSupportPanel: React.FC<AdminSupportPanelProps> = ({ adminId })
         </div>
       ) : (
         <div className="space-y-3">
-          {tickets.map(ticket => (
-            <button
-              key={ticket.id}
-              onClick={() => setSelectedTicketId(ticket.id)}
-              className="w-full bg-[#1a1c22] border border-white/5 rounded-2xl p-4 text-left hover:border-primary/50 hover:bg-[#1a1c22]/80 transition-all active:scale-95"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-black text-white tracking-tight truncate">{ticket.user_name}</h3>
-                    <span className="text-[9px] text-white/30 font-bold truncate">{ticket.user_email}</span>
+          {tickets.map(ticket => {
+            const needsReply = ticket.last_message_from_admin === false;
+            return (
+              <button
+                key={ticket.id}
+                onClick={() => setSelectedTicketId(ticket.id)}
+                className={`w-full rounded-2xl p-4 text-left transition-all active:scale-95 ${
+                  needsReply
+                    ? 'bg-red-500/[0.03] border border-red-500/20 hover:border-red-500/40 hover:bg-red-500/[0.06]'
+                    : 'bg-[#1a1c22] border border-white/5 hover:border-primary/50 hover:bg-[#1a1c22]/80'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className={`text-sm font-black tracking-tight truncate ${needsReply ? 'text-red-400' : 'text-white'}`}>{ticket.user_name}</h3>
+                      <span className="text-[9px] text-white/30 font-bold truncate">{ticket.user_email}</span>
+                      {needsReply && (
+                        <span className="shrink-0 px-1.5 py-0.5 bg-red-500/10 text-red-400 rounded text-[8px] font-black uppercase tracking-wider">
+                          Needs Reply
+                        </span>
+                      )}
+                      {!needsReply && ticket.last_message_from_admin === true && (
+                        <span className="shrink-0 px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded text-[8px] font-black uppercase tracking-wider">
+                          Replied
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-[10px] mt-1 line-clamp-1 ${needsReply ? 'text-red-300/50' : 'text-white/30'}`}>{ticket.last_message || 'New ticket'}</p>
+                    <p className="text-[8px] text-white/20 mt-2 flex items-center gap-1.5">
+                      <Clock size={10} />
+                      {new Date(ticket.updated_at).toLocaleDateString()} at {new Date(ticket.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
-                  <p className="text-[10px] text-white/30 mt-1 line-clamp-1">{ticket.last_message || 'New ticket'}</p>
-                  <p className="text-[8px] text-white/20 mt-2 flex items-center gap-1.5">
-                    <Clock size={10} />
-                    {new Date(ticket.updated_at).toLocaleDateString()} at {new Date(ticket.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    needsReply ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
+                  }`}>
+                    {needsReply ? <AlertCircle size={16} /> : <Check size={16} />}
+                  </div>
                 </div>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${ticket.status === 'open' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
-                  {ticket.status === 'open' ? <AlertCircle size={16} /> : <Check size={16} />}
-                </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

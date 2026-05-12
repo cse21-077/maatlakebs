@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- NowPayments Invoice Tracking Table
+-- Payment Invoice Tracking Table
 -- Run this in Supabase SQL Editor
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -8,7 +8,7 @@ CREATE TABLE public.invoices (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   
-  -- Invoice details from NowPayments
+  -- Invoice details
   invoice_id TEXT NOT NULL UNIQUE,
   order_id TEXT NOT NULL,
   payment_url TEXT NOT NULL,

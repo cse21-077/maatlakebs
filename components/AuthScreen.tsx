@@ -3,6 +3,7 @@ import { User, Lock, AlertCircle, CheckCircle2, Mail, Key, Eye, EyeOff } from 'l
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { Button, Card } from './shared';
+import { ForgotPasswordOTP } from './ForgotPasswordOTP';
 
 interface Props { onLogin: (s?: Session) => void; }
 
@@ -28,15 +29,11 @@ export const AuthScreen = ({ onLogin }: Props) => {
 
     // ── Forgot password state ──
     const [forgotMode, setForgotMode] = useState(false);
-    const [fEmail, setFEmail] = useState('');
-    const [fLoading, setFLoading] = useState(false);
-    const [fError, setFError] = useState('');
-    const [fSuccess, setFSuccess] = useState('');
 
     const SYSTEM_REFERRAL_CODE = 'MKB96';
 
     const switchTab = (t: 'login' | 'register') => {
-        setTab(t); setError(''); setRError(''); setForgotMode(false); setFError(''); setFSuccess('');
+        setTab(t); setError(''); setRError(''); setForgotMode(false);
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -102,29 +99,6 @@ export const AuthScreen = ({ onLogin }: Props) => {
         }
     };
 
-    const handleForgotPassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setFError(''); setFSuccess('');
-        if (!fEmail) { setFError('Please enter your email.'); return; }
-        setFLoading(true);
-
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(fEmail, {
-                redirectTo: `${window.location.origin}/`,
-            });
-            if (error) {
-                setFError(error.message);
-            } else {
-                setFSuccess('Password reset link sent! Check your email.');
-                setFEmail('');
-            }
-        } catch (e: any) {
-            setFError(e.message || 'Failed to send reset link.');
-        } finally {
-            setFLoading(false);
-        }
-    };
-
     const handleSocialLogin = async (provider: 'google') => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider,
@@ -177,30 +151,16 @@ export const AuthScreen = ({ onLogin }: Props) => {
                         <button onClick={() => switchTab('register')} className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${tab === 'register' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'}`}>Create Account</button>
                     </div>
 
-                    {/* Forgot Password Form */}
-                    {forgotMode && (
-                        <form onSubmit={handleForgotPassword} className="space-y-5 animate-fade-in">
-                            {fError && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-xs font-medium">{fError}</div>}
-                            {fSuccess && <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-emerald-400 text-xs font-medium">{fSuccess}</div>}
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest ml-1">Email Address</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                                        <input type="email" required placeholder="name@example.com" value={fEmail} onChange={e => setFEmail(e.target.value)}
-                                            className="w-full bg-[#161e31] border border-white/10 rounded-xl py-4 pl-12 pr-5 text-white font-medium focus:border-primary outline-none transition-all" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="pt-2 flex flex-col gap-3">
-                                <Button loading={fLoading} type="submit" className="w-full py-4 text-base">
-                                    Send Reset Link
-                                </Button>
-                                <button type="button" onClick={() => setForgotMode(false)} className="text-[10px] font-bold text-white/40 uppercase tracking-widest hover:text-white transition-all">
-                                    Back to Sign In
-                                </button>
-                            </div>
-                        </form>
+                    {/* Forgot Password Form - Using OTP */}
+                    {tab === 'login' && forgotMode && (
+                        <ForgotPasswordOTP 
+                            onBack={() => setForgotMode(false)}
+                            onSuccess={() => {
+                                setForgotMode(false);
+                                setEmail('');
+                                setPassword('');
+                            }}
+                        />
                     )}
 
                     {/* Login Form */}

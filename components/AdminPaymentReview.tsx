@@ -281,7 +281,7 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Mentor Payment Reviews</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Payment Reviews</h1>
           <p className="text-sm text-slate-600 mt-1">
             {pendingPayments.length} pending payment proof{pendingPayments.length !== 1 ? 's' : ''}
           </p>
@@ -317,7 +317,7 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
         <Card className="p-8 text-center">
           <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
           <p className="text-slate-900 font-semibold">All caught up!</p>
-          <p className="text-slate-600 text-sm mt-1">No pending mentor payment proofs to review.</p>
+          <p className="text-slate-600 text-sm mt-1">No pending payment proofs to review.</p>
         </Card>
       )}
 

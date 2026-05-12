@@ -79,7 +79,6 @@ export default async function handler(req, res) {
           'id, user_id, invoice_id, price_amount, price_currency, subscription_plan, payment_method, proof_of_payment_url, created_at, original_price, discount_amount'
         )
         .eq('payment_status', 'proof_submitted')
-        .eq('payment_method', 'mentor')
         .order('created_at', { ascending: false });
 
       if (invoicesError) {
@@ -108,7 +107,7 @@ export default async function handler(req, res) {
         });
       }
 
-      console.log(`✅ Retrieved ${enrichedInvoices.length} pending mentor payments`);
+      console.log(`✅ Retrieved ${enrichedInvoices.length} pending payment proofs`);
       return res.status(200).json({
         success: true,
         count: enrichedInvoices.length,

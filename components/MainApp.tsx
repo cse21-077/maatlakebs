@@ -18,6 +18,7 @@ import { MembershipProtocol } from './MembershipProtocol';
 import { SupportProtocol } from './SupportProtocol';
 import { TechSupportDashboard } from './TechSupportDashboard';
 import { AdminDashboard } from './AdminDashboard';
+import { ChangePassword } from './ChangePassword';
 
 type AppView = 'HOME' | 'CONFIG' | 'BILLING' | 'SUPPORT';
 type UIPaymentStatus = 'UNPAID' | 'CONFIRMED';
@@ -35,6 +36,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [connectionStatus, setConnectionStatus] = useState<string>('UNKNOWN');
     const [connectionLastChecked, setConnectionLastChecked] = useState<string | null>(null);
     const [dbRole, setDbRole] = useState<string>('student');
+    const [showChangePassword, setShowChangePassword] = useState(false);
 
     // Link student to default trader if not present in metadata
     const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
@@ -199,11 +201,31 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
                         <div className="space-y-4 pt-4">
                             <Button onClick={() => setShowProfileMenu(false)} className="w-full py-5 text-xs uppercase font-black tracking-widest">Done</Button>
+                            <button 
+                                onClick={() => {
+                                    setShowChangePassword(true);
+                                    setShowProfileMenu(false);
+                                }}
+                                className="w-full flex items-center justify-center gap-2 border border-primary/20 text-primary transition-all py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-primary/5 hover:border-primary/40 leading-none">
+                                <Lock size={14} /> Change Password
+                            </button>
                             <button onClick={() => { if (confirm('Logout?')) supabase.auth.signOut().then(onDisconnect) }} 
                                 className="w-full flex items-center justify-center gap-2 border border-red-500/20 text-red-500 transition-all py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.4em] hover:bg-red-500/5 hover:border-red-500/40 leading-none">
                                 <LogOutIcon size={14} /> Logout
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Change Password Modal */}
+            {showChangePassword && (
+                <div className="fixed inset-0 z-[600] flex items-center justify-center p-8 animate-fade-in backdrop-blur-md bg-dark/60">
+                    <div className="w-full max-w-sm bg-[#1a1c22] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto">
+                        <ChangePassword 
+                            sessionToken={session.access_token}
+                            onClose={() => setShowChangePassword(false)}
+                        />
                     </div>
                 </div>
             )}

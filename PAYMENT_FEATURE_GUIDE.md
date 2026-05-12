@@ -18,17 +18,17 @@ New fields added to `invoices` table:
 
 Features:
 - **Discount Display:** Shows "was $150, now $100" with % OFF badge
-- **Payment Method Selection:** Two tabs - "Crypto Payment" or "Paid via Mentor"
-- **Mentor Payment Flow:**
+- **Proof Upload Flow:**
   - File upload for proof of payment (images/PDF, max 5MB)
   - Automatic upload to Supabase Storage
   - Sets invoice status to `proof_submitted` for admin review
+  - Accepts all payment methods: FNB, Orange Money, Bank Transfer, Crypto, Cash, or any method arranged through your Mentor
 
 ### 3. **Admin Dashboard Component** ✅
 **File:** `components/AdminPaymentReview.tsx`
 
 Features:
-- Lists all pending mentor payment proofs
+- Lists all pending payment proofs
 - Shows user info, plan, amount, discount, and submission date
 - Preview modal to view proof of payment (images or PDFs)
 - **Approve Button:** Activates subscription for 30 days immediately
@@ -44,7 +44,6 @@ Features:
 
 Returns all invoices with:
 - `payment_status = 'proof_submitted'`
-- `payment_method = 'mentor'`
 - Enriched with user information
 
 #### Approve/Reject Payment
@@ -70,14 +69,6 @@ Actions:
 - **Reject:**
   - Updates invoice `payment_status` to `rejected`
   - Deletes proof file from Supabase Storage
-
-### 5. **Webhook Updates** ✅
-**File:** `api/webhooks/nowpayments.js`
-
-Changes:
-- Updated payment status to lowercase `'confirmed'` (consistency)
-- Changed billing period from 1 month to 30 days
-- Now properly stores `payment_method: 'crypto'`
 
 ---
 
@@ -167,7 +158,6 @@ Ensure Vercel/hosting has these env vars:
 ```
 VITE_SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_KEY=your_service_role_key
-NOW_PAYMENTS_IPN_SECRET=your_secret
 VITE_APP_URL=your_app_url
 ```
 
@@ -175,10 +165,10 @@ VITE_APP_URL=your_app_url
 
 ## 📊 User Flow
 
-### Mentor Payment Flow
+### Payment Proof Flow
 ```
 1. User selects plan → Sees discount pricing
-2. User chooses "Paid via Mentor" payment method
+2. User makes payment via any method (FNB, Orange Money, Crypto, Cash, etc.)
 3. User uploads proof of payment file
 4. System uploads to Supabase Storage
 5. Invoice created with status: proof_submitted
@@ -186,16 +176,6 @@ VITE_APP_URL=your_app_url
 7. Admin views proof and clicks "Approve"
 8. Subscription activated for 30 days
 9. User can now access full features
-```
-
-### Crypto Payment Flow (unchanged)
-```
-1. User selects plan → Sees discount pricing
-2. User chooses "Crypto Payment" method
-3. System creates NowPayments invoice
-4. User completes payment in popup window
-5. NowPayments webhook confirms payment
-6. Subscription activated for 30 days
 ```
 
 ---
@@ -221,15 +201,15 @@ View pending approvals:
 ```sql
 SELECT id, user_id, price_amount, subscription_plan, created_at
 FROM invoices
-WHERE payment_status = 'proof_submitted' AND payment_method = 'mentor'
+WHERE payment_status = 'proof_submitted'
 ORDER BY created_at DESC;
 ```
 
-View approved mentor payments:
+View approved payments:
 ```sql
 SELECT id, user_id, price_amount, subscription_plan, created_at
 FROM invoices
-WHERE payment_status = 'confirmed' AND payment_method = 'mentor'
+WHERE payment_status = 'confirmed'
 ORDER BY created_at DESC;
 ```
 
@@ -256,7 +236,7 @@ WHERE user_id = 'user_uuid_here';
 
 ## 📱 Testing
 
-### Test Mentor Payment Approval
+### Test Payment Proof Approval
 1. Create a test user account
 2. Upload a payment proof (test image)
 3. Note the invoice ID from DB

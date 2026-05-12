@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       price_currency,
       subscription_plan,
       // new optional fields
-      payment_method = 'nowpayments',
+      payment_method = 'proof_upload',
       payment_status = 'pending',
       original_price,
       discount_amount,

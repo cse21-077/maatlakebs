@@ -13,11 +13,15 @@ import crypto from 'crypto';
 import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
+import { Resend } from 'resend';
 
 const { Client } = pg;
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resendFrom = process.env.RESEND_FROM_EMAIL || 'noreply@maatlakebs.com';
 
 function createDbClient() {
   return new Client({
@@ -40,9 +44,50 @@ function generateResetToken() {
 async function sendOTPEmail(email, otp, userName = '') {
   try {
     console.log(`[OTP] Sending OTP ${otp} to ${email}`);
+
+    // Dev mode: log only, don't send
     if (process.env.NODE_ENV !== 'production') {
       console.log(`[OTP] DEV MODE - OTP for ${email}: ${otp}`);
+      return true;
     }
+
+    if (!resend) {
+      console.error('[OTP] RESEND_API_KEY not configured');
+      return false;
+    }
+
+    const { error } = await resend.emails.send({
+      from: `Maatla Kebs <${resendFrom}>`,
+      to: email,
+      subject: 'Your Password Reset Code',
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <h1 style="font-size: 22px; font-weight: 700; color: #2138bc; margin: 0; letter-spacing: -0.5px;">Maatla Kebs</h1>
+            <p style="font-size: 12px; color: #888; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 1.5px;">Password Reset</p>
+          </div>
+          <div style="background: #f8f9fb; border-radius: 16px; padding: 28px; text-align: center;">
+            <p style="font-size: 14px; color: #555; margin: 0 0 20px;">Hello ${userName || 'there'},</p>
+            <p style="font-size: 14px; color: #555; margin: 0 0 24px; line-height: 1.6;">Use the code below to reset your password. This code expires in <strong>15 minutes</strong>.</p>
+            <div style="background: #fff; border: 2px dashed #ddd; border-radius: 12px; padding: 20px; margin: 20px 0;">
+              <span style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #2138bc; font-family: monospace;">${otp}</span>
+            </div>
+            <p style="font-size: 12px; color: #999; margin: 20px 0 0;">If you didn't request this reset, you can safely ignore this email.</p>
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <p style="font-size: 11px; color: #bbb; margin: 0;">&copy; 2026 Maatla Kebs. Secure Protocol.</p>
+          </div>
+        </div>
+      `,
+      text: `Maatla Kebs - Password Reset\n\nYour reset code is: ${otp}\nThis code expires in 15 minutes.\n\nIf you didn't request this, you can safely ignore this email.`,
+    });
+
+    if (error) {
+      console.error('[OTP] Resend error:', error);
+      return false;
+    }
+
+    console.log(`[OTP] Email sent successfully to ${email}`);
     return true;
   } catch (error) {
     console.error('Failed to send OTP email:', error);

@@ -17,7 +17,7 @@ import { randomBytes } from 'crypto';
 const { Client } = pg;
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
 function createDbClient() {
   return new Client({
@@ -71,7 +71,7 @@ async function handleRequestOTP(email, client) {
   const otpHash = hashOTP(otp);
 
   await client.query(
-    `INSERT INTO auth.password_reset_tokens (user_id, otp_hash)
+    `INSERT INTO public.password_reset_tokens (user_id, otp_hash)
      VALUES ($1, $2)
      ON CONFLICT (user_id) DO UPDATE 
      SET otp_hash = $2, otp_attempts = 0, expires_at = now() + interval '15 minutes', created_at = now()`,
@@ -111,7 +111,7 @@ async function handleVerifyOTP(email, otp, client) {
 
   const tokenResult = await client.query(
     `SELECT otp_hash, otp_attempts, expires_at 
-     FROM auth.password_reset_tokens 
+     FROM public.password_reset_tokens 
      WHERE user_id = $1 AND expires_at > now()`,
     [userId]
   );
@@ -129,7 +129,7 @@ async function handleVerifyOTP(email, otp, client) {
 
   if (token.otp_hash !== otpHash) {
     await client.query(
-      'UPDATE auth.password_reset_tokens SET otp_attempts = otp_attempts + 1 WHERE user_id = $1',
+      'UPDATE public.password_reset_tokens SET otp_attempts = otp_attempts + 1 WHERE user_id = $1',
       [userId]
     );
     throw new Error('Invalid OTP');
@@ -139,7 +139,7 @@ async function handleVerifyOTP(email, otp, client) {
   const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
 
   await client.query(
-    `UPDATE auth.password_reset_tokens 
+    `UPDATE public.password_reset_tokens 
      SET otp_attempts = 0, otp_hash = $2 
      WHERE user_id = $1`,
     [userId, resetTokenHash]
@@ -173,7 +173,7 @@ async function handleResetPassword(email, resetToken, newPassword, client) {
   const userId = userResult.rows[0].id;
 
   const tokenResult = await client.query(
-    `SELECT expires_at FROM auth.password_reset_tokens 
+    `SELECT expires_at FROM public.password_reset_tokens 
      WHERE user_id = $1 AND expires_at > now()`,
     [userId]
   );
@@ -194,7 +194,7 @@ async function handleResetPassword(email, resetToken, newPassword, client) {
   }
 
   await client.query(
-    'DELETE FROM auth.password_reset_tokens WHERE user_id = $1',
+    'DELETE FROM public.password_reset_tokens WHERE user_id = $1',
     [userId]
   );
 

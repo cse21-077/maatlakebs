@@ -243,6 +243,9 @@ export const TerminalProtocol = ({
                         <p className="text-[11px] text-white/50 font-bold leading-relaxed">
                             Your account has been saved. We need to verify connectivity to ensure seamless signal mirroring. Please request verification through support — our team will confirm and activate your terminal.
                         </p>
+                        <p className="text-[10px] text-primary/60 font-bold leading-relaxed bg-primary/5 border border-primary/10 rounded-xl p-3">
+                            Note: Approval is only required when connecting an account for the first time. Already linked or switched accounts do not need re-approval.
+                        </p>
                     </div>
                     <div className="space-y-3">
                         <button 

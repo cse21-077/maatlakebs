@@ -3,11 +3,13 @@ import {
   ChevronDown, ChevronUp, Users, CreditCard, AlertCircle,
   CheckCircle, Loader, Eye, ExternalLink, Search, ShieldCheck,
   Monitor, Smartphone, Clock, XCircle, RefreshCw, Filter,
-  TrendingUp, Wallet, LogOut, Server
+  TrendingUp, Wallet, LogOut, Server, MessageSquare
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Button } from './shared';
 import { AdminPaymentReview } from './AdminPaymentReview';
+import { AdminSupportPanel } from './AdminSupportPanel';
+import { ProofImage } from './ProofImage';
 
 interface StudentAccount {
   id: string;
@@ -62,7 +64,7 @@ interface AdminDashboardProps {
   onBack?: () => void;
 }
 
-type AdminTab = 'students' | 'payments';
+type AdminTab = 'students' | 'payments' | 'support';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('students');
@@ -210,17 +212,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
           </div>
 
           <div className="bg-[#1a1c22] border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6">
-            {previewProof.proof_of_payment_url?.endsWith('.pdf') ? (
-              <div className="text-center space-y-4">
-                <p className="text-sm text-white/60">PDF Document</p>
-                <a href={previewProof.proof_of_payment_url} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/80 transition-all">
-                  <ExternalLink size={16} /> Open PDF
-                </a>
-              </div>
-            ) : (
-              <img src={previewProof.proof_of_payment_url} alt="Proof of payment" className="max-w-full rounded-xl sm:rounded-2xl" />
-            )}
+            <ProofImage
+              url={previewProof.proof_of_payment_url}
+              alt="Proof of payment"
+              className="rounded-xl sm:rounded-2xl"
+            />
           </div>
 
           <div className="flex gap-3">
@@ -252,6 +248,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
             <div className="flex items-center gap-1 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
               <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
               <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Payments</button>
+              <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Support</button>
             </div>
             <button
               onClick={handleRefreshServer}
@@ -279,6 +276,55 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
     );
   }
 
+  // ── Support Tab ────────────────────────────────────────────────────────────
+  if (activeTab === 'support') {
+    return (
+      <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
+        {/* Header */}
+        <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 border-b border-white/5 gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {onBack && (
+              <button onClick={onBack} className="w-9 h-9 sm:w-10 sm:h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
+                ✕
+              </button>
+            )}
+            <div>
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Admin</p>
+              <h1 className="text-lg sm:text-xl font-black text-white tracking-tighter">Dashboard</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
+              <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
+              <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
+              <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Support</button>
+            </div>
+            <button
+              onClick={handleRefreshServer}
+              disabled={refreshingServer}
+              className="flex items-center gap-1.5 px-3 py-2 bg-blue-500/10 text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500/20 transition-all disabled:opacity-50"
+              title="Refresh Server"
+            >
+              {refreshingServer ? <Loader size={14} className="animate-spin" /> : <Server size={14} />}
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto max-w-3xl mx-auto w-full">
+          <AdminSupportPanel adminId={adminId} />
+        </main>
+      </div>
+    );
+  }
+
   // ── Students Tab ──────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
@@ -299,6 +345,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
           <div className="flex items-center gap-1 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
             <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Students</button>
             <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
+            <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Support</button>
           </div>
           <button
             onClick={handleRefreshServer}

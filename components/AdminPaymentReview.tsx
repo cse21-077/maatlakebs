@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Loader, AlertCircle, ExternalLink, Eye } from 'lucide-react';
 import { Button, Card } from './shared';
 import { supabase } from '../lib/supabase';
+import { ProofImage } from './ProofImage';
 
 interface PendingPayment {
   id: string;
@@ -200,25 +201,11 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
         {/* Proof Preview */}
         <div className="mb-6 border-2 border-dashed border-slate-300 rounded-lg p-4">
           <p className="text-sm text-slate-600 mb-2">Proof of Payment:</p>
-          {selectedProof.proof_of_payment_url?.endsWith('.pdf') ? (
-            <div className="bg-slate-100 rounded p-4 text-center">
-              <p className="text-sm text-slate-600 mb-2">PDF Document</p>
-              <a
-                href={selectedProof.proof_of_payment_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-600 hover:text-emerald-700 font-semibold inline-flex items-center gap-1"
-              >
-                Open PDF <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          ) : (
-            <img
-              src={selectedProof.proof_of_payment_url}
-              alt="Proof of payment"
-              className="max-w-full max-h-96 rounded"
-            />
-          )}
+          <ProofImage
+            url={selectedProof.proof_of_payment_url}
+            alt="Proof of payment"
+            className="rounded"
+          />
         </div>
 
         {/* Error / Success */}

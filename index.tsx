@@ -25,25 +25,32 @@ const LandingPage = ({ onLaunch, isPWA, hasAuthParams }: { onLaunch: () => void;
   }, []);
 
   const handleInstallClick = async () => {
-    if (!isPWA) {
-      // Not in PWA mode - trigger install prompt
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          // Wait a moment for app to potentially install
-          setTimeout(() => {
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-              onLaunch();
-            }
-          }, 1000);
-        }
-        setDeferredPrompt(null);
-      }
+    if (isPWA) {
+      // Already in PWA mode - proceed
+      onLaunch();
       return;
     }
-    // Already in PWA mode - proceed
-    onLaunch();
+
+    // Not in PWA mode - try native install prompt first
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setTimeout(() => {
+          if (window.matchMedia('(display-mode: standalone)').matches) {
+            onLaunch();
+          }
+        }, 1000);
+      }
+      setDeferredPrompt(null);
+      return;
+    }
+
+    // Fallback: native prompt not available — scroll to manual install guide
+    const installSection = document.getElementById('install');
+    if (installSection) {
+      installSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const Nav = () => (

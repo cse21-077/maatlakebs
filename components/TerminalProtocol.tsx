@@ -396,14 +396,22 @@ export const TerminalProtocol = ({
                             </div>
                         )}
 
-                        {/* Link Different Account Toggle */}
-                        {(!localMt5Login || userAccounts.length > 0) && (
+                        {/* Link Different Account Toggle — blocked for unpaid users */}
+                        {(!localMt5Login || userAccounts.length > 0) && !isUnpaid && (
                             <button
                                 onClick={() => setShowAddNew(!showAddNew)}
                                 className="w-full py-4 border border-white/10 rounded-2xl text-[10px] font-black text-white/30 hover:text-primary hover:border-primary/30 uppercase tracking-[0.3em] transition-all"
                             >
                                 {showAddNew ? '← Cancel' : '+ Link Different Account'}
                             </button>
+                        )}
+                        {isUnpaid && (
+                            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 text-center space-y-3">
+                                <p className="text-[10px] font-black text-red-400 uppercase tracking-[0.3em]">Payment Required</p>
+                                <p className="text-xs text-white/40 font-bold leading-relaxed">
+                                    Account linking is disabled until your subscription is active. Please complete payment to connect your trading account.
+                                </p>
+                            </div>
                         )}
 
                         {/* Link Different Account Form */}
@@ -430,28 +438,38 @@ export const TerminalProtocol = ({
                             </div>
                         )}
 
-                        {/* No accounts at all — show default form */}
+                        {/* No accounts at all — show default form or payment block */}
                         {!localMt5Login && userAccounts.length === 0 && !showAddNew && (
-                            <div className="space-y-4">
-                                <input type="number" placeholder="MT5 Login ID" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold" value={mt5.login} onChange={e => setMt5({ ...mt5, login: e.target.value })} />
-                                <div className="relative">
-                                    <select className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold appearance-none transition-all focus:border-primary" value={mt5.server} onChange={e => setMt5({ ...mt5, server: e.target.value })}>
-                                        <option value="">Protocol Server</option>
-                                        <option value="Weltrade-Real">Weltrade-Real</option>
-                                        <option value="Weltrade-Demo">Weltrade-Demo</option>
-                                    </select>
-                                    <img src="/weltrade.png" className="absolute right-6 top-1/2 -translate-y-1/2 w-8 opacity-20" />
+                            isUnpaid ? (
+                                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-8 text-center space-y-4">
+                                    <Lock size={24} className="text-red-400 mx-auto opacity-40" />
+                                    <p className="text-[10px] font-black text-red-400 uppercase tracking-[0.3em]">Payment Required</p>
+                                    <p className="text-xs text-white/40 font-bold leading-relaxed">
+                                        You need an active subscription to link a trading account. Please complete your payment to get started.
+                                    </p>
                                 </div>
-                                <div className="relative">
-                                    <input type={seePw ? "text" : "password"} placeholder="Passphrase" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold pr-14" value={mt5.password} onChange={e => setMt5({ ...mt5, password: e.target.value })} />
-                                    <button onClick={() => setSeePw(!seePw)} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-all">
-                                        {seePw ? <EyeOff size={20} /> : <Eye size={20} />}
-                                    </button>
+                            ) : (
+                                <div className="space-y-4">
+                                    <input type="number" placeholder="MT5 Login ID" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold" value={mt5.login} onChange={e => setMt5({ ...mt5, login: e.target.value })} />
+                                    <div className="relative">
+                                        <select className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold appearance-none transition-all focus:border-primary" value={mt5.server} onChange={e => setMt5({ ...mt5, server: e.target.value })}>
+                                            <option value="">Protocol Server</option>
+                                            <option value="Weltrade-Real">Weltrade-Real</option>
+                                            <option value="Weltrade-Demo">Weltrade-Demo</option>
+                                        </select>
+                                        <img src="/weltrade.png" className="absolute right-6 top-1/2 -translate-y-1/2 w-8 opacity-20" />
+                                    </div>
+                                    <div className="relative">
+                                        <input type={seePw ? "text" : "password"} placeholder="Passphrase" className="w-full bg-dark/50 border border-white/10 rounded-2xl py-5 px-6 text-white text-lg font-bold pr-14" value={mt5.password} onChange={e => setMt5({ ...mt5, password: e.target.value })} />
+                                        <button onClick={() => setSeePw(!seePw)} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-all">
+                                            {seePw ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                    </div>
+                                    <Button loading={loading} onClick={handleSave} className="w-full py-5 text-xs uppercase font-black tracking-[0.2em] shadow-2xl shadow-primary/20">
+                                        Connect →
+                                    </Button>
                                 </div>
-                                <Button loading={loading} onClick={handleSave} className="w-full py-5 text-xs uppercase font-black tracking-[0.2em] shadow-2xl shadow-primary/20">
-                                    Connect →
-                                </Button>
-                            </div>
+                            )
                         )}
                     </div>
 

@@ -11,6 +11,19 @@ To enable file uploads for mentor payment proofs, you need to configure Supabase
 4. Set visibility: **Public** (since we want to serve the proof files)
 5. Click **Create bucket**
 
+### ⚠️ CRITICAL: Make the Bucket Public
+
+Even if you selected "Public" during creation, verify the bucket is actually public by running this SQL in the **SQL Editor**:
+
+```sql
+-- Ensure the proofofpay bucket is public
+UPDATE storage.buckets
+SET public = true
+WHERE name = 'proofofpay';
+```
+
+If the bucket was created as private, images will **not** load in the admin dashboard even with RLS policies. The `getPublicUrl()` method only works for truly public buckets.
+
 ## Step 2: Configure RLS Policies
 
 After creating the bucket, set up the following RLS policies:
@@ -111,7 +124,8 @@ WHERE id = 'invoice_id_here';
 
 **Q: File uploads but URL is inaccessible**
 - A: Check the **SELECT** RLS policy is set to `true` for public access
-- Or ensure your app is authenticated when accessing
+- Run the SQL above to ensure `storage.buckets.public = true` for `proofofpay`
+- The admin dashboard now has a fallback API (`/api/admin/proof-url`) that generates signed URLs if public access fails
 
 **Q: "Failed to upload" error in app**
 - A: Check browser console for detailed error

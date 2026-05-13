@@ -546,14 +546,21 @@ const App = () => {
     };
 
     const initialize = async () => {
-      const { data: { session: s } } = await supabase.auth.getSession();
-      if (s) { 
-        setSession(s); 
-        await checkOnboarding(s); 
-      } else {
-        setView(isPWA ? 'SPLASH' : 'LANDING');
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (s) { 
+          setSession(s); 
+          await checkOnboarding(s); 
+        } else {
+          setView(isPWA ? 'SPLASH' : 'LANDING');
+        }
+      } catch (err) {
+        console.error('Session initialization failed:', err);
+        // Fallback to auth screen so user isn't stuck on splash
+        setView(isPWA ? 'AUTH' : 'LANDING');
+      } finally {
+        setBooting(false);
       }
-      setBooting(false);
     };
 
     initialize();

@@ -1,22 +1,26 @@
-const CACHE_NAME = 'maatla-kebs-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'maatla-kebs-v2';
+const SHELL_ASSETS = [
   '/',
   '/index.html',
+  '/app.css',
   '/icon-192.png',
   '/icon-512.png',
-  '/MK Logo.png',
-  '/manifest.json'
+  '/MK Logo.png'
 ];
 
+// Install: cache app shell, but don't fail if some assets are missing
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(SHELL_ASSETS).catch((err) => {
+        console.warn('[SW] Precache partially failed:', err);
+      });
     })
   );
   self.skipWaiting();
 });
 
+// Activate: clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -25,19 +29,85 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
+
+// Helper: check if request is a navigation (HTML page)
+function isNavigationRequest(request) {
+  return request.mode === 'navigate';
+}
+
+// Helper: check if request is a static asset we want to cache
+function isStaticAsset(request) {
+  const dest = request.destination;
+  const url = new URL(request.url);
+  return dest === 'script' ||
+         dest === 'style' ||
+         dest === 'image' ||
+         dest === 'font' ||
+         url.pathname.startsWith('/assets/');
+}
 
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // 1. Navigation requests (HTML) → Network First
+  // This ensures users always get the latest index.html after a deploy
+  if (isNavigationRequest(request)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then((cached) => {
+            if (cached) return cached;
+            return new Response(
+              '<h1 style="color:#fff;background:#0d0f14;text-align:center;padding:40px;">Offline. Please check your connection and try again.</h1>',
+              { headers: { 'Content-Type': 'text/html' } }
+            );
+          });
+        })
+    );
+    return;
+  }
+
+  // 2. Static assets (JS, CSS, images) → Cache First, then network
+  if (isStaticAsset(request)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          // Refresh cache in background (stale-while-revalidate)
+          fetch(request).then((response) => {
+            if (response.ok) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+            }
+          }).catch(() => {});
+          return cached;
+        }
+
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. Everything else (API calls, external resources) → Network with cache fallback
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    fetch(request).catch(() => caches.match(request))
   );
 });
 
+// Handle skip-waiting messages from client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

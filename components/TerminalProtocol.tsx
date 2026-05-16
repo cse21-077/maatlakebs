@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     ChevronLeft, Lock, Unlock, Zap, ShieldAlert,
-    Eye, EyeOff, Trash2
+    Eye, EyeOff, Trash2, ChevronDown
 } from 'lucide-react';
 import { Button } from './shared';
 import { supabase } from '../lib/supabase';
@@ -60,6 +60,7 @@ export const TerminalProtocol = ({
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [editingSavedId, setEditingSavedId] = useState<string | null>(null);
     const [tempLogin, setTempLogin] = useState('');
+    const [tempServer, setTempServer] = useState('');
     const [tempPassword, setTempPassword] = useState('');
     const [accountToDelete, setAccountToDelete] = useState<{login: string, server: string} | null>(null);
 
@@ -89,7 +90,7 @@ export const TerminalProtocol = ({
         try {
             const activeAcct = userAccounts.find(a => a.mt5_login === localMt5Login);
             const login = isEditingPassword ? tempLogin : mt5.login;
-            const server = isEditingPassword ? (activeAcct?.mt5_server || mt5.server) : mt5.server;
+            const server = isEditingPassword ? tempServer : mt5.server;
             const password = isEditingPassword ? tempPassword : mt5.password;
             const accountId = isEditingPassword ? activeAcct?.id : undefined;
 
@@ -360,18 +361,38 @@ export const TerminalProtocol = ({
                                             </button>
                                         </div>
                                         {isEditingPassword && !editingSavedId ? (
-                                            <div className="mt-2 relative">
-                                                <input 
-                                                    type="number" 
-                                                    value={tempLogin} 
-                                                    onChange={(e) => setTempLogin(e.target.value)}
-                                                    className="text-2xl sm:text-3xl font-black text-white tracking-tighter bg-white/5 border-b-2 border-primary rounded-t-xl px-4 py-2 focus:outline-none w-full transition-all"
-                                                    placeholder="Login ID"
-                                                />
-                                                <span className="absolute -top-2 left-2 px-2 bg-[#1a1c22] text-[8px] font-black text-primary uppercase tracking-widest">New Login ID</span>
+                                            <div className="space-y-4 mt-4 animate-fade-in">
+                                                <div className="relative">
+                                                    <input 
+                                                        type="number" 
+                                                        value={tempLogin} 
+                                                        onChange={(e) => setTempLogin(e.target.value)}
+                                                        className="text-2xl sm:text-3xl font-black text-white tracking-tighter bg-white/5 border-b-2 border-primary rounded-t-xl px-4 py-3 focus:outline-none w-full transition-all"
+                                                        placeholder="Login ID"
+                                                    />
+                                                    <span className="absolute -top-2 left-2 px-2 bg-[#1a1c22] text-[8px] font-black text-primary uppercase tracking-widest">New Login ID</span>
+                                                </div>
+                                                <div className="relative">
+                                                    <select 
+                                                        value={tempServer} 
+                                                        onChange={(e) => setTempServer(e.target.value)}
+                                                        className="w-full bg-white/5 border-b-2 border-white/10 rounded-t-xl py-4 px-4 text-white text-sm font-bold appearance-none transition-all focus:border-primary"
+                                                    >
+                                                        <option value="">Select Server</option>
+                                                        <option value="Weltrade-Real">Weltrade-Real</option>
+                                                        <option value="Weltrade-Demo">Weltrade-Demo</option>
+                                                    </select>
+                                                    <span className="absolute -top-2 left-2 px-2 bg-[#1a1c22] text-[8px] font-black text-white/30 uppercase tracking-widest">Broker Protocol</span>
+                                                    <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                                                </div>
                                             </div>
                                         ) : (
-                                            <p className="mt-2 text-3xl font-black text-white tracking-tighter truncate">{localMt5Login}</p>
+                                            <div className="mt-2">
+                                                <p className="text-3xl font-black text-white tracking-tighter truncate">{localMt5Login}</p>
+                                                <p className="text-[10px] font-black text-green-400/40 uppercase tracking-[0.2em] mt-1">
+                                                    {userAccounts.find(a => a.mt5_login === localMt5Login)?.mt5_server || 'Connected Protocol'}
+                                                </p>
+                                            </div>
                                         )}
                                         
                                         {/* Password Display / Edit */}
@@ -423,6 +444,7 @@ export const TerminalProtocol = ({
                                                                 setIsEditingPassword(true);
                                                                 setEditingSavedId(null);
                                                                 setTempLogin(localMt5Login || '');
+                                                                setTempServer(userAccounts.find(a => a.mt5_login === localMt5Login)?.mt5_server || '');
                                                                 setTempPassword(userAccounts.find(a => a.mt5_login === localMt5Login)?.encrypted_password || '');
                                                             }}
                                                             className="p-2.5 bg-white/5 rounded-lg text-white/20 hover:text-primary transition-all"
@@ -434,13 +456,9 @@ export const TerminalProtocol = ({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1 shrink-0">
-                                        <img src="/weltrade.png" alt="Weltrade" className="w-10 h-10 object-contain" />
-                                        <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em]">Connected</span>
-                                    </div>
                                 </div>
                                 {!isEditingPassword && (
-                                    <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all pt-2">Disconnect Account →</button>
+                                    <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all pt-2 border-t border-white/5">Disconnect Account →</button>
                                 )}
                             </div>
                         )}
@@ -458,16 +476,34 @@ export const TerminalProtocol = ({
                                             <div className="flex items-center justify-between gap-4">
                                                 <div className="flex-1 min-w-0">
                                                     {editingSavedId === acct.id ? (
-                                                        <input 
-                                                            type="number" 
-                                                            value={tempLogin} 
-                                                            onChange={(e) => setTempLogin(e.target.value)}
-                                                            className="text-lg font-black text-white tracking-tight bg-white/10 border-b border-primary rounded-t-lg px-2 py-1 focus:outline-none w-full"
-                                                        />
+                                                        <div className="space-y-3">
+                                                            <div className="relative">
+                                                                <input 
+                                                                    type="number" 
+                                                                    value={tempLogin} 
+                                                                    onChange={(e) => setTempLogin(e.target.value)}
+                                                                    className="text-lg font-black text-white tracking-tight bg-white/10 border-b border-primary rounded-t-lg px-2 py-1.5 focus:outline-none w-full"
+                                                                />
+                                                                <span className="absolute -top-1.5 left-2 px-1 bg-[#1a1c22] text-[7px] font-black text-primary uppercase tracking-widest">Login ID</span>
+                                                            </div>
+                                                            <div className="relative">
+                                                                <select 
+                                                                    value={tempServer} 
+                                                                    onChange={(e) => setTempServer(e.target.value)}
+                                                                    className="w-full bg-white/5 border-b border-white/10 rounded-t-lg py-1.5 px-2 text-xs font-bold text-white appearance-none"
+                                                                >
+                                                                    <option value="Weltrade-Real">Weltrade-Real</option>
+                                                                    <option value="Weltrade-Demo">Weltrade-Demo</option>
+                                                                </select>
+                                                                <span className="absolute -top-1.5 left-2 px-1 bg-[#1a1c22] text-[7px] font-black text-white/20 uppercase tracking-widest">Server</span>
+                                                            </div>
+                                                        </div>
                                                     ) : (
-                                                        <p className="text-lg font-black text-white tracking-tight truncate">{acct.mt5_login}</p>
+                                                        <>
+                                                            <p className="text-lg font-black text-white tracking-tight truncate">{acct.mt5_login}</p>
+                                                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mt-1 truncate">{acct.mt5_server || 'Unknown Server'}</p>
+                                                        </>
                                                     )}
-                                                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mt-1 truncate">{acct.mt5_server || 'Unknown Server'}</p>
                                                 </div>
                                                 <div className="flex items-center gap-2 shrink-0">
                                                     {!editingSavedId && (
@@ -530,7 +566,7 @@ export const TerminalProtocol = ({
                                                                                 id: acct.id,
                                                                                 user_id: uid,
                                                                                 mt5_login: tempLogin,
-                                                                                mt5_server: acct.mt5_server,
+                                                                                mt5_server: tempServer,
                                                                                 encrypted_password: tempPassword,
                                                                                 is_active: false,
                                                                             }),
@@ -551,6 +587,7 @@ export const TerminalProtocol = ({
                                                             onClick={() => {
                                                                 setEditingSavedId(acct.id);
                                                                 setTempLogin(acct.mt5_login);
+                                                                setTempServer(acct.mt5_server);
                                                                 setTempPassword(acct.encrypted_password || '');
                                                             }}
                                                             className="p-2.5 bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"

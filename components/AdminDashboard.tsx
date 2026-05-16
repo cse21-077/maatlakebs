@@ -538,6 +538,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                               </div>
                             )}
                           </div>
+
+                          {/* Other/Unclassified Accounts */}
+                          {student.accounts.length > (student.live_accounts.length + student.demo_accounts.length) && (
+                            <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-1.5">
+                                <Monitor size={10} /> Other Accounts ({student.accounts.length - student.live_accounts.length - student.demo_accounts.length})
+                              </p>
+                              <div className="space-y-2">
+                                {student.accounts
+                                  .filter(a => !student.live_accounts.includes(a) && !student.demo_accounts.includes(a))
+                                  .map(acct => (
+                                    <div key={acct.id} className="flex items-center justify-between bg-white/[0.03] rounded-lg px-3 py-2">
+                                      <div className="flex items-center gap-3">
+                                        <div className={`w-2 h-2 rounded-full ${acct.is_active ? 'bg-slate-400' : 'bg-white/10'}`} />
+                                        <div>
+                                          <p className="text-xs font-bold text-white">{acct.mt5_login}</p>
+                                          <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider">{acct.mt5_server || 'Unknown Protocol'}</p>
+                                        </div>
+                                      </div>
+                                      {acct.is_active && <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Active</span>}
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Payment Status Section */}

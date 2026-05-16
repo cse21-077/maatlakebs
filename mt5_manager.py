@@ -1,21 +1,46 @@
 # mt5_manager.py
-# MaatlaKebs — MT5 Manager (Main Process)
-# Version 4.7 — Production Final (Pending Set Fix)
+# MaatlaKebs — MT5 Manager v5.0 (EA Slave Architecture)
+# ============================================================
+# ARCHITECTURE CHANGE:
+#   OLD: Python workers spawned per student, HTTP forwarding, IPC to MT5
+#   NEW: Python writes signal files, EA reads and executes inside MT5
+#
+# WHY WE SWITCHED:
+#   Python workers had fatal IPC timeouts (-10005) on cold MT5 terminals.
+#   12 paying clients received ZERO trades on May 13, 2026.
+#   Pre-warming, staggered startup, and 30s timeouts couldn't fix it.
+#   EA runs INSIDE MT5 — no IPC needed. No workers to manage.
+#
+# HOW IT WORKS:
+#   1. Receives HTTP POST from Hetzner Celery with signal data
+#   2. Fetches active students from Supabase (filtered by trader_id)
+#   3. Writes ONE file per student via FILE_COMMON path:
+#      %APPDATA%\MetaQuotes\Terminal\Common\Files\MaatlaKebs\signals\{login}.json
+#   4. Returns immediately — does NOT wait for execution
+#   5. Background thread collects result files from Common\Files\MaatlaKebs\results\
+#   6. Background thread monitors terminal health, updates connection_status
+#
+# PORTABLE MT5 NOTE:
+#   All signal/result folders MUST point to MetaQuotes Common\Files directory.
+#   This is the shared folder that MT5's FILE_COMMON flag resolves to,
+#   regardless of which portable terminal instance is running.
 # ============================================================
 
-from flask import Flask, request, jsonify
+import json
+import os
+import glob
+import time
+import uuid
+import threading
+import logging
+import sys
 import subprocess
+from datetime import datetime, timezone
+
 import requests as http_requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-import logging
-import threading
-import time
-import os
-import sys
-import signal
-from datetime import datetime, timezone
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, as_completed
+from flask import Flask, request, jsonify
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,56 +50,50 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(line_buffering=True)
-
 app = Flask(__name__)
 
 # ── Config ────────────────────────────────────────────────────
-SUPABASE_URL        = os.environ.get("SUPABASE_URL", "https://yrnjemftbqwvbvknlxol.supabase.co")
-SUPABASE_KEY        = os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybmplbWZ0YnF3dmJ2a25seG9sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTk1ODMyMSwiZXhwIjoyMDg3NTM0MzIxfQ.3Mh_msfKAq0gwVyad6A-VqvTEIfYzi9LYjVKrtO8g0g")
-PROVISION_SECRET    = os.environ.get("PROVISION_SECRET", "9ecf9109adf78a9bdda26cfae02227d7")
-SYNC_INTERVAL       = 60
-BASE_PORT           = 5100
-WORKER_TIMEOUT      = 30
-TRADE_TIMEOUT       = 5
-PYTHON_EXECUTABLE   = sys.executable
-WORKER_SCRIPT       = os.path.join(os.path.dirname(__file__), "student_worker.py")
-TERMINAL_BASE       = "C:\\MT5Terminals"
-GHOST_SLOTS         = {"Student001", "Student002", "Student003"}
-MAX_SLOT            = 53
-
-trade_executor = ThreadPoolExecutor(max_workers=5, thread_name_prefix="TradeForwarder")
-broadcast_semaphore = threading.Semaphore(5)
+SUPABASE_URL     = os.environ.get("SUPABASE_URL", "https://yrnjemftbqwvbvknlxol.supabase.co")
+SUPABASE_KEY     = os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlybmplbWZ0YnF3dmJ2a25seG9sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTk1ODMyMSwiZXhwIjoyMDg3NTM0MzIxfQ.3Mh_msfKAq0gwVyad6A-VqvTEIfYzi9LYjVKrtO8g0g")
+PROVISION_SECRET = os.environ.get("PROVISION_SECRET", "9ecf9109adf78a9bdda26cfae02227d7")
+# --- Common MetaQuotes shared folder (FILE_COMMON in MQL5 resolves here) ---
+_COMMON_FILES = os.path.join(
+    os.environ.get("APPDATA", r"C:\Users\Administrator\AppData\Roaming"),
+    r"MetaQuotes\Terminal\Common\Files"
+)
+SIGNALS_FOLDER   = os.environ.get("SIGNALS_FOLDER",   os.path.join(_COMMON_FILES, "MaatlaKebs", "signals"))
+RESULTS_FOLDER   = os.environ.get("RESULTS_FOLDER",   os.path.join(_COMMON_FILES, "MaatlaKebs", "results"))
+RESULT_SCAN_INTERVAL = int(os.environ.get("RESULT_SCAN_INTERVAL", "5"))
+STALE_SIGNAL_SECONDS = int(os.environ.get("STALE_SIGNAL_SECONDS", "60"))
+STUDENT_CACHE_SECONDS = 30
+CONNECTION_CHECK_INTERVAL = 30
 
 session = http_requests.Session()
-retry_strategy = Retry(total=1, backoff_factor=0.1)
-adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=20, pool_maxsize=20)
+retry_strategy = Retry(total=2, backoff_factor=0.2)
+adapter = HTTPAdapter(max_retries=retry_strategy, pool_connections=50, pool_maxsize=50)
 session.mount("http://", adapter)
+session.mount("https://", adapter)
 
+os.makedirs(SIGNALS_FOLDER, exist_ok=True)
+os.makedirs(RESULTS_FOLDER, exist_ok=True)
 
-# ── Worker Registry ───────────────────────────────────────────
-workers = {}
-workers_lock = threading.Lock()
-workers_pending = set()  # 🔥 Prevent duplicate spawning
-workers_pending_lock = threading.Lock()
-worker_failures = {}
-worker_restart_backoff = {}
-next_port = BASE_PORT
-port_lock = threading.Lock()
+# ── Threading Locks ───────────────────────────────────────────
+_signal_locks = {}
+_locks_lock = threading.Lock()
 
+def _get_lock(login: str) -> threading.Lock:
+    with _locks_lock:
+        if login not in _signal_locks:
+            _signal_locks[login] = threading.Lock()
+        return _signal_locks[login]
 
-def get_next_port() -> int:
-    global next_port
-    with port_lock:
-        port = next_port
-        next_port += 1
-    return port
+# ── Student Cache ─────────────────────────────────────────────
+_students_cache = []
+_students_cache_time = 0
+_students_cache_lock = threading.Lock()
 
-
-# ── Supabase Helpers ──────────────────────────────────────────
-
-def supabase_headers() -> dict:
+# ── Helpers ───────────────────────────────────────────────────
+def supabase_headers():
     return {
         "apikey":        SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -82,22 +101,60 @@ def supabase_headers() -> dict:
         "Prefer":        "return=minimal"
     }
 
-
-def fetch_students() -> list[dict]:
+def fetch_active_students(trader_id: str = None, force_refresh: bool = False) -> list:
+    global _students_cache, _students_cache_time
+    
+    with _students_cache_lock:
+        if (not force_refresh and 
+            time.time() - _students_cache_time < STUDENT_CACHE_SECONDS and 
+            _students_cache):
+            if trader_id:
+                return [s for s in _students_cache if s.get("trader_id") == trader_id]
+            return list(_students_cache)
+    
     try:
-        url = (
-            f"{SUPABASE_URL}/rest/v1/student_accounts"
-            f"?is_active=eq.true"
-            f"&select=user_id,mt5_login,encrypted_password,mt5_server,folder_path,is_ghost"
-        )
+        url = f"{SUPABASE_URL}/rest/v1/student_accounts?is_active=eq.true&select=user_id,mt5_login,trader_id,folder_path"
+        if trader_id:
+            url += f"&trader_id=eq.{trader_id}"
+        
         resp = session.get(url, headers=supabase_headers(), timeout=10)
         if resp.status_code == 200:
-            return resp.json()
-        return []
+            students = resp.json()
+            with _students_cache_lock:
+                _students_cache = students
+                _students_cache_time = time.time()
+            logger.info(f"Fetched {len(students)} active students" + (f" for trader={trader_id}" if trader_id else ""))
+            return students
+        else:
+            logger.error(f"Supabase error {resp.status_code}: {resp.text[:200]}")
     except Exception as e:
         logger.error(f"Failed to fetch students: {e}")
-        return []
+    
+    with _students_cache_lock:
+        if _students_cache:
+            logger.warning("Using stale student cache")
+            if trader_id:
+                return [s for s in _students_cache if s.get("trader_id") == trader_id]
+            return list(_students_cache)
+    return []
 
+def push_results_to_supabase(results: list):
+    if not results:
+        return
+    try:
+        url = f"{SUPABASE_URL}/rest/v1/trade_logs"
+        resp = session.post(
+            url, 
+            json=results,
+            headers={**supabase_headers(), "Prefer": "return=representation"},
+            timeout=15
+        )
+        if resp.status_code in (200, 201):
+            logger.info(f"Pushed {len(results)} results to Supabase")
+        else:
+            logger.error(f"Supabase push {resp.status_code}: {resp.text[:200]}")
+    except Exception as e:
+        logger.error(f"Supabase push exception: {e}")
 
 def update_connection_status(user_id: str, status: str, error_message: str = None):
     try:
@@ -112,586 +169,301 @@ def update_connection_status(user_id: str, status: str, error_message: str = Non
         resp = session.patch(patch_url, json=payload, headers=supabase_headers(), timeout=5)
         if resp.status_code == 404:
             url = f"{SUPABASE_URL}/rest/v1/connection_status"
-            headers = {**supabase_headers(), "Prefer": "return=minimal"}
-            session.post(url, json=payload, headers=headers, timeout=5)
-    except Exception:
-        pass
-
-
-def fetch_assigned_folder_paths() -> set[str]:
-    try:
-        url = f"{SUPABASE_URL}/rest/v1/student_accounts?select=folder_path&folder_path=not.is.null"
-        resp = session.get(url, headers=supabase_headers(), timeout=10)
-        if resp.status_code == 200:
-            assigned = set()
-            for row in resp.json():
-                fp = row.get("folder_path", "")
-                if fp:
-                    name = fp.replace("/", "\\").rstrip("\\").split("\\")[-1]
-                    assigned.add(name)
-            return assigned
-        return set()
-    except:
-        return set()
-
-
-def assign_folder_to_student(user_id: str, folder_path: str) -> bool:
-    try:
-        url = f"{SUPABASE_URL}/rest/v1/student_accounts?user_id=eq.{user_id}"
-        resp = session.patch(
-            url,
-            json={"folder_path": folder_path, "updated_at": datetime.now(timezone.utc).isoformat()},
-            headers=supabase_headers(),
-            timeout=10
-        )
-        return resp.status_code in (200, 204)
-    except:
-        return False
-
-
-# ── Worker Management ─────────────────────────────────────────
-
-def read_worker_output(process, user_id: str):
-    try:
-        for line in iter(process.stdout.readline, b''):
-            if line:
-                logger.info(f"[Worker-{user_id[:8]}] {line.decode(errors='replace').strip()}")
-    except Exception:
-        pass
-
-
-def start_worker(user_id: str, login: str, password: str, server: str, folder_path: str, is_ghost: bool = False) -> bool:
-    port = get_next_port()
-    terminal_path = folder_path if folder_path else ""
-    
-    cmd = [
-        PYTHON_EXECUTABLE, WORKER_SCRIPT,
-        "--login",    str(login),
-        "--password", str(password),
-        "--server",   str(server),
-        "--path",     str(terminal_path),
-        "--port",     str(port),
-    ]
-
-    try:
-        creationflags = 0
-        if sys.platform == "win32":
-            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
-        
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            creationflags=creationflags,
-            bufsize=0,
-            universal_newlines=False
-        )
-
-        threading.Thread(target=read_worker_output, args=(process, user_id), daemon=True).start()
-
-        logger.info(f"Waiting for worker {user_id[:8]} (login {login}) to start on port {port}...")
-        for attempt in range(WORKER_TIMEOUT * 2):
-            time.sleep(0.5)
-            try:
-                resp = http_requests.get(f"http://127.0.0.1:{port}/health", timeout=1)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if data.get("connected"):
-                        with workers_lock:
-                            workers[user_id] = {
-                                "process": process,
-                                "port":    port,
-                                "login":   int(login),
-                                "server":  server,
-                                "user_id": user_id,
-                                "is_ghost": is_ghost,
-                                "started": datetime.now(timezone.utc).isoformat()
-                            }
-                        logger.info(f"✓ Worker started | user={user_id[:8]} | login={login} | port={port}")
-                        update_connection_status(user_id, "CONNECTED")
-                        return True
-            except:
-                pass
-
-            if process.poll() is not None:
-                logger.error(f"Worker process for {user_id[:8]} died during startup")
-                update_connection_status(user_id, "ERROR", f"Process died with code {process.poll()}")
-                return False
-
-        logger.error(f"Worker for {user_id[:8]} timed out starting after {WORKER_TIMEOUT}s")
-        process.terminate()
-        update_connection_status(user_id, "ERROR", "Worker timed out on startup")
-        return False
-
+            session.post(url, json=payload, headers={**supabase_headers(), "Prefer": "return=minimal"}, timeout=5)
     except Exception as e:
-        logger.error(f"Failed to start worker for {user_id[:8]}: {e}")
-        update_connection_status(user_id, "ERROR", str(e))
-        return False
+        logger.error(f"Failed to update connection status for {user_id}: {e}")
 
-
-def stop_worker(user_id: str):
-    with workers_lock:
-        worker = workers.pop(user_id, None)
-
-    if worker:
+def cleanup_stale_files():
+    now = time.time()
+    for f in glob.glob(os.path.join(SIGNALS_FOLDER, "*.json")):
         try:
-            worker["process"].terminate()
-            worker["process"].wait(timeout=5)
-        except:
-            worker["process"].kill()
-    update_connection_status(user_id, "DISCONNECTED")
+            if now - os.path.getmtime(f) > STALE_SIGNAL_SECONDS:
+                os.remove(f)
+                logger.warning(f"Removed stale signal: {os.path.basename(f)}")
+        except Exception:
+            pass
+    for f in glob.glob(os.path.join(RESULTS_FOLDER, "*_result.json")):
+        try:
+            if now - os.path.getmtime(f) > 300:
+                os.remove(f)
+        except Exception:
+            pass
 
-
-def is_worker_healthy(user_id: str) -> bool:
-    with workers_lock:
-        worker = workers.get(user_id)
-
-    if not worker:
-        return False
-
-    if worker["process"].poll() is not None:
-        return False
-
+def get_running_terminal_paths() -> list:
+    """Get list of running terminal64.exe executable paths via WMIC."""
     try:
-        resp = session.get(f"http://127.0.0.1:{worker['port']}/health", timeout=1)
-        return resp.status_code == 200
-    except:
-        return False
-
-
-def forward_request_sync(user_id: str, endpoint: str, data: dict) -> dict:
-    with workers_lock:
-        worker = workers.get(user_id)
-
-    if not worker:
-        return {"status": "failed", "error": "No worker"}
-
-    try:
-        resp = session.post(
-            f"http://127.0.0.1:{worker['port']}{endpoint}",
-            json=data,
-            timeout=TRADE_TIMEOUT
+        result = subprocess.run(
+            ["wmic", "process", "where", "name=\"terminal64.exe\"", "get", "ExecutablePath", "/value"],
+            capture_output=True, text=True, timeout=10
         )
-        return resp.json()
-    except:
-        return {"status": "failed", "error": "Request failed"}
+        paths = []
+        for line in result.stdout.split("\n"):
+            line = line.strip()
+            if line.startswith("ExecutablePath="):
+                path = line.split("=", 1)[1].strip()
+                if path:
+                    paths.append(path.replace("/", "\\"))
+        return paths
+    except Exception as e:
+        logger.error(f"Failed to query running terminals: {e}")
+        return []
 
-
-# ── Staggered Startup ─────────────────────────────────────────
-
-def staggered_start_all(students_to_start: list):
-    total = len(students_to_start)
-    for i, (user_id, login, password, server, folder, is_ghost) in enumerate(students_to_start):
-        logger.info(f"🚀 Starting worker {i+1}/{total}: {user_id[:8]} (login: {login})")
-        success = start_worker(user_id, login, password, server, folder, is_ghost)
-        
-        # 🔥 Remove from pending regardless of outcome
-        with workers_pending_lock:
-            workers_pending.discard(user_id)
-        
-        if not success:
-            logger.error(f"❌ Worker {user_id[:8]} failed to start")
-        
-        if i < total - 1:
-            logger.info(f"⏳ Waiting 8s before next worker...")
-            time.sleep(8)
-
-
-# ── Sync Loop ─────────────────────────────────────────────────
-
-def sync_loop():
-    logger.info("Sync thread started")
+def write_signal_files(signal_data: dict, students: list) -> tuple:
+    batch_id = str(uuid.uuid4())
+    timestamp = int(time.time())
+    written = 0
+    failed = []
     
-    while True:
+    for student in students:
+        login = str(student.get("mt5_login", ""))
+        if not login:
+            continue
+        
+        payload = {
+            "batch_id": batch_id,
+            "timestamp": timestamp,
+            "action": signal_data.get("action", "OPEN"),
+            "symbol": signal_data.get("symbol", ""),
+            "order_type": signal_data.get("order_type", ""),
+            "volume": float(signal_data.get("volume", 0)),
+            "mentor_ticket": str(signal_data.get("mentor_ticket", "")),
+            "sl": float(signal_data.get("sl", 0)),
+            "tp": float(signal_data.get("tp", 0)),
+            "student_id": student.get("user_id", ""),
+            "login": login
+        }
+        
+        filepath = os.path.join(SIGNALS_FOLDER, f"{login}.json")
+        tmppath = filepath + ".tmp"
+        lock = _get_lock(login)
+        
+        acquired = lock.acquire(blocking=True, timeout=5.0)
+        if not acquired:
+            logger.error(f"Lock timeout for {login}")
+            failed.append(login)
+            continue
+        
         try:
-            students = fetch_students()
-            active_ids = set()
-            ghost_count = 0
-            live_count = 0
-            
-            new_students = []
-            unhealthy_students = []
-
-            for student in students:
-                user_id  = student.get("user_id")
-                login    = student.get("mt5_login")
-                password = student.get("encrypted_password")
-                server   = student.get("mt5_server", "")
-                folder   = student.get("folder_path", "")
-                is_ghost = student.get("is_ghost", False)
-
-                if not all([user_id, login, password]):
-                    continue
-
-                if not is_ghost and not folder:
-                    continue
-
-                active_ids.add(user_id)
-                
-                if is_ghost:
-                    ghost_count += 1
-                else:
-                    live_count += 1
-
-                with workers_lock:
-                    worker = workers.get(user_id)
-                    exists = worker is not None
-                    # Detect if account credentials (login) changed
-                    changed = exists and int(worker.get("login", 0)) != int(login)
-
-                if not exists:
-                    # 🔥 Check pending set to avoid duplicate spawning
-                    with workers_pending_lock:
-                        already_pending = user_id in workers_pending
-                    
-                    if not already_pending:
-                        new_students.append((user_id, login, password, server, folder, is_ghost))
-                elif changed:
-                    logger.info(f"🔄 Student {user_id[:8]} changed account ({worker['login']} -> {login}) — restarting...")
-                    stop_worker(user_id)
-                    with workers_pending_lock:
-                        workers_pending.add(user_id)
-                    new_students.append((user_id, login, password, server, folder, is_ghost))
-                elif not is_worker_healthy(user_id):
-                    worker_failures[user_id] = worker_failures.get(user_id, 0) + 1
-                    if worker_failures[user_id] >= 3:
-                        unhealthy_students.append((user_id, login, password, server, folder, is_ghost))
-                        worker_failures[user_id] = 0
-                else:
-                    worker_failures[user_id] = 0
-                    if user_id in worker_restart_backoff:
-                        worker_restart_backoff[user_id] = 5
-
-            # 🔥 Start new workers in background (with pending tracking)
-            if new_students:
-                with workers_pending_lock:
-                    for uid, *_ in new_students:
-                        workers_pending.add(uid)
-                
-                threading.Thread(
-                    target=staggered_start_all,
-                    args=(new_students,),
-                    daemon=True
-                ).start()
-
-            # Restart unhealthy workers
-            if unhealthy_students:
-                logger.info(f"🔄 Restarting {len(unhealthy_students)} unhealthy workers...")
-                for user_id, login, password, server, folder, is_ghost in unhealthy_students:
-                    backoff = worker_restart_backoff.get(user_id, 5)
-                    logger.warning(f"⚠️ Worker {user_id[:8]} unhealthy — restarting (backoff: {backoff}s)")
-                    time.sleep(backoff)
-                    stop_worker(user_id)
-                    time.sleep(2)
-                    if start_worker(user_id, login, password, server, folder, is_ghost):
-                        worker_restart_backoff[user_id] = min(backoff * 2, 60)
-
-            # Remove deactivated students
-            with workers_lock:
-                current_ids = list(workers.keys())
-
-            for uid in current_ids:
-                if uid not in active_ids:
-                    logger.info(f"👋 Student {uid[:8]} deactivated — stopping worker...")
-                    stop_worker(uid)
-
-            with workers_lock:
-                total_workers = len(workers)
-            
-            logger.info(f"✅ Sync complete: {total_workers} active workers ({ghost_count} ghost, {live_count} live)")
-
+            with open(tmppath, "w") as f:
+                json.dump(payload, f)
+            os.replace(tmppath, filepath)
+            written += 1
         except Exception as e:
-            logger.error(f"Sync loop error: {e}")
-
-        time.sleep(SYNC_INTERVAL)
-
+            logger.error(f"Write failed for {login}: {e}")
+            failed.append(login)
+        finally:
+            lock.release()
+    
+    logger.info(f"Wrote {written}/{len(students)} signals (batch={batch_id[:8]})")
+    return written, failed
 
 # ── Flask Routes ──────────────────────────────────────────────
-
 @app.route("/health", methods=["GET"])
 def health():
-    with workers_lock:
-        worker_info = {}
-        for uid, w in workers.items():
-            worker_info[uid[:8]] = {
-                "port":    w["port"],
-                "login":   w["login"],
-                "alive":   w["process"].poll() is None
-            }
-    
-    return jsonify({
-        "status":  "ok",
-        "workers": len(worker_info),
-        "details": worker_info,
-        "time":    datetime.now(timezone.utc).isoformat()
-    })
+    try:
+        signal_count = len(glob.glob(os.path.join(SIGNALS_FOLDER, "*.json")))
+        result_count = len(glob.glob(os.path.join(RESULTS_FOLDER, "*_result.json")))
+        with _students_cache_lock:
+            cached = len(_students_cache)
+        return jsonify({
+            "status": "ok",
+            "pending_signals": signal_count,
+            "pending_results": result_count,
+            "cached_students": cached,
+            "time": datetime.now(timezone.utc).isoformat()
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route("/signal", methods=["POST"])
+def receive_signal():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"status": "failed", "error": "Empty body"}), 400
+        
+        symbol = data.get("symbol")
+        order_type = data.get("order_type")
+        volume = data.get("volume")
+        action = data.get("action", "OPEN")
+        mentor_ticket = data.get("mentor_ticket", str(uuid.uuid4()))
+        trader_id = data.get("trader_id", "")
+        sl = data.get("stop_loss", 0)
+        tp = data.get("take_profit", 0)
+        
+        if not symbol or not order_type or volume is None:
+            return jsonify({"status": "failed", "error": "symbol, order_type, volume required"}), 400
+        
+        students = fetch_active_students(trader_id if trader_id else None)
+        if not students:
+            return jsonify({"status": "failed", "error": "No active students"}), 404
+        
+        signal_data = {
+            "action": action,
+            "symbol": symbol,
+            "order_type": order_type,
+            "volume": float(volume),
+            "mentor_ticket": str(mentor_ticket),
+            "sl": float(sl),
+            "tp": float(tp),
+        }
+        
+        written, failed = write_signal_files(signal_data, students)
+        
+        return jsonify({
+            "status": "written",
+            "batch_id": str(uuid.uuid4())[:8],
+            "students_total": len(students),
+            "files_written": written,
+            "files_failed": len(failed),
+            "failed_logins": failed,
+        })
+    except Exception as e:
+        logger.error(f"Signal error: {e}")
+        return jsonify({"status": "failed", "error": str(e)}), 500
+
+@app.route("/refresh-students", methods=["POST"])
+def refresh_students():
+    try:
+        body = request.json or {}
+        trader_id = body.get("trader_id", "")
+        students = fetch_active_students(trader_id if trader_id else None, force_refresh=True)
+        return jsonify({
+            "status": "refreshed",
+            "count": len(students),
+            "trader_id": trader_id or "all"
+        })
+    except Exception as e:
+        return jsonify({"status": "failed", "error": str(e)}), 500
 
 @app.route("/provision", methods=["POST"])
 def provision_student():
     secret = request.headers.get("X-Provision-Secret", "")
     if not PROVISION_SECRET or secret != PROVISION_SECRET:
         return jsonify({"status": "failed", "error": "Unauthorized"}), 401
-
+    
     data = request.json or {}
     user_id = data.get("user_id", "").strip()
-
     if not user_id:
-        return jsonify({"status": "failed", "error": "user_id is required"}), 400
-
+        return jsonify({"status": "failed", "error": "user_id required"}), 400
+    
     try:
-        check_url = f"{SUPABASE_URL}/rest/v1/student_accounts?user_id=eq.{user_id}&select=user_id,folder_path,is_ghost"
-        resp = session.get(check_url, headers=supabase_headers(), timeout=10)
-        if resp.status_code != 200 or not resp.json():
-            return jsonify({"status": "failed", "error": "Student account not found"}), 404
-
-        student = resp.json()[0]
-
-        if student.get("is_ghost"):
-            return jsonify({"status": "failed", "error": "Ghost accounts cannot be provisioned"}), 400
-
-        if student.get("folder_path"):
-            return jsonify({"status": "already_provisioned", "folder_path": student["folder_path"]}), 200
-
-    except Exception as e:
-        return jsonify({"status": "failed", "error": str(e)}), 500
-
-    assigned = fetch_assigned_folder_paths()
-    assigned_slot = None
+        url = f"{SUPABASE_URL}/rest/v1/student_accounts?select=folder_path&folder_path=not.is.null"
+        resp = session.get(url, headers=supabase_headers(), timeout=10)
+        assigned = set()
+        if resp.status_code == 200:
+            for row in resp.json():
+                fp = row.get("folder_path", "")
+                if fp:
+                    assigned.add(fp.replace("/", "\\").rstrip("\\").split("\\")[-1])
+    except Exception:
+        assigned = set()
+    
+    TERMINAL_BASE = r"C:\MT5Terminals"
+    GHOST_SLOTS = {"Student001", "Student002", "Student003"}
+    MAX_SLOT = 53
     
     for i in range(4, MAX_SLOT + 1):
         slot_name = f"Student{i:03d}"
-        if slot_name in GHOST_SLOTS:
+        if slot_name in GHOST_SLOTS or slot_name in assigned:
             continue
-        if slot_name not in assigned:
-            folder_path = f"{TERMINAL_BASE}\\{slot_name}"
-            if os.path.exists(os.path.join(folder_path, "terminal64.exe")):
-                assigned_slot = slot_name
-                break
-
-    if not assigned_slot:
-        return jsonify({"status": "failed", "error": "No terminal slots available"}), 503
-
-    folder_path = f"{TERMINAL_BASE}\\{assigned_slot}"
-    success = assign_folder_to_student(user_id, folder_path)
-
-    if not success:
-        return jsonify({"status": "failed", "error": "Failed to save slot assignment"}), 500
-
-    logger.info(f"✅ Provisioned student {user_id[:8]} → {folder_path}")
-    return jsonify({"status": "success", "folder_path": folder_path, "slot": assigned_slot})
-
-
-@app.route("/trade", methods=["POST"], strict_slashes=False)
-def execute_trade():
-    data = request.json
-    if not data:
-        return jsonify({"status": "failed", "error": "Empty body"}), 400
-        
-    login = int(data.get("login", 0))
-    if not login:
-        return jsonify({"status": "failed", "error": "login required"}), 400
-
-    user_id = None
-    with workers_lock:
-        for uid, w in workers.items():
-            if w["login"] == login:
-                user_id = uid
-                break
-
-    if not user_id:
-        return jsonify({"status": "failed", "error": f"No worker for login {login}"}), 404
-
-    result = forward_request_sync(user_id, "/trade", data)
-    return jsonify(result), 200 if result.get("status") in ["success", "queued"] else 500
-
-
-@app.route("/trade/broadcast", methods=["POST"], strict_slashes=False)
-def execute_trade_broadcast():
-    logger.info(f"📡 Incoming /trade/broadcast request from {request.remote_addr}")
+        folder_path = os.path.join(TERMINAL_BASE, slot_name)
+        if os.path.exists(os.path.join(folder_path, "terminal64.exe")):
+            try:
+                patch_url = f"{SUPABASE_URL}/rest/v1/student_accounts?user_id=eq.{user_id}"
+                session.patch(patch_url, json={"folder_path": folder_path}, headers=supabase_headers(), timeout=10)
+                logger.info(f"Provisioned {user_id[:8]} -> {slot_name}")
+                return jsonify({"status": "success", "folder_path": folder_path, "slot": slot_name})
+            except Exception:
+                return jsonify({"status": "failed", "error": "DB update failed"}), 500
     
-    data = request.json
-    if not data:
-        return jsonify({"status": "failed", "error": "Empty body"}), 400
-    
-    symbol = data.get("symbol")
-    order_type = data.get("order_type")
-    volume = data.get("volume")
-    
-    if not all([symbol, order_type, volume]):
-        return jsonify({"status": "failed", "error": "symbol, order_type, and volume required"}), 400
-    
-    with workers_lock:
-        all_workers = list(workers.items())
-    
-    logger.info(f"🚀 Broadcasting {symbol} {order_type} {volume} to {len(all_workers)} workers")
-    
-    if not broadcast_semaphore.acquire(timeout=2):
-        logger.error("❌ Broadcast rejected — system overloaded")
-        return jsonify({"status": "failed", "error": "System overloaded, retry later"}), 503
-    
-    try:
-        results = []
-        successes = 0
-        failures = 0
-        future_map = {}
-        
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            for i, (uid, w) in enumerate(all_workers):
-                trade_data = {
-                    "login": w["login"],
-                    "symbol": symbol,
-                    "order_type": order_type,
-                    "volume": volume,
-                    "mentor_ticket": data.get("mentor_ticket", "")
-                }
-                future = executor.submit(forward_request_sync, uid, "/trade", trade_data)
-                future_map[future] = (uid, w["login"])
+    return jsonify({"status": "failed", "error": "No slots available"}), 503
+
+# ── Background Threads ────────────────────────────────────────
+def result_collector_loop():
+    logger.info("Result collector started")
+    while True:
+        try:
+            files = glob.glob(os.path.join(RESULTS_FOLDER, "*_result.json"))
+            if files:
+                batch = []
+                for fp in files:
+                    try:
+                        # utf-8-sig strips BOM if present; fallback to utf-16 for
+                        # any files written before FILE_ANSI was added to the EA
+                        try:
+                            with open(fp, "r", encoding="utf-8-sig") as f:
+                                batch.append(json.load(f))
+                        except (UnicodeDecodeError, ValueError):
+                            with open(fp, "r", encoding="utf-16") as f:
+                                batch.append(json.load(f))
+                        os.remove(fp)
+                    except Exception as e:
+                        logger.error(f"Bad result file {fp}: {e}")
                 
-                if i % 5 == 4:
-                    time.sleep(0.05)
+                if batch:
+                    push_results_to_supabase(batch)
+                    logger.info(f"Collected {len(batch)} results")
             
-            for future in as_completed(future_map, timeout=TRADE_TIMEOUT + 2):
-                uid, login = future_map[future]
-                try:
-                    result = future.result(timeout=TRADE_TIMEOUT)
-                    results.append({
-                        "login": login,
-                        "status": result.get("status"),
-                        "ticket": result.get("ticket"),
-                        "error": result.get("error")
-                    })
-                    if result.get("status") in ["success", "queued"]:
-                        successes += 1
-                        logger.info(f"  ✅ {login}: {result.get('status')}")
-                    else:
-                        failures += 1
-                        logger.warning(f"  ❌ {login}: {result.get('error')}")
-                except FuturesTimeoutError:
-                    failures += 1
-                    results.append({"login": login, "status": "failed", "error": "Timeout"})
-                    logger.error(f"  ⏰ {login}: timed out")
-                except Exception as e:
-                    failures += 1
-                    results.append({"login": login, "status": "failed", "error": str(e)})
-                    logger.error(f"  ❌ {login}: {e}")
+            cleanup_stale_files()
+        except Exception as e:
+            logger.error(f"Collector error: {e}")
+        time.sleep(RESULT_SCAN_INTERVAL)
+
+def connection_monitor_loop():
+    """Monitor running MT5 terminals and update connection_status in Supabase."""
+    logger.info("Connection monitor started")
+    while True:
+        try:
+            students = fetch_active_students(force_refresh=True)
+            running_paths = get_running_terminal_paths()
+            
+            for student in students:
+                user_id = student.get("user_id")
+                folder = student.get("folder_path", "")
+                login = str(student.get("mt5_login", ""))
+                
+                if not folder:
+                    update_connection_status(user_id, "DISCONNECTED", "No folder_path assigned")
+                    continue
+                
+                # Check if terminal process is running from this folder
+                folder_normalized = folder.replace("/", "\\")
+                is_running = any(folder_normalized in path for path in running_paths)
+                
+                # Also check for recent EA activity (result files)
+                has_recent_activity = False
+                if login:
+                    result_file = os.path.join(RESULTS_FOLDER, f"{login}_result.json")
+                    if os.path.exists(result_file):
+                        if time.time() - os.path.getmtime(result_file) < 300:
+                            has_recent_activity = True
+                
+                if is_running or has_recent_activity:
+                    update_connection_status(user_id, "CONNECTED")
+                else:
+                    update_connection_status(user_id, "DISCONNECTED", "Terminal not running")
+                    
+        except Exception as e:
+            logger.error(f"Connection monitor error: {e}")
         
-        logger.info(f"📊 Broadcast complete: {successes} success, {failures} failed")
-        
-        return jsonify({
-            "status": "broadcast_complete",
-            "total": len(results),
-            "successes": successes,
-            "failures": failures,
-            "results": results
-        })
-    finally:
-        broadcast_semaphore.release()
-
-
-@app.route("/refresh", methods=["POST", "GET"])
-def manual_refresh():
-    logger.info("Manual refresh triggered via endpoint")
-    threading.Thread(target=sync_loop_once, daemon=True).start()
-    return jsonify({"status": "success", "message": "Refresh triggered"})
-
-def sync_loop_once():
-    # Helper to run one sync iteration outside the main loop timer
-    try:
-        students = fetch_students()
-        active_ids = set()
-        # ... logic similar to sync_loop but as a one-off
-        # (For simplicity, we'll just let the main sync_loop handle it next time, 
-        # but the endpoint can signal the loop to run immediately)
-        pass
-    except Exception as e:
-        logger.error(f"Manual refresh failed: {e}")
-
-@app.route("/close", methods=["POST"])
-def close_trade():
-    data = request.json
-    if not data:
-        return jsonify({"status": "failed", "error": "Empty body"}), 400
-        
-    login = int(data.get("login", 0))
-    if not login:
-        return jsonify({"status": "failed", "error": "login required"}), 400
-
-    user_id = None
-    with workers_lock:
-        for uid, w in workers.items():
-            if w["login"] == login:
-                user_id = uid
-                break
-
-    if not user_id:
-        return jsonify({"status": "skipped", "reason": f"No worker for login {login}"}), 200
-
-    result = forward_request_sync(user_id, "/close", data)
-    return jsonify(result), 200
-
-
-@app.route("/workers", methods=["GET"])
-def list_workers():
-    with workers_lock:
-        worker_list = [
-            {"login": w["login"], "port": w["port"], "alive": w["process"].poll() is None}
-            for w in workers.values()
-        ]
-        return jsonify({"count": len(workers), "workers": worker_list})
-
-
-# ── Graceful Shutdown ─────────────────────────────────────────
-
-def shutdown_all():
-    logger.info("🛑 Shutting down all workers...")
-    with workers_lock:
-        ids = list(workers.keys())
-    for uid in ids:
-        stop_worker(uid)
-    trade_executor.shutdown(wait=True)
-    session.close()
-    logger.info("✅ All workers stopped.")
-
-
-def handle_signal(signum, frame):
-    shutdown_all()
-    sys.exit(0)
-
+        time.sleep(CONNECTION_CHECK_INTERVAL)
 
 # ── Entry Point ───────────────────────────────────────────────
-
 if __name__ == "__main__":
     print("=" * 60, flush=True)
-    print("MaatlaKebs MT5 Manager v4.7 starting...", flush=True)
-    print(f"Trade timeout: {TRADE_TIMEOUT}s | Worker timeout: {WORKER_TIMEOUT}s | Staggered: 8s gap", flush=True)
+    print("MaatlaKebs MT5 Manager v5.0 — EA Slave Architecture", flush=True)
+    print(f"Signals: {SIGNALS_FOLDER}", flush=True)
+    print(f"Results: {RESULTS_FOLDER}", flush=True)
+    print(f"Stale cleanup: {STALE_SIGNAL_SECONDS}s", flush=True)
     print("=" * 60, flush=True)
-
-    if not SUPABASE_KEY:
-        logger.error("SUPABASE_SERVICE_KEY environment variable not set!")
-        sys.exit(1)
-
-    if not os.path.exists(WORKER_SCRIPT):
-        logger.error(f"student_worker.py not found at {WORKER_SCRIPT}")
-        sys.exit(1)
-
-    signal.signal(signal.SIGINT, handle_signal)
-    signal.signal(signal.SIGTERM, handle_signal)
-
-    def start_background_services():
-        time.sleep(3)
-        logger.info("Starting background sync loop...")
-        sync_loop()
     
-    threading.Thread(target=start_background_services, daemon=True).start()
-
+    threading.Thread(target=result_collector_loop, daemon=True).start()
+    threading.Thread(target=connection_monitor_loop, daemon=True).start()
+    
     try:
         from waitress import serve
-        logger.info("Starting Waitress production server on port 5000...")
-        print("🚀 Manager is running with Waitress. Press Ctrl+C to stop.", flush=True)
         serve(app, host="0.0.0.0", port=5000, threads=32, connection_limit=200)
     except ImportError:
-        logger.error("Waitress not installed! Run: pip install waitress")
-        logger.warning("Falling back to Flask development server")
-        print("⚠️ Using Flask dev server. Install waitress for production.", flush=True)
+        logger.warning("waitress not found, using Flask dev server")
         app.run(host="0.0.0.0", port=5000, debug=False, threaded=True, use_reloader=False)

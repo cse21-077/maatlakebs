@@ -58,6 +58,7 @@ export const TerminalProtocol = ({
     const [userAccounts, setUserAccounts] = useState<any[]>([]);
     const [showAddNew, setShowAddNew] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [editingSavedId, setEditingSavedId] = useState<string | null>(null);
     const [accountToDelete, setAccountToDelete] = useState<{login: string, server: string} | null>(null);
 
     // Local override for mt5Login to ensure UI responsiveness after unlink
@@ -71,7 +72,7 @@ export const TerminalProtocol = ({
         const fetchAccounts = async () => {
             const { data, error } = await (supabase as any)
                 .from('student_accounts')
-                .select('id, mt5_login, mt5_server, is_active, folder_path')
+                .select('id, mt5_login, mt5_server, is_active, folder_path, encrypted_password')
                 .eq('user_id', uid)
                 .order('created_at', { ascending: false });
             if (!error) setUserAccounts(data || []);
@@ -79,10 +80,31 @@ export const TerminalProtocol = ({
         fetchAccounts();
     }, [uid, localMt5Login, loading]);
 
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
+    const [tempPassword, setTempPassword] = useState('');
+
     const handleSave = async () => {
         setErr(''); setLoading(true);
         try {
-            if (!localMt5Login && mt5.login) {
+            // Case 1: Updating password for existing localMt5Login
+            if (localMt5Login && isEditingPassword) {
+                const activeAcct = userAccounts.find(a => a.mt5_login === localMt5Login);
+                const res = await fetch('/api/upsert-student-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: uid,
+                        mt5_login: localMt5Login,
+                        mt5_server: activeAcct?.mt5_server,
+                        encrypted_password: tempPassword,
+                        is_active: true,
+                    }),
+                });
+                if (!res.ok) throw new Error('Failed to update password');
+                setIsEditingPassword(false);
+            } 
+            // Case 2: Linking a brand new account
+            else if (!localMt5Login && mt5.login) {
                 const encrypted = mt5.password;
                 const resolvedTraderId = traderId || DEFAULT_TRADER_ID;
                 
@@ -132,11 +154,14 @@ export const TerminalProtocol = ({
                 setShowVerifyModal(true); // Show verification modal
             }
 
-            const { error: riskErr } = await (supabase as any).from('risk_profiles').upsert({
-                user_id: uid, aggressiveness, max_lot: maxLot, max_drawdown: maxDD, 
-                min_balance: minBal, pause_copy: pauseCopy, advanced_options: advanced
-            });
-            if (riskErr) throw riskErr;
+            // Always save risk profile if we're not just editing password
+            if (!isEditingPassword) {
+                const { error: riskErr } = await (supabase as any).from('risk_profiles').upsert({
+                    user_id: uid, aggressiveness, max_lot: maxLot, max_drawdown: maxDD, 
+                    min_balance: minBal, pause_copy: pauseCopy, advanced_options: advanced
+                });
+                if (riskErr) throw riskErr;
+            }
 
             onRefresh({
                 aggressiveness,
@@ -341,58 +366,196 @@ export const TerminalProtocol = ({
                         {localMt5Login && (
                             <div className="p-6 bg-green-500/5 rounded-3xl border border-green-500/20 flex flex-col gap-4">
                                 <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="text-[10px] text-green-400 font-black uppercase tracking-widest leading-none">Active Login</p>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[10px] text-green-400 font-black uppercase tracking-widest leading-none">Active Login</p>
+                                            <button 
+                                                onClick={() => {
+                                                    const activeAcct = userAccounts.find(a => a.mt5_login === localMt5Login);
+                                                    if (activeAcct) {
+                                                        setAccountToDelete({ login: activeAcct.mt5_login, server: activeAcct.mt5_server });
+                                                        setShowDeleteConfirm(true);
+                                                    }
+                                                }}
+                                                className="p-1.5 text-red-500/20 hover:text-red-500 transition-all"
+                                                title="Permanently delete active account"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
                                         <p className="mt-2 text-3xl font-black text-white tracking-tighter">{localMt5Login}</p>
+                                        
+                                        {/* Password Display / Edit */}
+                                        <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between group/pw">
+                                            <div className="flex flex-col">
+                                                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Master Passphrase</span>
+                                                {isEditingPassword && !editingSavedId ? (
+                                                    <input 
+                                                        type="text" 
+                                                        value={tempPassword} 
+                                                        onChange={(e) => setTempPassword(e.target.value)}
+                                                        className="bg-transparent text-white font-bold text-sm focus:outline-none mt-1"
+                                                        placeholder="New Password"
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <span className="text-white font-bold text-sm mt-1">
+                                                        {seePw ? (userAccounts.find(a => a.mt5_login === localMt5Login)?.encrypted_password || '••••••••') : '••••••••'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {isEditingPassword && !editingSavedId ? (
+                                                    <>
+                                                        <button 
+                                                            onClick={() => setIsEditingPassword(false)}
+                                                            className="text-[9px] font-black text-white/20 uppercase hover:text-white"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <Button 
+                                                            onClick={handleSave} 
+                                                            loading={loading}
+                                                            className="px-3 py-1.5 text-[9px] uppercase font-black tracking-widest"
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button 
+                                                            onClick={() => setSeePw(!seePw)} 
+                                                            className="p-1.5 text-white/20 hover:text-white transition-all"
+                                                        >
+                                                            {seePw ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setIsEditingPassword(true);
+                                                                setEditingSavedId(null);
+                                                                setTempPassword(userAccounts.find(a => a.mt5_login === localMt5Login)?.encrypted_password || '');
+                                                            }}
+                                                            className="p-1.5 text-white/20 hover:text-primary transition-all"
+                                                        >
+                                                            <Lock size={14} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-1">
+                                    <div className="flex flex-col items-end gap-1 shrink-0">
                                         <img src="/weltrade.png" alt="Weltrade" className="w-10 h-10 object-contain" />
                                         <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em]">Connected</span>
                                     </div>
                                 </div>
-                                <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all">Disconnect Account →</button>
+                                {!isEditingPassword && (
+                                    <button onClick={() => setShowUnlinkConfirm(true)} className="w-full text-[10px] font-black text-red-500/30 hover:text-red-500 uppercase tracking-[0.4em] transition-all pt-2">Disconnect Account →</button>
+                                )}
                             </div>
                         )}
 
                         {/* Saved Accounts List */}
                         {userAccounts.length > 0 && (
                             <div className="space-y-3">
-                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Saved Accounts</p>
+                                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Saved Accounts ({userAccounts.length})</p>
                                 <p className="text-[9px] text-white/20 font-bold leading-relaxed">
-                                    Only one account can be active at a time. Switching deactivates the current account.
+                                    You have full access to manage your trading registry. Only one account can be active at a time.
                                 </p>
-                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).slice(0, 3).map((acct) => (
-                                    <div key={acct.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                                        <div>
-                                            <p className="text-lg font-black text-white tracking-tight">{acct.mt5_login}</p>
-                                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">{acct.mt5_server || 'Unknown Server'}</p>
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {userAccounts.filter(a => a.mt5_login !== localMt5Login).map((acct) => (
+                                        <div key={acct.id} className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-lg font-black text-white tracking-tight">{acct.mt5_login}</p>
+                                                    <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">{acct.mt5_server || 'Unknown Server'}</p>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            setAccountToDelete({ login: acct.mt5_login, server: acct.mt5_server });
+                                                            setShowDeleteConfirm(true);
+                                                        }}
+                                                        className="p-2 text-white/10 hover:text-red-500 transition-all"
+                                                        title="Delete account"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                    <Button
+                                                        onClick={() => handleSwitchAccount(acct.mt5_login, acct.mt5_server)}
+                                                        loading={loading}
+                                                        className="px-4 py-2 text-[9px] uppercase font-black tracking-[0.2em]"
+                                                    >
+                                                        Switch →
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Saved Account Password Management */}
+                                            <div className="p-3 bg-black/20 rounded-xl flex items-center justify-between border border-white/5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Saved Passphrase</span>
+                                                    {editingSavedId === acct.id ? (
+                                                        <input 
+                                                            type="text" 
+                                                            value={tempPassword} 
+                                                            onChange={(e) => setTempPassword(e.target.value)}
+                                                            className="bg-transparent text-white font-bold text-xs focus:outline-none mt-1"
+                                                            placeholder="New Password"
+                                                            autoFocus
+                                                        />
+                                                    ) : (
+                                                        <span className="text-white/40 font-bold text-xs mt-1">
+                                                            {seePw ? (acct.encrypted_password || '••••••••') : '••••••••'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {editingSavedId === acct.id ? (
+                                                        <button 
+                                                            onClick={async () => {
+                                                                setErr(''); setLoading(true);
+                                                                try {
+                                                                    const res = await fetch('/api/upsert-student-account', {
+                                                                        method: 'POST',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({
+                                                                            user_id: uid,
+                                                                            mt5_login: acct.mt5_login,
+                                                                            mt5_server: acct.mt5_server,
+                                                                            encrypted_password: tempPassword,
+                                                                            is_active: false,
+                                                                        }),
+                                                                    });
+                                                                    if (!res.ok) throw new Error('Failed to update password');
+                                                                    setEditingSavedId(null);
+                                                                    onRefresh();
+                                                                } catch (e: any) { setErr(e.message); }
+                                                                finally { setLoading(false); }
+                                                            }}
+                                                            className="text-[9px] font-black text-primary uppercase"
+                                                        >
+                                                            Update
+                                                        </button>
+                                                    ) : (
+                                                        <button 
+                                                            onClick={() => {
+                                                                setEditingSavedId(acct.id);
+                                                                setTempPassword(acct.encrypted_password || '');
+                                                            }}
+                                                            className="p-1.5 text-white/10 hover:text-white"
+                                                        >
+                                                            <Lock size={12} />
+                                                        </button>
+                                                    )}
+                                                    {editingSavedId === acct.id && (
+                                                        <button onClick={() => setEditingSavedId(null)} className="text-[9px] font-black text-white/10 uppercase">✕</button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    setAccountToDelete({ login: acct.mt5_login, server: acct.mt5_server });
-                                                    setShowDeleteConfirm(true);
-                                                }}
-                                                className="p-2 text-white/10 hover:text-red-500 transition-all"
-                                                title="Delete account"
-                                            >
-                                                <Trash2 size={14} />
-                                            </button>
-                                            <Button
-                                                onClick={() => handleSwitchAccount(acct.mt5_login, acct.mt5_server)}
-                                                loading={loading}
-                                                className="px-4 py-2 text-[9px] uppercase font-black tracking-[0.2em]"
-                                            >
-                                                Switch →
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {userAccounts.filter(a => a.mt5_login !== localMt5Login).length > 3 && (
-                                    <p className="text-[9px] text-white/20 font-black uppercase tracking-widest text-center">
-                                        +{userAccounts.filter(a => a.mt5_login !== localMt5Login).length - 3} more saved accounts
-                                    </p>
-                                )}
+                                    ))}
+                                </div>
                             </div>
                         )}
 

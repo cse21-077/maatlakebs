@@ -196,6 +196,7 @@ export const TerminalProtocol = ({
     const handleSwitchAccount = async (login: string, server: string) => {
         setErr(''); setLoading(true);
         try {
+            const existingAcct = userAccounts.find(a => a.mt5_login === login && a.mt5_server === server);
             const res = await fetch('/api/upsert-student-account', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -203,6 +204,7 @@ export const TerminalProtocol = ({
                     user_id: uid,
                     mt5_login: login,
                     mt5_server: server,
+                    encrypted_password: existingAcct?.encrypted_password,
                     is_active: true,
                 }),
             });

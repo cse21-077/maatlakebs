@@ -34,13 +34,13 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { user_id, mt5_login, mt5_server, encrypted_password, trader_id, is_active } = req.body;
+    const { id, user_id, mt5_login, mt5_server, encrypted_password, trader_id, is_active } = req.body;
 
     if (!user_id || !mt5_login || !mt5_server) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    console.log('📝 Upserting student account:', { user_id, mt5_login, mt5_server });
+    console.log('📝 Upserting student account:', { id, user_id, mt5_login, mt5_server });
 
     const upsertData = {
       user_id,
@@ -48,12 +48,13 @@ export default async function handler(req, res) {
       mt5_server,
       is_active: is_active ?? true,
     };
+    if (id) upsertData.id = id;
     if (encrypted_password !== undefined) upsertData.encrypted_password = encrypted_password;
     if (trader_id !== undefined) upsertData.trader_id = trader_id;
 
     const { data, error } = await supabase
       .from('student_accounts')
-      .upsert(upsertData, { onConflict: 'mt5_login,mt5_server' });
+      .upsert(upsertData, { onConflict: id ? 'id' : 'mt5_login,mt5_server' });
 
     if (error) {
       console.error('❌ Failed to upsert student account:', error);

@@ -82,7 +82,12 @@ Write-Host "Found $($folders.Count) active terminal folder(s)." -ForegroundColor
 # --- Kill existing terminals -----------------------------------
 
 Write-Host "Stopping existing terminal64.exe processes..." -ForegroundColor Yellow
-Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+$terminals = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+if ($terminals) {
+    $terminals | Stop-Process -Force -ErrorAction SilentlyContinue
+    # Wait until all are confirmed dead
+    $terminals | Wait-Process -Timeout 10 -ErrorAction SilentlyContinue
+}
 Start-Sleep -Seconds 3
 
 # --- Copy EA and launch each terminal --------------------------
@@ -110,22 +115,30 @@ foreach ($folder in $folders) {
         Write-Warning "Failed to copy EA to $folder : $_"
     }
 
-    # Get credentials for this specific folder
+    # Get credentials for this specific folder and cleanly trim them
     $account = $response | Where-Object { $_.folder_path -eq $folder } | Select-Object -First 1
-    $login = $account.mt5_login
-    $pass  = $account.encrypted_password
-    $srv   = $account.mt5_server
+    $login = [string]$account.mt5_login
+    $pass  = [string]$account.encrypted_password
+    $srv   = [string]$account.mt5_server
+
+    if ($login) { $login = $login.Trim() }
+    if ($pass)  { $pass = $pass.Trim() }
+    if ($srv)   { $srv = $srv.Trim() }
 
     $hasPass = if ($pass) { "YES (len:$($pass.Length))" } else { "NO (EMPTY)" }
     Write-Host "DIAGNOSTIC: Folder $folder -> Login: $login, Password: $hasPass, Server: $srv" -ForegroundColor Gray
 
-    # Launch terminal with portable mode and auto-login
+    # Launch terminal with portable mode and auto-login using a config file
+    # MT5 INI parser fails if the file has a UTF-8 BOM. We must use ASCII.
     try {
-        # Using an array for arguments is the most robust way to handle special characters
-        $argList = @("/portable", "/login:$login", "/password:$pass", "/server:$srv")
+        $iniPath = Join-Path $folder "startup.ini"
+        $iniContent = "[Common]`r`nLogin=$login`r`nPassword=$pass`r`nServer=$srv`r`n"
+        Set-Content -Path $iniPath -Value $iniContent -Encoding Ascii -Force
+
+        $argList = @("/portable", "/config:$iniPath")
         
         Start-Process -FilePath $terminalPath -ArgumentList $argList -WorkingDirectory $folder -WindowStyle Normal
-        Write-Host "  [LAUNCHED] $folder (Login: $login)" -ForegroundColor Green
+        Write-Host "  [LAUNCHED] $folder (Login: $login via config)" -ForegroundColor Green
         $launched++
         
         # Small delay to prevent resource contention during bulk launch

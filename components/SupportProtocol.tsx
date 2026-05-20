@@ -295,25 +295,27 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }
                                 <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=Felix`} alt="Admin" className="w-full h-full object-contain" />
                             </div>
                         )}
-                        <div className="flex flex-col gap-2">
-                            <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-lg border border-white/5' : 'bg-primary rounded-tr-lg shadow-xl shadow-primary/10 text-white font-bold'}`}>
-                                <p className="text-xs leading-relaxed">{msg.content}</p>
-                                <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/20' : 'text-white/50'}`}>
-                                    <Clock size={10} />
+                        <div className="flex flex-col gap-1 max-w-[75%]">
+                            <div className={`inline-block self-${msg.is_admin ? 'start' : 'end'} px-4 py-2.5 rounded-2xl ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-md border border-white/5' : 'bg-primary rounded-br-md shadow-lg shadow-primary/10 text-white'}`}>
+                                <p className="text-sm leading-snug whitespace-pre-wrap break-words">{msg.content}</p>
+                                <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] font-medium ${msg.is_admin ? 'text-white/30' : 'text-white/60'}`}>
                                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    {msg.is_read && msg.is_admin && (
-                                        <span className="text-white/30 ml-2">✓</span>
+                                    {!msg.is_admin && msg.is_read && (
+                                        <span className="ml-0.5">✓✓</span>
+                                    )}
+                                    {!msg.is_admin && !msg.is_read && (
+                                        <span className="ml-0.5">✓</span>
                                     )}
                                 </div>
                             </div>
                             {/* Reactions */}
                             {msg.reactions && Object.keys(msg.reactions).length > 0 && (
-                                <div className={`flex flex-wrap gap-2 ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                                <div className={`flex flex-wrap gap-1.5 ${msg.is_admin ? '' : 'justify-end'}`}>
                                     {Object.entries(msg.reactions).map(([emoji, users]) => (
                                         <button
                                             key={emoji}
                                             onClick={() => addReaction(msg.id, emoji)}
-                                            className={`px-2 py-1 rounded-lg text-sm font-bold transition-all ${
+                                            className={`px-2 py-0.5 rounded-md text-xs font-bold transition-all ${
                                                 users.includes(uid)
                                                     ? 'bg-primary/20 border border-primary'
                                                     : 'bg-white/5 border border-white/10 hover:bg-white/10'
@@ -327,12 +329,12 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }
                             )}
                             {/* Reaction Picker */}
                             {showReactionPicker === msg.id && (
-                                <div className={`flex gap-1 p-2 bg-[#1a1c22] rounded-xl border border-white/5 ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                                <div className={`flex gap-1 p-1.5 bg-[#1a1c22] rounded-lg border border-white/5 w-fit ${msg.is_admin ? '' : 'self-end'}`}>
                                     {reactions.map((emoji) => (
                                         <button
                                             key={emoji}
                                             onClick={() => addReaction(msg.id, emoji)}
-                                            className="text-xl hover:scale-125 transition-all"
+                                            className="text-lg hover:scale-125 transition-all px-1"
                                         >
                                             {emoji}
                                         </button>
@@ -340,10 +342,10 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }
                                 </div>
                             )}
                             {/* Reaction Button */}
-                            <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-all ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                            <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-all ${msg.is_admin ? '' : 'justify-end'}`}>
                                 <button
                                     onClick={() => setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id)}
-                                    className="text-[10px] px-2 py-1 bg-white/5 border border-white/10 rounded-lg font-bold text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                                    className="text-[10px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-md font-bold text-white/50 hover:text-white hover:bg-white/10 transition-all"
                                 >
                                     React
                                 </button>

@@ -74,6 +74,7 @@ interface SupportProtocolProps {
     uid: string;
     onBack: () => void;
     prefillMessage?: string;
+    onUnreadChanged?: () => void; // Called when messages are marked as read or reactions added
 }
 
 interface Message {
@@ -86,7 +87,7 @@ interface Message {
     reactions?: Record<string, string[]>;
 }
 
-export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocolProps) => {
+export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }: SupportProtocolProps) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState(prefillMessage || '');
     const [loading, setLoading] = useState(false);
@@ -118,14 +119,20 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
 
     const markAsRead = async (messageIds: string[]) => {
         try {
+            console.log('[SupportProtocol] Marking as read:', messageIds.length, 'messages');
             const { error } = await (supabase.from('support_messages' as any) as any)
-                .update({ is_read: true })
+                .update({ is_read: true, updated_at: new Date().toISOString() })
                 .in('id', messageIds);
             
             if (!error) {
                 setMessages(prev => prev.map(m => 
                     messageIds.includes(m.id) ? { ...m, is_read: true } : m
                 ));
+                // Notify parent that unread status changed
+                if (onUnreadChanged) {
+                    console.log('[SupportProtocol] Calling onUnreadChanged callback');
+                    onUnreadChanged();
+                }
             }
         } catch (err) {
             console.error('Failed to mark as read:', err);
@@ -134,6 +141,7 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
 
     const addReaction = async (messageId: string, emoji: string) => {
         try {
+            console.log('[SupportProtocol] Adding reaction:', emoji, 'to message:', messageId);
             const message = messages.find(m => m.id === messageId);
             if (!message) return;
 
@@ -156,6 +164,11 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
                 setMessages(prev => prev.map(m => 
                     m.id === messageId ? { ...m, reactions } : m
                 ));
+                // Notify parent that unread status might have changed
+                if (onUnreadChanged) {
+                    console.log('[SupportProtocol] Calling onUnreadChanged after reaction');
+                    onUnreadChanged();
+                }
             }
         } catch (err) {
             console.error('Failed to add reaction:', err);

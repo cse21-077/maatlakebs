@@ -123,19 +123,33 @@ export const TechSupportDashboard = ({ uid, onBack }: TechSupportDashboardProps)
             });
             if (error) throw error;
             setInput('');
-            // Trigger push notification to the user
-            await fetch('/api/send-push', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: selectedTicketId,
-                    title: 'Support Reply',
-                    body: content.length > 80 ? content.slice(0, 77) + '...' : content,
-                    url: '/'
-                })
-            });
+            
+            // Trigger push notification to the user (non-blocking)
+            console.log('[Admin] Sending push notification to user:', selectedTicketId);
+            try {
+                const pushRes = await fetch('/api/send-push', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: selectedTicketId,
+                        title: 'Support Reply',
+                        body: content.length > 80 ? content.slice(0, 77) + '...' : content,
+                        url: '/'
+                    })
+                });
+                
+                const pushData = await pushRes.json();
+                if (pushRes.ok) {
+                    console.log('[Admin] ✅ Push notification sent successfully:', pushData);
+                } else {
+                    console.warn('[Admin] ⚠️ Push notification failed:', pushRes.status, pushData);
+                }
+            } catch (pushErr: any) {
+                console.error('[Admin] ❌ Push notification error:', pushErr.message);
+                // Don't fail the message send if push fails
+            }
         } catch (e: any) {
-            console.error('Error sending message:', e);
+            console.error('❌ Error sending message:', e);
         } finally {
             setLoading(false);
         }

@@ -125,6 +125,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             const response = await fetch(`/api/student/account?user_id=${uid}&action=unread`);
             const data = await response.json();
             if (response.ok) {
+                console.log('[MainApp] Unread count updated:', data.unread_count);
                 setUnreadMessages(data.unread_count || 0);
             }
         } catch (e) {
@@ -219,7 +220,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     return (
         <div className="min-h-screen bg-[#0d0f14] flex flex-col pt-12 pb-safe animate-fade-in relative overflow-hidden">
             {view === 'BILLING' && <MembershipProtocol uid={uid} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onRefresh={load} />}
-            {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => setView('HOME')} prefillMessage={supportMessage} />}
+            {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => { setView('HOME'); fetchUnreadMessages(); }} prefillMessage={supportMessage} onUnreadChanged={fetchUnreadMessages} />}
             {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={session.user.user_metadata?.trader_id} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} onOpenSupport={(msg) => { setSupportMessage(msg); setView('SUPPORT'); }} onAccountChanged={load} />}
 
             {/* Profile Selection Overlay */}

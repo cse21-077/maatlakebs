@@ -234,6 +234,11 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }
             if (error) throw error;
             // Replace optimistic message with real one from DB
             setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? data : m));
+            // Notify parent that unread status changed (user sent a message)
+            if (onUnreadChanged) {
+                console.log('[SupportProtocol] Message sent, calling onUnreadChanged');
+                onUnreadChanged();
+            }
         } catch (e: any) {
             console.error('Chat Error:', e.message);
             // Remove optimistic message on failure

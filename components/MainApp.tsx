@@ -5,7 +5,7 @@ import {
     LogOut as LogOutIcon, ShieldAlert, CreditCard, Clock,
     CheckCircle, QrCode, X, WifiOff, Wifi, ChevronRight,
     MessageSquare, HelpCircle, Lock, Unlock, ChevronLeft,
-    TrendingUp, User as UserIcon, LifeBuoy, RefreshCw
+    TrendingUp, User as UserIcon, LifeBuoy, RefreshCw, Bell
 } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -37,6 +37,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const [connectionLastChecked, setConnectionLastChecked] = useState<string | null>(null);
     const [dbRole, setDbRole] = useState<string>('student');
     const [showChangePassword, setShowChangePassword] = useState(false);
+    const [unreadMessages, setUnreadMessages] = useState(0);
 
     // Link student to default trader if not present in metadata
     const traderId = session.user.user_metadata?.trader_id || DEFAULT_TRADER_ID;
@@ -118,6 +119,19 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         }
     };
 
+    const fetchUnreadMessages = async () => {
+        if (!uid || uid === '00000000-0000-4000-a000-000000000000') return;
+        try {
+            const response = await fetch(`/api/unread-messages?user_id=${uid}`);
+            const data = await response.json();
+            if (response.ok) {
+                setUnreadMessages(data.unread_count || 0);
+            }
+        } catch (e) {
+            console.error('Unread messages fetch error:', e);
+        }
+    };
+
     useEffect(() => { load(); }, [uid, view]);
 
     // Fetch connection status on mount / uid change + real-time subscription
@@ -151,6 +165,35 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
 
         return () => {
             subscription.unsubscribe();
+        };
+    }, [uid]);
+
+    // Fetch unread messages on mount / uid change + real-time subscription
+    useEffect(() => {
+        if (!uid || uid === '00000000-0000-4000-a000-000000000000') return;
+
+        // Immediate fetch on mount / uid change
+        fetchUnreadMessages();
+
+        // Subscribe to real-time updates when new admin messages arrive or messages are marked as read
+        const messagesSubscription = (supabase as any)
+            .channel('support_messages_changes')
+            .on('postgres_changes', 
+                { 
+                    event: '*', 
+                    schema: 'public', 
+                    table: 'support_messages', 
+                    filter: `user_id=eq.${uid}` 
+                },
+                (payload: any) => {
+                    // Refetch unread count when messages change
+                    fetchUnreadMessages();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            messagesSubscription.unsubscribe();
         };
     }, [uid]);
 
@@ -233,9 +276,20 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             {/* Top Navigation */}
             <header className="px-8 pt-6 flex justify-between items-center h-24 shrink-0">
                 <div><h1 className="text-3xl font-black text-white tracking-tighter">{`Hi ${firstName}`}</h1><p className="text-xs text-white/30 font-bold uppercase tracking-widest mt-0.5">Welcome back</p></div>
-                <div className="w-14 h-14 rounded-2xl border border-white/10 relative overflow-hidden active:scale-95 transition-all shadow-2xl" onClick={() => setShowProfileMenu(true)}>
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                    <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0d0f14]" />
+                <div className="flex items-center gap-4">
+                    {/* Notification Bell Icon */}
+                    {unreadMessages > 0 && (
+                        <button onClick={() => setView('SUPPORT')} className="relative w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 group">
+                            <Bell size={20} className="text-white/40 group-hover:text-white transition-all" />
+                            <div className="absolute top-2 right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-lg shadow-red-500/50">
+                                {unreadMessages > 9 ? '9+' : unreadMessages}
+                            </div>
+                        </button>
+                    )}
+                    <div className="w-14 h-14 rounded-2xl border border-white/10 relative overflow-hidden active:scale-95 transition-all shadow-2xl" onClick={() => setShowProfileMenu(true)}>
+                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        <div className="absolute bottom-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0d0f14]" />
+                    </div>
                 </div>
             </header>
 
@@ -343,10 +397,19 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                             <img src="/support.jpg" alt="Support" className="absolute inset-0 w-full h-full object-cover opacity-60" />
                             <div className="absolute inset-0 bg-gradient-to-r from-dark/95 via-dark/40 to-transparent" />
                             <div className="absolute inset-0 p-8 flex flex-col justify-between items-start">
-                                <LifeBuoy size={28} className="text-white/40" />
+                                <div className="relative">
+                                    <LifeBuoy size={28} className="text-white/40" />
+                                    {unreadMessages > 0 && (
+                                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg shadow-red-500/50 animate-pulse">
+                                            {unreadMessages > 9 ? '9+' : unreadMessages}
+                                        </div>
+                                    )}
+                                </div>
                                 <div>
                                     <p className="text-lg font-black text-white uppercase leading-none">Get Help</p>
-                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Live Tech Support Chat</p>
+                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">
+                                        {unreadMessages > 0 ? `${unreadMessages} unread message${unreadMessages !== 1 ? 's' : ''}` : 'Live Tech Support Chat'}
+                                    </p>
                                 </div>
                             </div>
                         </div>

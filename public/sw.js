@@ -113,3 +113,81 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// ── Push Notifications ──────────────────────────────────────────────────────
+// Handle push events from server (VAPID subscriptions)
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push event received:', event);
+  
+  let data = { 
+    title: 'Maatla Kebs', 
+    body: 'You have a new message', 
+    url: '/',
+    badge: '/icon-192.png',
+    icon: '/icon-192.png'
+  };
+  
+  try {
+    if (event.data) {
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
+      console.log('[SW] Parsed push data:', data);
+    }
+  } catch (err) {
+    if (event.data) {
+      data.body = event.data.text();
+      console.log('[SW] Text push data:', data.body);
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/icon-192.png',
+    badge: data.badge || '/icon-192.png',
+    vibrate: [200, 100, 200],
+    tag: 'maatla-kebs-notification',
+    requireInteraction: true,
+    data: { url: data.url || '/', timestamp: Date.now() },
+    actions: [
+      { action: 'open', title: 'Open' },
+      { action: 'close', title: 'Dismiss' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+      .then(() => console.log('[SW] Notification shown'))
+      .catch(err => console.error('[SW] Failed to show notification:', err))
+  );
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked, action:', event.action);
+  event.notification.close();
+  
+  if (event.action === 'close') return;
+  
+  const url = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            console.log('[SW] Focusing existing client');
+            return client.focus();
+          }
+        }
+        // Open new window if not already open
+        console.log('[SW] Opening new window');
+        return clients.openWindow(url);
+      })
+  );
+});
+
+// Handle notification dismissal
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification dismissed');
+});

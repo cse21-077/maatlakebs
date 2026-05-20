@@ -19,25 +19,54 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 
 async function subscribeToPush(uid: string) {
     try {
-        if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return;
-        const reg = await navigator.serviceWorker.ready;
-        let sub = await reg.pushManager.getSubscription();
-        if (!sub) {
-            sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+            console.warn('[Push] Notifications or Service Workers not supported');
+            return;
         }
+        
+        const permission = await Notification.requestPermission();
+        console.log('[Push] Permission status:', permission);
+        
+        if (permission !== 'granted') {
+            console.warn('[Push] User denied notification permission');
+            return;
+        }
+        
+        const reg = await navigator.serviceWorker.ready;
+        console.log('[Push] Service worker ready');
+        
+        let sub = await reg.pushManager.getSubscription();
+        
+        if (!sub) {
+            console.log('[Push] No existing subscription, creating new one...');
+            try {
+                sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+                console.log('[Push] Successfully subscribed:', sub);
+            } catch (err) {
+                console.error('[Push] Failed to subscribe:', err);
+                return;
+            }
+        } else {
+            console.log('[Push] Existing subscription found');
+        }
+        
         // Save subscription to Supabase
-        await (supabase.from('push_subscriptions' as any) as any).upsert({
+        const { error } = await (supabase.from('push_subscriptions' as any) as any).upsert({
             user_id: uid,
             subscription: JSON.stringify(sub),
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
+        
+        if (error) {
+            console.error('[Push] Failed to save subscription:', error);
+        } else {
+            console.log('[Push] Subscription saved to Supabase');
+        }
     } catch (err) {
-        console.warn('[Push] Subscription failed:', err);
+        console.error('[Push] Subscription error:', err);
     }
 }
 
@@ -53,6 +82,8 @@ interface Message {
     content: string;
     is_admin: boolean;
     created_at: string;
+    is_read?: boolean;
+    reactions?: Record<string, string[]>;
 }
 
 export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocolProps) => {
@@ -61,6 +92,9 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [messageSent, setMessageSent] = useState(false);
+    const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+    
+    const reactions = ['👍', '❤️', '🔥', '😂', '🙏', '👌'];
 
     const loadMessages = async () => {
         const { data, error } = await supabase
@@ -69,7 +103,64 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
             .eq('user_id', uid)
             .order('created_at', { ascending: true });
 
-        if (data) setMessages(data);
+        if (data) {
+            setMessages(data);
+            // Mark admin messages as read
+            const unreadAdminIds = data
+                .filter((m: Message) => m.is_admin && !m.is_read)
+                .map((m: Message) => m.id);
+            
+            if (unreadAdminIds.length > 0) {
+                markAsRead(unreadAdminIds);
+            }
+        }
+    };
+
+    const markAsRead = async (messageIds: string[]) => {
+        try {
+            const { error } = await (supabase.from('support_messages' as any) as any)
+                .update({ is_read: true })
+                .in('id', messageIds);
+            
+            if (!error) {
+                setMessages(prev => prev.map(m => 
+                    messageIds.includes(m.id) ? { ...m, is_read: true } : m
+                ));
+            }
+        } catch (err) {
+            console.error('Failed to mark as read:', err);
+        }
+    };
+
+    const addReaction = async (messageId: string, emoji: string) => {
+        try {
+            const message = messages.find(m => m.id === messageId);
+            if (!message) return;
+
+            const reactions = message.reactions || {};
+            const currentReactions = reactions[emoji] || [];
+            
+            // Toggle reaction
+            if (currentReactions.includes(uid)) {
+                reactions[emoji] = currentReactions.filter(id => id !== uid);
+                if (reactions[emoji].length === 0) delete reactions[emoji];
+            } else {
+                reactions[emoji] = [...currentReactions, uid];
+            }
+
+            const { error } = await (supabase.from('support_messages' as any) as any)
+                .update({ reactions, updated_at: new Date().toISOString() })
+                .eq('id', messageId);
+
+            if (!error) {
+                setMessages(prev => prev.map(m => 
+                    m.id === messageId ? { ...m, reactions } : m
+                ));
+            }
+        } catch (err) {
+            console.error('Failed to add reaction:', err);
+        }
+        setShowReactionPicker(null);
     };
 
     // Auto-send prefilled message on mount
@@ -170,17 +261,64 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage }: SupportProtocol
                 )}
 
                 {messages.map((msg, i) => (
-                    <div key={msg.id || i} className={`flex items-end gap-3 ${msg.is_admin ? 'justify-start' : 'justify-end'} animate-fade-in`}>
+                    <div key={msg.id || i} className={`flex items-end gap-3 ${msg.is_admin ? 'justify-start' : 'justify-end'} animate-fade-in group relative`}>
                         {msg.is_admin && (
                             <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 overflow-hidden shrink-0">
                                 <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=Felix`} alt="Admin" className="w-full h-full object-contain" />
                             </div>
                         )}
-                        <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-lg border border-white/5' : 'bg-primary rounded-tr-lg shadow-xl shadow-primary/10 text-white font-bold'}`}>
-                            <p className="text-xs leading-relaxed">{msg.content}</p>
-                            <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/20' : 'text-white/50'}`}>
-                                <Clock size={10} />
-                                {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div className="flex flex-col gap-2">
+                            <div className={`max-w-[70%] p-5 rounded-[2rem] flex flex-col gap-2 ${msg.is_admin ? 'bg-[#1a1c22] rounded-bl-lg border border-white/5' : 'bg-primary rounded-tr-lg shadow-xl shadow-primary/10 text-white font-bold'}`}>
+                                <p className="text-xs leading-relaxed">{msg.content}</p>
+                                <div className={`flex items-center gap-1.5 text-[8px] font-black uppercase tracking-tighter ${msg.is_admin ? 'text-white/20' : 'text-white/50'}`}>
+                                    <Clock size={10} />
+                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {msg.is_read && msg.is_admin && (
+                                        <span className="text-white/30 ml-2">✓</span>
+                                    )}
+                                </div>
+                            </div>
+                            {/* Reactions */}
+                            {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                                <div className={`flex flex-wrap gap-2 ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                                    {Object.entries(msg.reactions).map(([emoji, users]) => (
+                                        <button
+                                            key={emoji}
+                                            onClick={() => addReaction(msg.id, emoji)}
+                                            className={`px-2 py-1 rounded-lg text-sm font-bold transition-all ${
+                                                users.includes(uid)
+                                                    ? 'bg-primary/20 border border-primary'
+                                                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                                            }`}
+                                            title={users.length === 1 ? 'You reacted' : `${users.length} reactions`}
+                                        >
+                                            {emoji} {users.length > 1 ? users.length : ''}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {/* Reaction Picker */}
+                            {showReactionPicker === msg.id && (
+                                <div className={`flex gap-1 p-2 bg-[#1a1c22] rounded-xl border border-white/5 ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                                    {reactions.map((emoji) => (
+                                        <button
+                                            key={emoji}
+                                            onClick={() => addReaction(msg.id, emoji)}
+                                            className="text-xl hover:scale-125 transition-all"
+                                        >
+                                            {emoji}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {/* Reaction Button */}
+                            <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-all ${msg.is_admin ? 'ml-8' : 'justify-end mr-8'}`}>
+                                <button
+                                    onClick={() => setShowReactionPicker(showReactionPicker === msg.id ? null : msg.id)}
+                                    className="text-[10px] px-2 py-1 bg-white/5 border border-white/10 rounded-lg font-bold text-white/50 hover:text-white hover:bg-white/10 transition-all"
+                                >
+                                    React
+                                </button>
                             </div>
                         </div>
                         {!msg.is_admin && (

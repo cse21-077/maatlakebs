@@ -108,6 +108,7 @@ export const TerminalProtocol = ({
                     mt5_login: login,
                     mt5_server: server,
                     encrypted_password: password,
+                    trader_id: traderId,
                     is_active: true,
                 }),
             });
@@ -180,6 +181,7 @@ export const TerminalProtocol = ({
                     mt5_login: login,
                     mt5_server: server,
                     encrypted_password: existingAcct?.encrypted_password,
+                    trader_id: traderId,
                     is_active: true,
                 }),
             });
@@ -568,6 +570,7 @@ export const TerminalProtocol = ({
                                                                                 mt5_login: tempLogin,
                                                                                 mt5_server: tempServer,
                                                                                 encrypted_password: tempPassword,
+                                                                                trader_id: traderId,
                                                                                 is_active: false,
                                                                             }),
                                                                         });

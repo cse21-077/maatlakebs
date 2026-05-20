@@ -31,6 +31,7 @@ export type Support_messagesMinAggregateOutputType = {
   is_admin: boolean | null
   created_at: Date | null
   updated_at: Date | null
+  is_read: boolean | null
 }
 
 export type Support_messagesMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type Support_messagesMaxAggregateOutputType = {
   is_admin: boolean | null
   created_at: Date | null
   updated_at: Date | null
+  is_read: boolean | null
 }
 
 export type Support_messagesCountAggregateOutputType = {
@@ -49,6 +51,8 @@ export type Support_messagesCountAggregateOutputType = {
   is_admin: number
   created_at: number
   updated_at: number
+  is_read: number
+  reactions: number
   _all: number
 }
 
@@ -60,6 +64,7 @@ export type Support_messagesMinAggregateInputType = {
   is_admin?: true
   created_at?: true
   updated_at?: true
+  is_read?: true
 }
 
 export type Support_messagesMaxAggregateInputType = {
@@ -69,6 +74,7 @@ export type Support_messagesMaxAggregateInputType = {
   is_admin?: true
   created_at?: true
   updated_at?: true
+  is_read?: true
 }
 
 export type Support_messagesCountAggregateInputType = {
@@ -78,6 +84,8 @@ export type Support_messagesCountAggregateInputType = {
   is_admin?: true
   created_at?: true
   updated_at?: true
+  is_read?: true
+  reactions?: true
   _all?: true
 }
 
@@ -160,6 +168,8 @@ export type Support_messagesGroupByOutputType = {
   is_admin: boolean
   created_at: Date
   updated_at: Date
+  is_read: boolean | null
+  reactions: runtime.JsonValue | null
   _count: Support_messagesCountAggregateOutputType | null
   _min: Support_messagesMinAggregateOutputType | null
   _max: Support_messagesMaxAggregateOutputType | null
@@ -190,6 +200,8 @@ export type support_messagesWhereInput = {
   is_admin?: Prisma.BoolFilter<"support_messages"> | boolean
   created_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
+  is_read?: Prisma.BoolNullableFilter<"support_messages"> | boolean | null
+  reactions?: Prisma.JsonNullableFilter<"support_messages">
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }
 
@@ -200,6 +212,8 @@ export type support_messagesOrderByWithRelationInput = {
   is_admin?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  is_read?: Prisma.SortOrderInput | Prisma.SortOrder
+  reactions?: Prisma.SortOrderInput | Prisma.SortOrder
   users?: Prisma.public_usersOrderByWithRelationInput
 }
 
@@ -213,6 +227,8 @@ export type support_messagesWhereUniqueInput = Prisma.AtLeast<{
   is_admin?: Prisma.BoolFilter<"support_messages"> | boolean
   created_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
+  is_read?: Prisma.BoolNullableFilter<"support_messages"> | boolean | null
+  reactions?: Prisma.JsonNullableFilter<"support_messages">
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }, "id">
 
@@ -223,6 +239,8 @@ export type support_messagesOrderByWithAggregationInput = {
   is_admin?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  is_read?: Prisma.SortOrderInput | Prisma.SortOrder
+  reactions?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.support_messagesCountOrderByAggregateInput
   _max?: Prisma.support_messagesMaxOrderByAggregateInput
   _min?: Prisma.support_messagesMinOrderByAggregateInput
@@ -238,6 +256,8 @@ export type support_messagesScalarWhereWithAggregatesInput = {
   is_admin?: Prisma.BoolWithAggregatesFilter<"support_messages"> | boolean
   created_at?: Prisma.DateTimeWithAggregatesFilter<"support_messages"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"support_messages"> | Date | string
+  is_read?: Prisma.BoolNullableWithAggregatesFilter<"support_messages"> | boolean | null
+  reactions?: Prisma.JsonNullableWithAggregatesFilter<"support_messages">
 }
 
 export type support_messagesCreateInput = {
@@ -246,6 +266,8 @@ export type support_messagesCreateInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   users: Prisma.public_usersCreateNestedOneWithoutSupport_messagesInput
 }
 
@@ -256,6 +278,8 @@ export type support_messagesUncheckedCreateInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUpdateInput = {
@@ -264,6 +288,8 @@ export type support_messagesUpdateInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   users?: Prisma.public_usersUpdateOneRequiredWithoutSupport_messagesNestedInput
 }
 
@@ -274,6 +300,8 @@ export type support_messagesUncheckedUpdateInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesCreateManyInput = {
@@ -283,6 +311,8 @@ export type support_messagesCreateManyInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUpdateManyMutationInput = {
@@ -291,6 +321,8 @@ export type support_messagesUpdateManyMutationInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUncheckedUpdateManyInput = {
@@ -300,6 +332,8 @@ export type support_messagesUncheckedUpdateManyInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesCountOrderByAggregateInput = {
@@ -309,6 +343,8 @@ export type support_messagesCountOrderByAggregateInput = {
   is_admin?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  is_read?: Prisma.SortOrder
+  reactions?: Prisma.SortOrder
 }
 
 export type support_messagesMaxOrderByAggregateInput = {
@@ -318,6 +354,7 @@ export type support_messagesMaxOrderByAggregateInput = {
   is_admin?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  is_read?: Prisma.SortOrder
 }
 
 export type support_messagesMinOrderByAggregateInput = {
@@ -327,6 +364,7 @@ export type support_messagesMinOrderByAggregateInput = {
   is_admin?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  is_read?: Prisma.SortOrder
 }
 
 export type Support_messagesListRelationFilter = {
@@ -387,6 +425,8 @@ export type support_messagesCreateWithoutUsersInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUncheckedCreateWithoutUsersInput = {
@@ -395,6 +435,8 @@ export type support_messagesUncheckedCreateWithoutUsersInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesCreateOrConnectWithoutUsersInput = {
@@ -433,6 +475,8 @@ export type support_messagesScalarWhereInput = {
   is_admin?: Prisma.BoolFilter<"support_messages"> | boolean
   created_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"support_messages"> | Date | string
+  is_read?: Prisma.BoolNullableFilter<"support_messages"> | boolean | null
+  reactions?: Prisma.JsonNullableFilter<"support_messages">
 }
 
 export type support_messagesCreateManyUsersInput = {
@@ -441,6 +485,8 @@ export type support_messagesCreateManyUsersInput = {
   is_admin?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  is_read?: boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUpdateWithoutUsersInput = {
@@ -449,6 +495,8 @@ export type support_messagesUpdateWithoutUsersInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUncheckedUpdateWithoutUsersInput = {
@@ -457,6 +505,8 @@ export type support_messagesUncheckedUpdateWithoutUsersInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type support_messagesUncheckedUpdateManyWithoutUsersInput = {
@@ -465,6 +515,8 @@ export type support_messagesUncheckedUpdateManyWithoutUsersInput = {
   is_admin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  is_read?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  reactions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -476,6 +528,8 @@ export type support_messagesSelect<ExtArgs extends runtime.Types.Extensions.Inte
   is_admin?: boolean
   created_at?: boolean
   updated_at?: boolean
+  is_read?: boolean
+  reactions?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["support_messages"]>
 
@@ -486,6 +540,8 @@ export type support_messagesSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   is_admin?: boolean
   created_at?: boolean
   updated_at?: boolean
+  is_read?: boolean
+  reactions?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["support_messages"]>
 
@@ -496,6 +552,8 @@ export type support_messagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   is_admin?: boolean
   created_at?: boolean
   updated_at?: boolean
+  is_read?: boolean
+  reactions?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["support_messages"]>
 
@@ -506,9 +564,11 @@ export type support_messagesSelectScalar = {
   is_admin?: boolean
   created_at?: boolean
   updated_at?: boolean
+  is_read?: boolean
+  reactions?: boolean
 }
 
-export type support_messagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "content" | "is_admin" | "created_at" | "updated_at", ExtArgs["result"]["support_messages"]>
+export type support_messagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "content" | "is_admin" | "created_at" | "updated_at" | "is_read" | "reactions", ExtArgs["result"]["support_messages"]>
 export type support_messagesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }
@@ -531,6 +591,8 @@ export type $support_messagesPayload<ExtArgs extends runtime.Types.Extensions.In
     is_admin: boolean
     created_at: Date
     updated_at: Date
+    is_read: boolean | null
+    reactions: runtime.JsonValue | null
   }, ExtArgs["result"]["support_messages"]>
   composites: {}
 }
@@ -961,6 +1023,8 @@ export interface support_messagesFieldRefs {
   readonly is_admin: Prisma.FieldRef<"support_messages", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"support_messages", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"support_messages", 'DateTime'>
+  readonly is_read: Prisma.FieldRef<"support_messages", 'Boolean'>
+  readonly reactions: Prisma.FieldRef<"support_messages", 'Json'>
 }
     
 

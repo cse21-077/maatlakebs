@@ -418,7 +418,8 @@ export const ModelName = {
   system_flags: 'system_flags',
   trade_logs: 'trade_logs',
   support_messages: 'support_messages',
-  public_users: 'public_users'
+  public_users: 'public_users',
+  password_reset_tokens: 'password_reset_tokens'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -434,7 +435,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "invoices" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "support_messages" | "public_users"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "sessions" | "sso_domains" | "sso_providers" | "auth_users" | "webauthn_challenges" | "webauthn_credentials" | "connection_status" | "dead_letter_queue" | "mentor_heartbeat" | "payment_status" | "invoices" | "risk_profiles" | "student_accounts" | "system_events" | "system_flags" | "trade_logs" | "support_messages" | "public_users" | "password_reset_tokens"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3028,6 +3029,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    password_reset_tokens: {
+      payload: Prisma.$password_reset_tokensPayload<ExtArgs>
+      fields: Prisma.password_reset_tokensFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.password_reset_tokensFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.password_reset_tokensFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        findFirst: {
+          args: Prisma.password_reset_tokensFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.password_reset_tokensFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        findMany: {
+          args: Prisma.password_reset_tokensFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>[]
+        }
+        create: {
+          args: Prisma.password_reset_tokensCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        createMany: {
+          args: Prisma.password_reset_tokensCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.password_reset_tokensCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>[]
+        }
+        delete: {
+          args: Prisma.password_reset_tokensDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        update: {
+          args: Prisma.password_reset_tokensUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        deleteMany: {
+          args: Prisma.password_reset_tokensDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.password_reset_tokensUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.password_reset_tokensUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>[]
+        }
+        upsert: {
+          args: Prisma.password_reset_tokensUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$password_reset_tokensPayload>
+        }
+        aggregate: {
+          args: Prisma.Password_reset_tokensAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePassword_reset_tokens>
+        }
+        groupBy: {
+          args: Prisma.password_reset_tokensGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Password_reset_tokensGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.password_reset_tokensCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Password_reset_tokensCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3512,13 +3587,13 @@ export const InvoicesScalarFieldEnum = {
   payment_status: 'payment_status',
   subscription_plan: 'subscription_plan',
   paid_for_month: 'paid_for_month',
-  original_price: 'original_price',
-  discount_amount: 'discount_amount',
-  payment_method: 'payment_method',
-  proof_of_payment_url: 'proof_of_payment_url',
-  mentor_id: 'mentor_id',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  discount_amount: 'discount_amount',
+  mentor_id: 'mentor_id',
+  original_price: 'original_price',
+  payment_method: 'payment_method',
+  proof_of_payment_url: 'proof_of_payment_url'
 } as const
 
 export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
@@ -3608,7 +3683,9 @@ export const Support_messagesScalarFieldEnum = {
   content: 'content',
   is_admin: 'is_admin',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  is_read: 'is_read',
+  reactions: 'reactions'
 } as const
 
 export type Support_messagesScalarFieldEnum = (typeof Support_messagesScalarFieldEnum)[keyof typeof Support_messagesScalarFieldEnum]
@@ -3620,12 +3697,24 @@ export const Public_usersScalarFieldEnum = {
   role: 'role',
   full_name: 'full_name',
   trader_id: 'trader_id',
-  onboarding_completed: 'onboarding_completed',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  onboarding_completed: 'onboarding_completed'
 } as const
 
 export type Public_usersScalarFieldEnum = (typeof Public_usersScalarFieldEnum)[keyof typeof Public_usersScalarFieldEnum]
+
+
+export const Password_reset_tokensScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  otp_hash: 'otp_hash',
+  otp_attempts: 'otp_attempts',
+  expires_at: 'expires_at',
+  created_at: 'created_at'
+} as const
+
+export type Password_reset_tokensScalarFieldEnum = (typeof Password_reset_tokensScalarFieldEnum)[keyof typeof Password_reset_tokensScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4154,6 +4243,7 @@ export type GlobalOmitConfig = {
   trade_logs?: Prisma.trade_logsOmit
   support_messages?: Prisma.support_messagesOmit
   public_users?: Prisma.public_usersOmit
+  password_reset_tokens?: Prisma.password_reset_tokensOmit
 }
 
 /* Types for Logging */

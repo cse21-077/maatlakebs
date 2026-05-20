@@ -451,6 +451,7 @@ model auth_users {
   sessions                    sessions[]
   webauthn_challenges         webauthn_challenges[]
   webauthn_credentials        webauthn_credentials[]
+  password_reset_tokens       password_reset_tokens?
   users                       public_users?
 
   @@index([instance_id])
@@ -693,14 +694,15 @@ model support_messages {
   user_id    String       @db.Uuid
   content    String
   is_admin   Boolean      @default(false)
-  is_read    Boolean      @default(false)
-  reactions  Json?
   created_at DateTime     @default(now()) @db.Timestamptz(6)
   updated_at DateTime     @default(now()) @db.Timestamptz(6)
+  is_read    Boolean?     @default(false)
+  reactions  Json?        @default("{}")
   users      public_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id])
   @@index([created_at(sort: Desc)], map: "idx_support_messages_created_at")
+  @@index([user_id], map: "idx_support_messages_user_unread", where: raw("(is_read = false)"))
   @@schema("public")
 }
 
@@ -734,6 +736,22 @@ model public_users {
   other_users                                            public_users[]      @relation("usersTousers")
 
   @@map("users")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model password_reset_tokens {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String     @unique @db.Uuid
+  otp_hash     String     @db.VarChar(255)
+  otp_attempts Int?       @default(0)
+  expires_at   DateTime   @default(dbgenerated("(now() + '00:15:00'::interval)")) @db.Timestamptz(6)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  users        auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([expires_at], map: "idx_password_reset_tokens_expires_at")
+  @@index([user_id], map: "idx_password_reset_tokens_user_id")
   @@schema("public")
 }
 

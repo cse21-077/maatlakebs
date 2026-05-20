@@ -180,7 +180,7 @@ export type mentor_heartbeat = Prisma.mentor_heartbeatModel
 export type payment_status = Prisma.payment_statusModel
 /**
  * Model invoices
- * Track individual NowPayments invoice records for subscription payments
+ * Track individual payment invoice records for subscription payments
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type invoices = Prisma.invoicesModel
@@ -227,3 +227,9 @@ export type support_messages = Prisma.support_messagesModel
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type public_users = Prisma.public_usersModel
+/**
+ * Model password_reset_tokens
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type password_reset_tokens = Prisma.password_reset_tokensModel

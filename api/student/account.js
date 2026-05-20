@@ -50,6 +50,29 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid action or missing user_id' });
     }
 
+    // ── Action: Mark messages as read (PATCH) ──
+    if (req.method === 'PATCH') {
+      const { user_id, message_ids } = req.body || {};
+
+      if (!user_id || !Array.isArray(message_ids) || message_ids.length === 0) {
+        return res.status(400).json({ error: 'user_id and message_ids array are required' });
+      }
+
+      const { data, error } = await supabase
+        .from('support_messages')
+        .update({ is_read: true, updated_at: new Date().toISOString() })
+        .eq('user_id', user_id)
+        .in('id', message_ids)
+        .select();
+
+      if (error) {
+        console.error('❌ Failed to mark messages as read:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      return res.status(200).json({ success: true, updated: data?.length || 0 });
+    }
+
     // ── Action: Delete account ──
     if (req.method === 'DELETE') {
       const { user_id, mt5_login } = req.body;

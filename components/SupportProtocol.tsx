@@ -120,19 +120,29 @@ export const SupportProtocol = ({ uid, onBack, prefillMessage, onUnreadChanged }
     const markAsRead = async (messageIds: string[]) => {
         try {
             console.log('[SupportProtocol] Marking as read:', messageIds.length, 'messages');
-            const { error } = await (supabase.from('support_messages' as any) as any)
-                .update({ is_read: true, updated_at: new Date().toISOString() })
-                .in('id', messageIds);
             
-            if (!error) {
-                setMessages(prev => prev.map(m => 
-                    messageIds.includes(m.id) ? { ...m, is_read: true } : m
-                ));
-                // Notify parent that unread status changed
-                if (onUnreadChanged) {
-                    console.log('[SupportProtocol] Calling onUnreadChanged callback');
-                    onUnreadChanged();
-                }
+            // Use API to bypass RLS and ensure messages are actually marked read
+            const res = await fetch('/api/student/account', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid, message_ids: messageIds })
+            });
+            
+            const result = await res.json();
+            
+            if (!res.ok) {
+                console.error('[SupportProtocol] markAsRead API error:', result.error);
+                return;
+            }
+            
+            console.log('[SupportProtocol] markAsRead success, updated rows:', result.updated);
+            setMessages(prev => prev.map(m => 
+                messageIds.includes(m.id) ? { ...m, is_read: true } : m
+            ));
+            // Notify parent that unread status changed
+            if (onUnreadChanged) {
+                console.log('[SupportProtocol] Calling onUnreadChanged callback');
+                onUnreadChanged();
             }
         } catch (err) {
             console.error('Failed to mark as read:', err);

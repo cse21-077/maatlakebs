@@ -122,7 +122,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const fetchUnreadMessages = async () => {
         if (!uid || uid === '00000000-0000-4000-a000-000000000000') return;
         try {
-            const response = await fetch(`/api/student/account?user_id=${uid}&action=unread`);
+            const response = await fetch(`/api/student/account?user_id=${uid}&action=unread&t=${Date.now()}`);
             const data = await response.json();
             if (response.ok) {
                 console.log('[MainApp] Unread count updated:', data.unread_count);
@@ -176,19 +176,21 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         // Immediate fetch on mount / uid change
         fetchUnreadMessages();
 
-        // Subscribe to real-time updates when new admin messages arrive or messages are marked as read
+        // Subscribe to real-time updates when new admin messages arrive
         const messagesSubscription = (supabase as any)
             .channel('support_messages_changes')
             .on('postgres_changes', 
                 { 
-                    event: '*', 
+                    event: 'INSERT', 
                     schema: 'public', 
                     table: 'support_messages', 
                     filter: `user_id=eq.${uid}` 
                 },
                 (payload: any) => {
-                    // Refetch unread count when messages change
-                    fetchUnreadMessages();
+                    // Only refetch on new admin messages (not on our own messages or read status updates)
+                    if (payload.new?.is_admin) {
+                        fetchUnreadMessages();
+                    }
                 }
             )
             .subscribe();

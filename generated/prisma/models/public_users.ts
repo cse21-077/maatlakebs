@@ -31,9 +31,9 @@ export type Public_usersMinAggregateOutputType = {
   role: $Enums.user_role | null
   full_name: string | null
   trader_id: string | null
-  onboarding_completed: boolean | null
   created_at: Date | null
   updated_at: Date | null
+  onboarding_completed: boolean | null
 }
 
 export type Public_usersMaxAggregateOutputType = {
@@ -42,9 +42,9 @@ export type Public_usersMaxAggregateOutputType = {
   role: $Enums.user_role | null
   full_name: string | null
   trader_id: string | null
-  onboarding_completed: boolean | null
   created_at: Date | null
   updated_at: Date | null
+  onboarding_completed: boolean | null
 }
 
 export type Public_usersCountAggregateOutputType = {
@@ -53,9 +53,9 @@ export type Public_usersCountAggregateOutputType = {
   role: number
   full_name: number
   trader_id: number
-  onboarding_completed: number
   created_at: number
   updated_at: number
+  onboarding_completed: number
   _all: number
 }
 
@@ -66,9 +66,9 @@ export type Public_usersMinAggregateInputType = {
   role?: true
   full_name?: true
   trader_id?: true
-  onboarding_completed?: true
   created_at?: true
   updated_at?: true
+  onboarding_completed?: true
 }
 
 export type Public_usersMaxAggregateInputType = {
@@ -77,9 +77,9 @@ export type Public_usersMaxAggregateInputType = {
   role?: true
   full_name?: true
   trader_id?: true
-  onboarding_completed?: true
   created_at?: true
   updated_at?: true
+  onboarding_completed?: true
 }
 
 export type Public_usersCountAggregateInputType = {
@@ -88,9 +88,9 @@ export type Public_usersCountAggregateInputType = {
   role?: true
   full_name?: true
   trader_id?: true
-  onboarding_completed?: true
   created_at?: true
   updated_at?: true
+  onboarding_completed?: true
   _all?: true
 }
 
@@ -172,9 +172,9 @@ export type Public_usersGroupByOutputType = {
   role: $Enums.user_role
   full_name: string | null
   trader_id: string | null
-  onboarding_completed: boolean
   created_at: Date
   updated_at: Date
+  onboarding_completed: boolean
   _count: Public_usersCountAggregateOutputType | null
   _min: Public_usersMinAggregateOutputType | null
   _max: Public_usersMaxAggregateOutputType | null
@@ -204,22 +204,22 @@ export type public_usersWhereInput = {
   role?: Prisma.Enumuser_roleFilter<"public_users"> | $Enums.user_role
   full_name?: Prisma.StringNullableFilter<"public_users"> | string | null
   trader_id?: Prisma.UuidNullableFilter<"public_users"> | string | null
-  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
   created_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
+  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
   connection_status?: Prisma.XOR<Prisma.Connection_statusNullableScalarRelationFilter, Prisma.connection_statusWhereInput> | null
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.Dead_letter_queueListRelationFilter
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.Dead_letter_queueListRelationFilter
+  invoices?: Prisma.InvoicesListRelationFilter
   mentor_heartbeat?: Prisma.XOR<Prisma.Mentor_heartbeatNullableScalarRelationFilter, Prisma.mentor_heartbeatWhereInput> | null
   payment_status?: Prisma.XOR<Prisma.Payment_statusNullableScalarRelationFilter, Prisma.payment_statusWhereInput> | null
-  invoices?: Prisma.InvoicesListRelationFilter
   risk_profiles?: Prisma.XOR<Prisma.Risk_profilesNullableScalarRelationFilter, Prisma.risk_profilesWhereInput> | null
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.Student_accountsListRelationFilter
   student_accounts_student_accounts_trader_idTousers?: Prisma.Student_accountsListRelationFilter
   student_accounts_student_accounts_user_idTousers?: Prisma.Student_accountsListRelationFilter
+  support_messages?: Prisma.Support_messagesListRelationFilter
   system_events?: Prisma.System_eventsListRelationFilter
   system_flags?: Prisma.System_flagsListRelationFilter
-  support_messages?: Prisma.Support_messagesListRelationFilter
   trade_logs?: Prisma.Trade_logsListRelationFilter
   auth_user?: Prisma.XOR<Prisma.Auth_usersScalarRelationFilter, Prisma.auth_usersWhereInput>
   trader?: Prisma.XOR<Prisma.Public_usersNullableScalarRelationFilter, Prisma.public_usersWhereInput> | null
@@ -232,22 +232,22 @@ export type public_usersOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   full_name?: Prisma.SortOrderInput | Prisma.SortOrder
   trader_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  onboarding_completed?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  onboarding_completed?: Prisma.SortOrder
   connection_status?: Prisma.connection_statusOrderByWithRelationInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueOrderByRelationAggregateInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueOrderByRelationAggregateInput
+  invoices?: Prisma.invoicesOrderByRelationAggregateInput
   mentor_heartbeat?: Prisma.mentor_heartbeatOrderByWithRelationInput
   payment_status?: Prisma.payment_statusOrderByWithRelationInput
-  invoices?: Prisma.invoicesOrderByRelationAggregateInput
   risk_profiles?: Prisma.risk_profilesOrderByWithRelationInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsOrderByRelationAggregateInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsOrderByRelationAggregateInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsOrderByRelationAggregateInput
+  support_messages?: Prisma.support_messagesOrderByRelationAggregateInput
   system_events?: Prisma.system_eventsOrderByRelationAggregateInput
   system_flags?: Prisma.system_flagsOrderByRelationAggregateInput
-  support_messages?: Prisma.support_messagesOrderByRelationAggregateInput
   trade_logs?: Prisma.trade_logsOrderByRelationAggregateInput
   auth_user?: Prisma.auth_usersOrderByWithRelationInput
   trader?: Prisma.public_usersOrderByWithRelationInput
@@ -263,22 +263,22 @@ export type public_usersWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.Enumuser_roleFilter<"public_users"> | $Enums.user_role
   full_name?: Prisma.StringNullableFilter<"public_users"> | string | null
   trader_id?: Prisma.UuidNullableFilter<"public_users"> | string | null
-  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
   created_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
+  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
   connection_status?: Prisma.XOR<Prisma.Connection_statusNullableScalarRelationFilter, Prisma.connection_statusWhereInput> | null
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.Dead_letter_queueListRelationFilter
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.Dead_letter_queueListRelationFilter
+  invoices?: Prisma.InvoicesListRelationFilter
   mentor_heartbeat?: Prisma.XOR<Prisma.Mentor_heartbeatNullableScalarRelationFilter, Prisma.mentor_heartbeatWhereInput> | null
   payment_status?: Prisma.XOR<Prisma.Payment_statusNullableScalarRelationFilter, Prisma.payment_statusWhereInput> | null
-  invoices?: Prisma.InvoicesListRelationFilter
   risk_profiles?: Prisma.XOR<Prisma.Risk_profilesNullableScalarRelationFilter, Prisma.risk_profilesWhereInput> | null
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.Student_accountsListRelationFilter
   student_accounts_student_accounts_trader_idTousers?: Prisma.Student_accountsListRelationFilter
   student_accounts_student_accounts_user_idTousers?: Prisma.Student_accountsListRelationFilter
+  support_messages?: Prisma.Support_messagesListRelationFilter
   system_events?: Prisma.System_eventsListRelationFilter
   system_flags?: Prisma.System_flagsListRelationFilter
-  support_messages?: Prisma.Support_messagesListRelationFilter
   trade_logs?: Prisma.Trade_logsListRelationFilter
   auth_user?: Prisma.XOR<Prisma.Auth_usersScalarRelationFilter, Prisma.auth_usersWhereInput>
   trader?: Prisma.XOR<Prisma.Public_usersNullableScalarRelationFilter, Prisma.public_usersWhereInput> | null
@@ -291,9 +291,9 @@ export type public_usersOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   full_name?: Prisma.SortOrderInput | Prisma.SortOrder
   trader_id?: Prisma.SortOrderInput | Prisma.SortOrder
-  onboarding_completed?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  onboarding_completed?: Prisma.SortOrder
   _count?: Prisma.public_usersCountOrderByAggregateInput
   _max?: Prisma.public_usersMaxOrderByAggregateInput
   _min?: Prisma.public_usersMinOrderByAggregateInput
@@ -308,31 +308,31 @@ export type public_usersScalarWhereWithAggregatesInput = {
   role?: Prisma.Enumuser_roleWithAggregatesFilter<"public_users"> | $Enums.user_role
   full_name?: Prisma.StringNullableWithAggregatesFilter<"public_users"> | string | null
   trader_id?: Prisma.UuidNullableWithAggregatesFilter<"public_users"> | string | null
-  onboarding_completed?: Prisma.BoolWithAggregatesFilter<"public_users"> | boolean
   created_at?: Prisma.DateTimeWithAggregatesFilter<"public_users"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"public_users"> | Date | string
+  onboarding_completed?: Prisma.BoolWithAggregatesFilter<"public_users"> | boolean
 }
 
 export type public_usersCreateInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -345,22 +345,22 @@ export type public_usersUncheckedCreateInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -369,22 +369,22 @@ export type public_usersUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -397,22 +397,22 @@ export type public_usersUncheckedUpdateInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -423,18 +423,18 @@ export type public_usersCreateManyInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
 }
 
 export type public_usersUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type public_usersUncheckedUpdateManyInput = {
@@ -443,9 +443,9 @@ export type public_usersUncheckedUpdateManyInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type Public_usersNullableScalarRelationFilter = {
@@ -474,9 +474,9 @@ export type public_usersCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   full_name?: Prisma.SortOrder
   trader_id?: Prisma.SortOrder
-  onboarding_completed?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  onboarding_completed?: Prisma.SortOrder
 }
 
 export type public_usersMaxOrderByAggregateInput = {
@@ -485,9 +485,9 @@ export type public_usersMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   full_name?: Prisma.SortOrder
   trader_id?: Prisma.SortOrder
-  onboarding_completed?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  onboarding_completed?: Prisma.SortOrder
 }
 
 export type public_usersMinOrderByAggregateInput = {
@@ -496,9 +496,9 @@ export type public_usersMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   full_name?: Prisma.SortOrder
   trader_id?: Prisma.SortOrder
-  onboarding_completed?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  onboarding_completed?: Prisma.SortOrder
 }
 
 export type public_usersCreateNestedOneWithoutAuth_userInput = {
@@ -807,22 +807,22 @@ export type public_usersCreateWithoutAuth_userInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
   other_users?: Prisma.public_usersCreateNestedManyWithoutTraderInput
@@ -833,22 +833,22 @@ export type public_usersUncheckedCreateWithoutAuth_userInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -873,22 +873,22 @@ export type public_usersUpdateWithoutAuth_userInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
   other_users?: Prisma.public_usersUpdateManyWithoutTraderNestedInput
@@ -899,22 +899,22 @@ export type public_usersUncheckedUpdateWithoutAuth_userInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -923,21 +923,21 @@ export type public_usersCreateWithoutConnection_statusInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -950,21 +950,21 @@ export type public_usersUncheckedCreateWithoutConnection_statusInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -989,21 +989,21 @@ export type public_usersUpdateWithoutConnection_statusInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1016,21 +1016,21 @@ export type public_usersUncheckedUpdateWithoutConnection_statusInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1039,21 +1039,21 @@ export type public_usersCreateWithoutDead_letter_queue_dead_letter_queue_resolve
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1066,21 +1066,21 @@ export type public_usersUncheckedCreateWithoutDead_letter_queue_dead_letter_queu
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1094,21 +1094,21 @@ export type public_usersCreateWithoutDead_letter_queue_dead_letter_queue_user_id
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1121,21 +1121,21 @@ export type public_usersUncheckedCreateWithoutDead_letter_queue_dead_letter_queu
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1160,21 +1160,21 @@ export type public_usersUpdateWithoutDead_letter_queue_dead_letter_queue_resolve
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1187,21 +1187,21 @@ export type public_usersUncheckedUpdateWithoutDead_letter_queue_dead_letter_queu
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1221,21 +1221,21 @@ export type public_usersUpdateWithoutDead_letter_queue_dead_letter_queue_user_id
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1248,21 +1248,21 @@ export type public_usersUncheckedUpdateWithoutDead_letter_queue_dead_letter_queu
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1271,21 +1271,21 @@ export type public_usersCreateWithoutMentor_heartbeatInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
-  payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
   invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
+  payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1298,21 +1298,21 @@ export type public_usersUncheckedCreateWithoutMentor_heartbeatInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
-  payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
   invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
+  payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1337,21 +1337,21 @@ export type public_usersUpdateWithoutMentor_heartbeatInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
-  payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
   invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
+  payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1364,21 +1364,21 @@ export type public_usersUncheckedUpdateWithoutMentor_heartbeatInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
-  payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
   invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
+  payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1387,21 +1387,21 @@ export type public_usersCreateWithoutPayment_statusInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
-  mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
+  mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1414,21 +1414,21 @@ export type public_usersUncheckedCreateWithoutPayment_statusInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
-  mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
+  mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1453,21 +1453,21 @@ export type public_usersUpdateWithoutPayment_statusInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
-  mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
+  mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1480,21 +1480,21 @@ export type public_usersUncheckedUpdateWithoutPayment_statusInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
-  mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
+  mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1503,9 +1503,9 @@ export type public_usersCreateWithoutInvoicesInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
@@ -1515,9 +1515,9 @@ export type public_usersCreateWithoutInvoicesInput = {
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1530,9 +1530,9 @@ export type public_usersUncheckedCreateWithoutInvoicesInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
@@ -1542,9 +1542,9 @@ export type public_usersUncheckedCreateWithoutInvoicesInput = {
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1569,9 +1569,9 @@ export type public_usersUpdateWithoutInvoicesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
@@ -1581,9 +1581,9 @@ export type public_usersUpdateWithoutInvoicesInput = {
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1596,9 +1596,9 @@ export type public_usersUncheckedUpdateWithoutInvoicesInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
@@ -1608,9 +1608,9 @@ export type public_usersUncheckedUpdateWithoutInvoicesInput = {
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1619,21 +1619,21 @@ export type public_usersCreateWithoutRisk_profilesInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1646,21 +1646,21 @@ export type public_usersUncheckedCreateWithoutRisk_profilesInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1685,21 +1685,21 @@ export type public_usersUpdateWithoutRisk_profilesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1712,21 +1712,21 @@ export type public_usersUncheckedUpdateWithoutRisk_profilesInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1735,21 +1735,21 @@ export type public_usersCreateWithoutStudent_accounts_student_accounts_ghost_own
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1762,21 +1762,21 @@ export type public_usersUncheckedCreateWithoutStudent_accounts_student_accounts_
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1790,21 +1790,21 @@ export type public_usersCreateWithoutStudent_accounts_student_accounts_trader_id
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1817,21 +1817,21 @@ export type public_usersUncheckedCreateWithoutStudent_accounts_student_accounts_
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1845,21 +1845,21 @@ export type public_usersCreateWithoutStudent_accounts_student_accounts_user_idTo
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -1872,21 +1872,21 @@ export type public_usersUncheckedCreateWithoutStudent_accounts_student_accounts_
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -1911,21 +1911,21 @@ export type public_usersUpdateWithoutStudent_accounts_student_accounts_ghost_own
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1938,21 +1938,21 @@ export type public_usersUncheckedUpdateWithoutStudent_accounts_student_accounts_
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -1972,21 +1972,21 @@ export type public_usersUpdateWithoutStudent_accounts_student_accounts_trader_id
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -1999,21 +1999,21 @@ export type public_usersUncheckedUpdateWithoutStudent_accounts_student_accounts_
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -2033,21 +2033,21 @@ export type public_usersUpdateWithoutStudent_accounts_student_accounts_user_idTo
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -2060,21 +2060,21 @@ export type public_usersUncheckedUpdateWithoutStudent_accounts_student_accounts_
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -2083,21 +2083,21 @@ export type public_usersCreateWithoutSystem_eventsInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
-  system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
   support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
+  system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -2110,21 +2110,21 @@ export type public_usersUncheckedCreateWithoutSystem_eventsInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
-  system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
   support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
+  system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -2149,21 +2149,21 @@ export type public_usersUpdateWithoutSystem_eventsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
-  system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
   support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
+  system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -2176,21 +2176,21 @@ export type public_usersUncheckedUpdateWithoutSystem_eventsInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
-  system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
   support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
+  system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -2199,21 +2199,21 @@ export type public_usersCreateWithoutSystem_flagsInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
-  system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
+  system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -2226,21 +2226,21 @@ export type public_usersUncheckedCreateWithoutSystem_flagsInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
-  system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
+  system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -2265,21 +2265,21 @@ export type public_usersUpdateWithoutSystem_flagsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
-  system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
+  system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -2292,21 +2292,21 @@ export type public_usersUncheckedUpdateWithoutSystem_flagsInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
-  system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
+  system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -2315,22 +2315,22 @@ export type public_usersCreateWithoutTrade_logsInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
   other_users?: Prisma.public_usersCreateNestedManyWithoutTraderInput
@@ -2342,22 +2342,22 @@ export type public_usersUncheckedCreateWithoutTrade_logsInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
 
@@ -2381,22 +2381,22 @@ export type public_usersUpdateWithoutTrade_logsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
   other_users?: Prisma.public_usersUpdateManyWithoutTraderNestedInput
@@ -2408,22 +2408,22 @@ export type public_usersUncheckedUpdateWithoutTrade_logsInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
 
@@ -2431,15 +2431,15 @@ export type public_usersCreateWithoutSupport_messagesInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
@@ -2458,15 +2458,15 @@ export type public_usersUncheckedCreateWithoutSupport_messagesInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
@@ -2497,15 +2497,15 @@ export type public_usersUpdateWithoutSupport_messagesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
@@ -2524,15 +2524,15 @@ export type public_usersUncheckedUpdateWithoutSupport_messagesInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
@@ -2547,22 +2547,22 @@ export type public_usersCreateWithoutOther_usersInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   trader?: Prisma.public_usersCreateNestedOneWithoutOther_usersInput
@@ -2574,22 +2574,22 @@ export type public_usersUncheckedCreateWithoutOther_usersInput = {
   role?: $Enums.user_role
   full_name?: string | null
   trader_id?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
 }
 
@@ -2602,22 +2602,22 @@ export type public_usersCreateWithoutTraderInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsCreateNestedManyWithoutUsersInput
   auth_user: Prisma.auth_usersCreateNestedOneWithoutUsersInput
   other_users?: Prisma.public_usersCreateNestedManyWithoutTraderInput
@@ -2628,22 +2628,22 @@ export type public_usersUncheckedCreateWithoutTraderInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
   connection_status?: Prisma.connection_statusUncheckedCreateNestedOneWithoutUsersInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_resolved_byTousersInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedCreateNestedManyWithoutUsers_dead_letter_queue_user_idTousersInput
+  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedCreateNestedOneWithoutUsersInput
   payment_status?: Prisma.payment_statusUncheckedCreateNestedOneWithoutUsersInput
-  invoices?: Prisma.invoicesUncheckedCreateNestedManyWithoutUsersInput
   risk_profiles?: Prisma.risk_profilesUncheckedCreateNestedOneWithoutUsersInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_ghost_ownerTousersInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_trader_idTousersInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedCreateNestedManyWithoutUsers_student_accounts_user_idTousersInput
+  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   system_events?: Prisma.system_eventsUncheckedCreateNestedManyWithoutUsersInput
   system_flags?: Prisma.system_flagsUncheckedCreateNestedManyWithoutUsersInput
-  support_messages?: Prisma.support_messagesUncheckedCreateNestedManyWithoutUsersInput
   trade_logs?: Prisma.trade_logsUncheckedCreateNestedManyWithoutUsersInput
   other_users?: Prisma.public_usersUncheckedCreateNestedManyWithoutTraderInput
 }
@@ -2673,22 +2673,22 @@ export type public_usersUpdateWithoutOther_usersInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   trader?: Prisma.public_usersUpdateOneWithoutOther_usersNestedInput
@@ -2700,22 +2700,22 @@ export type public_usersUncheckedUpdateWithoutOther_usersInput = {
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   trader_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
@@ -2744,9 +2744,9 @@ export type public_usersScalarWhereInput = {
   role?: Prisma.Enumuser_roleFilter<"public_users"> | $Enums.user_role
   full_name?: Prisma.StringNullableFilter<"public_users"> | string | null
   trader_id?: Prisma.UuidNullableFilter<"public_users"> | string | null
-  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
   created_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"public_users"> | Date | string
+  onboarding_completed?: Prisma.BoolFilter<"public_users"> | boolean
 }
 
 export type public_usersCreateManyTraderInput = {
@@ -2754,31 +2754,31 @@ export type public_usersCreateManyTraderInput = {
   email: string
   role?: $Enums.user_role
   full_name?: string | null
-  onboarding_completed?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  onboarding_completed?: boolean
 }
 
 export type public_usersUpdateWithoutTraderInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUpdateManyWithoutUsersNestedInput
   auth_user?: Prisma.auth_usersUpdateOneRequiredWithoutUsersNestedInput
   other_users?: Prisma.public_usersUpdateManyWithoutTraderNestedInput
@@ -2789,22 +2789,22 @@ export type public_usersUncheckedUpdateWithoutTraderInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   connection_status?: Prisma.connection_statusUncheckedUpdateOneWithoutUsersNestedInput
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_resolved_byTousersNestedInput
   dead_letter_queue_dead_letter_queue_user_idTousers?: Prisma.dead_letter_queueUncheckedUpdateManyWithoutUsers_dead_letter_queue_user_idTousersNestedInput
+  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   mentor_heartbeat?: Prisma.mentor_heartbeatUncheckedUpdateOneWithoutUsersNestedInput
   payment_status?: Prisma.payment_statusUncheckedUpdateOneWithoutUsersNestedInput
-  invoices?: Prisma.invoicesUncheckedUpdateManyWithoutUsersNestedInput
   risk_profiles?: Prisma.risk_profilesUncheckedUpdateOneWithoutUsersNestedInput
   student_accounts_student_accounts_ghost_ownerTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_ghost_ownerTousersNestedInput
   student_accounts_student_accounts_trader_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_trader_idTousersNestedInput
   student_accounts_student_accounts_user_idTousers?: Prisma.student_accountsUncheckedUpdateManyWithoutUsers_student_accounts_user_idTousersNestedInput
+  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   system_events?: Prisma.system_eventsUncheckedUpdateManyWithoutUsersNestedInput
   system_flags?: Prisma.system_flagsUncheckedUpdateManyWithoutUsersNestedInput
-  support_messages?: Prisma.support_messagesUncheckedUpdateManyWithoutUsersNestedInput
   trade_logs?: Prisma.trade_logsUncheckedUpdateManyWithoutUsersNestedInput
   other_users?: Prisma.public_usersUncheckedUpdateManyWithoutTraderNestedInput
 }
@@ -2814,9 +2814,9 @@ export type public_usersUncheckedUpdateManyWithoutTraderInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.Enumuser_roleFieldUpdateOperationsInput | $Enums.user_role
   full_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onboarding_completed?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -2831,9 +2831,9 @@ export type Public_usersCountOutputType = {
   student_accounts_student_accounts_ghost_ownerTousers: number
   student_accounts_student_accounts_trader_idTousers: number
   student_accounts_student_accounts_user_idTousers: number
+  support_messages: number
   system_events: number
   system_flags: number
-  support_messages: number
   trade_logs: number
   other_users: number
 }
@@ -2845,9 +2845,9 @@ export type Public_usersCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   student_accounts_student_accounts_ghost_ownerTousers?: boolean | Public_usersCountOutputTypeCountStudent_accounts_student_accounts_ghost_ownerTousersArgs
   student_accounts_student_accounts_trader_idTousers?: boolean | Public_usersCountOutputTypeCountStudent_accounts_student_accounts_trader_idTousersArgs
   student_accounts_student_accounts_user_idTousers?: boolean | Public_usersCountOutputTypeCountStudent_accounts_student_accounts_user_idTousersArgs
+  support_messages?: boolean | Public_usersCountOutputTypeCountSupport_messagesArgs
   system_events?: boolean | Public_usersCountOutputTypeCountSystem_eventsArgs
   system_flags?: boolean | Public_usersCountOutputTypeCountSystem_flagsArgs
-  support_messages?: boolean | Public_usersCountOutputTypeCountSupport_messagesArgs
   trade_logs?: boolean | Public_usersCountOutputTypeCountTrade_logsArgs
   other_users?: boolean | Public_usersCountOutputTypeCountOther_usersArgs
 }
@@ -2907,6 +2907,13 @@ export type Public_usersCountOutputTypeCountStudent_accounts_student_accounts_us
 /**
  * Public_usersCountOutputType without action
  */
+export type Public_usersCountOutputTypeCountSupport_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.support_messagesWhereInput
+}
+
+/**
+ * Public_usersCountOutputType without action
+ */
 export type Public_usersCountOutputTypeCountSystem_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.system_eventsWhereInput
 }
@@ -2916,13 +2923,6 @@ export type Public_usersCountOutputTypeCountSystem_eventsArgs<ExtArgs extends ru
  */
 export type Public_usersCountOutputTypeCountSystem_flagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.system_flagsWhereInput
-}
-
-/**
- * Public_usersCountOutputType without action
- */
-export type Public_usersCountOutputTypeCountSupport_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.support_messagesWhereInput
 }
 
 /**
@@ -2946,22 +2946,22 @@ export type public_usersSelect<ExtArgs extends runtime.Types.Extensions.Internal
   role?: boolean
   full_name?: boolean
   trader_id?: boolean
-  onboarding_completed?: boolean
   created_at?: boolean
   updated_at?: boolean
+  onboarding_completed?: boolean
   connection_status?: boolean | Prisma.public_users$connection_statusArgs<ExtArgs>
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: boolean | Prisma.public_users$dead_letter_queue_dead_letter_queue_resolved_byTousersArgs<ExtArgs>
   dead_letter_queue_dead_letter_queue_user_idTousers?: boolean | Prisma.public_users$dead_letter_queue_dead_letter_queue_user_idTousersArgs<ExtArgs>
+  invoices?: boolean | Prisma.public_users$invoicesArgs<ExtArgs>
   mentor_heartbeat?: boolean | Prisma.public_users$mentor_heartbeatArgs<ExtArgs>
   payment_status?: boolean | Prisma.public_users$payment_statusArgs<ExtArgs>
-  invoices?: boolean | Prisma.public_users$invoicesArgs<ExtArgs>
   risk_profiles?: boolean | Prisma.public_users$risk_profilesArgs<ExtArgs>
   student_accounts_student_accounts_ghost_ownerTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_ghost_ownerTousersArgs<ExtArgs>
   student_accounts_student_accounts_trader_idTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_trader_idTousersArgs<ExtArgs>
   student_accounts_student_accounts_user_idTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_user_idTousersArgs<ExtArgs>
+  support_messages?: boolean | Prisma.public_users$support_messagesArgs<ExtArgs>
   system_events?: boolean | Prisma.public_users$system_eventsArgs<ExtArgs>
   system_flags?: boolean | Prisma.public_users$system_flagsArgs<ExtArgs>
-  support_messages?: boolean | Prisma.public_users$support_messagesArgs<ExtArgs>
   trade_logs?: boolean | Prisma.public_users$trade_logsArgs<ExtArgs>
   auth_user?: boolean | Prisma.auth_usersDefaultArgs<ExtArgs>
   trader?: boolean | Prisma.public_users$traderArgs<ExtArgs>
@@ -2975,9 +2975,9 @@ export type public_usersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   role?: boolean
   full_name?: boolean
   trader_id?: boolean
-  onboarding_completed?: boolean
   created_at?: boolean
   updated_at?: boolean
+  onboarding_completed?: boolean
   auth_user?: boolean | Prisma.auth_usersDefaultArgs<ExtArgs>
   trader?: boolean | Prisma.public_users$traderArgs<ExtArgs>
 }, ExtArgs["result"]["public_users"]>
@@ -2988,9 +2988,9 @@ export type public_usersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   role?: boolean
   full_name?: boolean
   trader_id?: boolean
-  onboarding_completed?: boolean
   created_at?: boolean
   updated_at?: boolean
+  onboarding_completed?: boolean
   auth_user?: boolean | Prisma.auth_usersDefaultArgs<ExtArgs>
   trader?: boolean | Prisma.public_users$traderArgs<ExtArgs>
 }, ExtArgs["result"]["public_users"]>
@@ -3001,26 +3001,26 @@ export type public_usersSelectScalar = {
   role?: boolean
   full_name?: boolean
   trader_id?: boolean
-  onboarding_completed?: boolean
   created_at?: boolean
   updated_at?: boolean
+  onboarding_completed?: boolean
 }
 
-export type public_usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "role" | "full_name" | "trader_id" | "onboarding_completed" | "created_at" | "updated_at", ExtArgs["result"]["public_users"]>
+export type public_usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "role" | "full_name" | "trader_id" | "created_at" | "updated_at" | "onboarding_completed", ExtArgs["result"]["public_users"]>
 export type public_usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   connection_status?: boolean | Prisma.public_users$connection_statusArgs<ExtArgs>
   dead_letter_queue_dead_letter_queue_resolved_byTousers?: boolean | Prisma.public_users$dead_letter_queue_dead_letter_queue_resolved_byTousersArgs<ExtArgs>
   dead_letter_queue_dead_letter_queue_user_idTousers?: boolean | Prisma.public_users$dead_letter_queue_dead_letter_queue_user_idTousersArgs<ExtArgs>
+  invoices?: boolean | Prisma.public_users$invoicesArgs<ExtArgs>
   mentor_heartbeat?: boolean | Prisma.public_users$mentor_heartbeatArgs<ExtArgs>
   payment_status?: boolean | Prisma.public_users$payment_statusArgs<ExtArgs>
-  invoices?: boolean | Prisma.public_users$invoicesArgs<ExtArgs>
   risk_profiles?: boolean | Prisma.public_users$risk_profilesArgs<ExtArgs>
   student_accounts_student_accounts_ghost_ownerTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_ghost_ownerTousersArgs<ExtArgs>
   student_accounts_student_accounts_trader_idTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_trader_idTousersArgs<ExtArgs>
   student_accounts_student_accounts_user_idTousers?: boolean | Prisma.public_users$student_accounts_student_accounts_user_idTousersArgs<ExtArgs>
+  support_messages?: boolean | Prisma.public_users$support_messagesArgs<ExtArgs>
   system_events?: boolean | Prisma.public_users$system_eventsArgs<ExtArgs>
   system_flags?: boolean | Prisma.public_users$system_flagsArgs<ExtArgs>
-  support_messages?: boolean | Prisma.public_users$support_messagesArgs<ExtArgs>
   trade_logs?: boolean | Prisma.public_users$trade_logsArgs<ExtArgs>
   auth_user?: boolean | Prisma.auth_usersDefaultArgs<ExtArgs>
   trader?: boolean | Prisma.public_users$traderArgs<ExtArgs>
@@ -3042,16 +3042,16 @@ export type $public_usersPayload<ExtArgs extends runtime.Types.Extensions.Intern
     connection_status: Prisma.$connection_statusPayload<ExtArgs> | null
     dead_letter_queue_dead_letter_queue_resolved_byTousers: Prisma.$dead_letter_queuePayload<ExtArgs>[]
     dead_letter_queue_dead_letter_queue_user_idTousers: Prisma.$dead_letter_queuePayload<ExtArgs>[]
+    invoices: Prisma.$invoicesPayload<ExtArgs>[]
     mentor_heartbeat: Prisma.$mentor_heartbeatPayload<ExtArgs> | null
     payment_status: Prisma.$payment_statusPayload<ExtArgs> | null
-    invoices: Prisma.$invoicesPayload<ExtArgs>[]
     risk_profiles: Prisma.$risk_profilesPayload<ExtArgs> | null
     student_accounts_student_accounts_ghost_ownerTousers: Prisma.$student_accountsPayload<ExtArgs>[]
     student_accounts_student_accounts_trader_idTousers: Prisma.$student_accountsPayload<ExtArgs>[]
     student_accounts_student_accounts_user_idTousers: Prisma.$student_accountsPayload<ExtArgs>[]
+    support_messages: Prisma.$support_messagesPayload<ExtArgs>[]
     system_events: Prisma.$system_eventsPayload<ExtArgs>[]
     system_flags: Prisma.$system_flagsPayload<ExtArgs>[]
-    support_messages: Prisma.$support_messagesPayload<ExtArgs>[]
     trade_logs: Prisma.$trade_logsPayload<ExtArgs>[]
     auth_user: Prisma.$auth_usersPayload<ExtArgs>
     trader: Prisma.$public_usersPayload<ExtArgs> | null
@@ -3063,9 +3063,9 @@ export type $public_usersPayload<ExtArgs extends runtime.Types.Extensions.Intern
     role: $Enums.user_role
     full_name: string | null
     trader_id: string | null
-    onboarding_completed: boolean
     created_at: Date
     updated_at: Date
+    onboarding_completed: boolean
   }, ExtArgs["result"]["public_users"]>
   composites: {}
 }
@@ -3463,16 +3463,16 @@ export interface Prisma__public_usersClient<T, Null = never, ExtArgs extends run
   connection_status<T extends Prisma.public_users$connection_statusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$connection_statusArgs<ExtArgs>>): Prisma.Prisma__connection_statusClient<runtime.Types.Result.GetResult<Prisma.$connection_statusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   dead_letter_queue_dead_letter_queue_resolved_byTousers<T extends Prisma.public_users$dead_letter_queue_dead_letter_queue_resolved_byTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$dead_letter_queue_dead_letter_queue_resolved_byTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$dead_letter_queuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dead_letter_queue_dead_letter_queue_user_idTousers<T extends Prisma.public_users$dead_letter_queue_dead_letter_queue_user_idTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$dead_letter_queue_dead_letter_queue_user_idTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$dead_letter_queuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invoices<T extends Prisma.public_users$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$invoicesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentor_heartbeat<T extends Prisma.public_users$mentor_heartbeatArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$mentor_heartbeatArgs<ExtArgs>>): Prisma.Prisma__mentor_heartbeatClient<runtime.Types.Result.GetResult<Prisma.$mentor_heartbeatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   payment_status<T extends Prisma.public_users$payment_statusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$payment_statusArgs<ExtArgs>>): Prisma.Prisma__payment_statusClient<runtime.Types.Result.GetResult<Prisma.$payment_statusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  invoices<T extends Prisma.public_users$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$invoicesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   risk_profiles<T extends Prisma.public_users$risk_profilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$risk_profilesArgs<ExtArgs>>): Prisma.Prisma__risk_profilesClient<runtime.Types.Result.GetResult<Prisma.$risk_profilesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   student_accounts_student_accounts_ghost_ownerTousers<T extends Prisma.public_users$student_accounts_student_accounts_ghost_ownerTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$student_accounts_student_accounts_ghost_ownerTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$student_accountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   student_accounts_student_accounts_trader_idTousers<T extends Prisma.public_users$student_accounts_student_accounts_trader_idTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$student_accounts_student_accounts_trader_idTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$student_accountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   student_accounts_student_accounts_user_idTousers<T extends Prisma.public_users$student_accounts_student_accounts_user_idTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$student_accounts_student_accounts_user_idTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$student_accountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  support_messages<T extends Prisma.public_users$support_messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$support_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$support_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   system_events<T extends Prisma.public_users$system_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$system_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$system_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   system_flags<T extends Prisma.public_users$system_flagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$system_flagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$system_flagsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  support_messages<T extends Prisma.public_users$support_messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$support_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$support_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   trade_logs<T extends Prisma.public_users$trade_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$trade_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$trade_logsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auth_user<T extends Prisma.auth_usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_usersDefaultArgs<ExtArgs>>): Prisma.Prisma__auth_usersClient<runtime.Types.Result.GetResult<Prisma.$auth_usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   trader<T extends Prisma.public_users$traderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.public_users$traderArgs<ExtArgs>>): Prisma.Prisma__public_usersClient<runtime.Types.Result.GetResult<Prisma.$public_usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -3511,9 +3511,9 @@ export interface public_usersFieldRefs {
   readonly role: Prisma.FieldRef<"public_users", 'user_role'>
   readonly full_name: Prisma.FieldRef<"public_users", 'String'>
   readonly trader_id: Prisma.FieldRef<"public_users", 'String'>
-  readonly onboarding_completed: Prisma.FieldRef<"public_users", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"public_users", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"public_users", 'DateTime'>
+  readonly onboarding_completed: Prisma.FieldRef<"public_users", 'Boolean'>
 }
     
 
@@ -3982,6 +3982,30 @@ export type public_users$dead_letter_queue_dead_letter_queue_user_idTousersArgs<
 }
 
 /**
+ * public_users.invoices
+ */
+export type public_users$invoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the invoices
+   */
+  select?: Prisma.invoicesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the invoices
+   */
+  omit?: Prisma.invoicesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.invoicesInclude<ExtArgs> | null
+  where?: Prisma.invoicesWhereInput
+  orderBy?: Prisma.invoicesOrderByWithRelationInput | Prisma.invoicesOrderByWithRelationInput[]
+  cursor?: Prisma.invoicesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvoicesScalarFieldEnum | Prisma.InvoicesScalarFieldEnum[]
+}
+
+/**
  * public_users.mentor_heartbeat
  */
 export type public_users$mentor_heartbeatArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4017,30 +4041,6 @@ export type public_users$payment_statusArgs<ExtArgs extends runtime.Types.Extens
    */
   include?: Prisma.payment_statusInclude<ExtArgs> | null
   where?: Prisma.payment_statusWhereInput
-}
-
-/**
- * public_users.invoices
- */
-export type public_users$invoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the invoices
-   */
-  select?: Prisma.invoicesSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the invoices
-   */
-  omit?: Prisma.invoicesOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.invoicesInclude<ExtArgs> | null
-  where?: Prisma.invoicesWhereInput
-  orderBy?: Prisma.invoicesOrderByWithRelationInput | Prisma.invoicesOrderByWithRelationInput[]
-  cursor?: Prisma.invoicesWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InvoicesScalarFieldEnum | Prisma.InvoicesScalarFieldEnum[]
 }
 
 /**
@@ -4135,6 +4135,30 @@ export type public_users$student_accounts_student_accounts_user_idTousersArgs<Ex
 }
 
 /**
+ * public_users.support_messages
+ */
+export type public_users$support_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the support_messages
+   */
+  select?: Prisma.support_messagesSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the support_messages
+   */
+  omit?: Prisma.support_messagesOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.support_messagesInclude<ExtArgs> | null
+  where?: Prisma.support_messagesWhereInput
+  orderBy?: Prisma.support_messagesOrderByWithRelationInput | Prisma.support_messagesOrderByWithRelationInput[]
+  cursor?: Prisma.support_messagesWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Support_messagesScalarFieldEnum | Prisma.Support_messagesScalarFieldEnum[]
+}
+
+/**
  * public_users.system_events
  */
 export type public_users$system_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4180,30 +4204,6 @@ export type public_users$system_flagsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.System_flagsScalarFieldEnum | Prisma.System_flagsScalarFieldEnum[]
-}
-
-/**
- * public_users.support_messages
- */
-export type public_users$support_messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the support_messages
-   */
-  select?: Prisma.support_messagesSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the support_messages
-   */
-  omit?: Prisma.support_messagesOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.support_messagesInclude<ExtArgs> | null
-  where?: Prisma.support_messagesWhereInput
-  orderBy?: Prisma.support_messagesOrderByWithRelationInput | Prisma.support_messagesOrderByWithRelationInput[]
-  cursor?: Prisma.support_messagesWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.Support_messagesScalarFieldEnum | Prisma.Support_messagesScalarFieldEnum[]
 }
 
 /**

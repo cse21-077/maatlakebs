@@ -85,7 +85,8 @@ export const ModelName = {
   system_flags: 'system_flags',
   trade_logs: 'trade_logs',
   support_messages: 'support_messages',
-  public_users: 'public_users'
+  public_users: 'public_users',
+  password_reset_tokens: 'password_reset_tokens'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -549,13 +550,13 @@ export const InvoicesScalarFieldEnum = {
   payment_status: 'payment_status',
   subscription_plan: 'subscription_plan',
   paid_for_month: 'paid_for_month',
-  original_price: 'original_price',
-  discount_amount: 'discount_amount',
-  payment_method: 'payment_method',
-  proof_of_payment_url: 'proof_of_payment_url',
-  mentor_id: 'mentor_id',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  discount_amount: 'discount_amount',
+  mentor_id: 'mentor_id',
+  original_price: 'original_price',
+  payment_method: 'payment_method',
+  proof_of_payment_url: 'proof_of_payment_url'
 } as const
 
 export type InvoicesScalarFieldEnum = (typeof InvoicesScalarFieldEnum)[keyof typeof InvoicesScalarFieldEnum]
@@ -645,7 +646,9 @@ export const Support_messagesScalarFieldEnum = {
   content: 'content',
   is_admin: 'is_admin',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  is_read: 'is_read',
+  reactions: 'reactions'
 } as const
 
 export type Support_messagesScalarFieldEnum = (typeof Support_messagesScalarFieldEnum)[keyof typeof Support_messagesScalarFieldEnum]
@@ -657,12 +660,24 @@ export const Public_usersScalarFieldEnum = {
   role: 'role',
   full_name: 'full_name',
   trader_id: 'trader_id',
-  onboarding_completed: 'onboarding_completed',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  onboarding_completed: 'onboarding_completed'
 } as const
 
 export type Public_usersScalarFieldEnum = (typeof Public_usersScalarFieldEnum)[keyof typeof Public_usersScalarFieldEnum]
+
+
+export const Password_reset_tokensScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  otp_hash: 'otp_hash',
+  otp_attempts: 'otp_attempts',
+  expires_at: 'expires_at',
+  created_at: 'created_at'
+} as const
+
+export type Password_reset_tokensScalarFieldEnum = (typeof Password_reset_tokensScalarFieldEnum)[keyof typeof Password_reset_tokensScalarFieldEnum]
 
 
 export const SortOrder = {

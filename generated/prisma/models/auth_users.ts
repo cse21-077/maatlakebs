@@ -459,6 +459,7 @@ export type auth_usersWhereInput = {
   sessions?: Prisma.SessionsListRelationFilter
   webauthn_challenges?: Prisma.Webauthn_challengesListRelationFilter
   webauthn_credentials?: Prisma.Webauthn_credentialsListRelationFilter
+  password_reset_tokens?: Prisma.XOR<Prisma.Password_reset_tokensNullableScalarRelationFilter, Prisma.password_reset_tokensWhereInput> | null
   users?: Prisma.XOR<Prisma.Public_usersNullableScalarRelationFilter, Prisma.public_usersWhereInput> | null
 }
 
@@ -506,6 +507,7 @@ export type auth_usersOrderByWithRelationInput = {
   sessions?: Prisma.sessionsOrderByRelationAggregateInput
   webauthn_challenges?: Prisma.webauthn_challengesOrderByRelationAggregateInput
   webauthn_credentials?: Prisma.webauthn_credentialsOrderByRelationAggregateInput
+  password_reset_tokens?: Prisma.password_reset_tokensOrderByWithRelationInput
   users?: Prisma.public_usersOrderByWithRelationInput
 }
 
@@ -556,6 +558,7 @@ export type auth_usersWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.SessionsListRelationFilter
   webauthn_challenges?: Prisma.Webauthn_challengesListRelationFilter
   webauthn_credentials?: Prisma.Webauthn_credentialsListRelationFilter
+  password_reset_tokens?: Prisma.XOR<Prisma.Password_reset_tokensNullableScalarRelationFilter, Prisma.password_reset_tokensWhereInput> | null
   users?: Prisma.XOR<Prisma.Public_usersNullableScalarRelationFilter, Prisma.public_usersWhereInput> | null
 }, "id" | "email" | "confirmation_token" | "recovery_token" | "email_change_token_new" | "phone" | "email_change_token_current" | "reauthentication_token">
 
@@ -687,6 +690,7 @@ export type auth_usersCreateInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -734,6 +738,7 @@ export type auth_usersUncheckedCreateInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -781,6 +786,7 @@ export type auth_usersUpdateInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -828,6 +834,7 @@ export type auth_usersUncheckedUpdateInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1211,6 +1218,20 @@ export type auth_usersUpdateOneRequiredWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.auth_usersUpdateToOneWithWhereWithoutUsersInput, Prisma.auth_usersUpdateWithoutUsersInput>, Prisma.auth_usersUncheckedUpdateWithoutUsersInput>
 }
 
+export type auth_usersCreateNestedOneWithoutPassword_reset_tokensInput = {
+  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedCreateWithoutPassword_reset_tokensInput>
+  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutPassword_reset_tokensInput
+  connect?: Prisma.auth_usersWhereUniqueInput
+}
+
+export type auth_usersUpdateOneRequiredWithoutPassword_reset_tokensNestedInput = {
+  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedCreateWithoutPassword_reset_tokensInput>
+  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutPassword_reset_tokensInput
+  upsert?: Prisma.auth_usersUpsertWithoutPassword_reset_tokensInput
+  connect?: Prisma.auth_usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.auth_usersUpdateToOneWithWhereWithoutPassword_reset_tokensInput, Prisma.auth_usersUpdateWithoutPassword_reset_tokensInput>, Prisma.auth_usersUncheckedUpdateWithoutPassword_reset_tokensInput>
+}
+
 export type auth_usersCreateWithoutIdentitiesInput = {
   instance_id?: string | null
   id: string
@@ -1254,6 +1275,7 @@ export type auth_usersCreateWithoutIdentitiesInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1300,6 +1322,7 @@ export type auth_usersUncheckedCreateWithoutIdentitiesInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1362,6 +1385,7 @@ export type auth_usersUpdateWithoutIdentitiesInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1408,6 +1432,7 @@ export type auth_usersUncheckedUpdateWithoutIdentitiesInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1454,6 +1479,7 @@ export type auth_usersCreateWithoutMfa_factorsInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1500,6 +1526,7 @@ export type auth_usersUncheckedCreateWithoutMfa_factorsInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1562,6 +1589,7 @@ export type auth_usersUpdateWithoutMfa_factorsInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1608,6 +1636,7 @@ export type auth_usersUncheckedUpdateWithoutMfa_factorsInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1654,6 +1683,7 @@ export type auth_usersCreateWithoutOauth_authorizationsInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1700,6 +1730,7 @@ export type auth_usersUncheckedCreateWithoutOauth_authorizationsInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1762,6 +1793,7 @@ export type auth_usersUpdateWithoutOauth_authorizationsInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1808,6 +1840,7 @@ export type auth_usersUncheckedUpdateWithoutOauth_authorizationsInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -1854,6 +1887,7 @@ export type auth_usersCreateWithoutOauth_consentsInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1900,6 +1934,7 @@ export type auth_usersUncheckedCreateWithoutOauth_consentsInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -1962,6 +1997,7 @@ export type auth_usersUpdateWithoutOauth_consentsInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2008,6 +2044,7 @@ export type auth_usersUncheckedUpdateWithoutOauth_consentsInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2054,6 +2091,7 @@ export type auth_usersCreateWithoutOne_time_tokensInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2100,6 +2138,7 @@ export type auth_usersUncheckedCreateWithoutOne_time_tokensInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2162,6 +2201,7 @@ export type auth_usersUpdateWithoutOne_time_tokensInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2208,6 +2248,7 @@ export type auth_usersUncheckedUpdateWithoutOne_time_tokensInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2254,6 +2295,7 @@ export type auth_usersCreateWithoutSessionsInput = {
   one_time_tokens?: Prisma.one_time_tokensCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2300,6 +2342,7 @@ export type auth_usersUncheckedCreateWithoutSessionsInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2362,6 +2405,7 @@ export type auth_usersUpdateWithoutSessionsInput = {
   one_time_tokens?: Prisma.one_time_tokensUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2408,6 +2452,7 @@ export type auth_usersUncheckedUpdateWithoutSessionsInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2454,6 +2499,7 @@ export type auth_usersCreateWithoutWebauthn_challengesInput = {
   one_time_tokens?: Prisma.one_time_tokensCreateNestedManyWithoutUsersInput
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2500,6 +2546,7 @@ export type auth_usersUncheckedCreateWithoutWebauthn_challengesInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2562,6 +2609,7 @@ export type auth_usersUpdateWithoutWebauthn_challengesInput = {
   one_time_tokens?: Prisma.one_time_tokensUpdateManyWithoutUsersNestedInput
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2608,6 +2656,7 @@ export type auth_usersUncheckedUpdateWithoutWebauthn_challengesInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2654,6 +2703,7 @@ export type auth_usersCreateWithoutWebauthn_credentialsInput = {
   one_time_tokens?: Prisma.one_time_tokensCreateNestedManyWithoutUsersInput
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2700,6 +2750,7 @@ export type auth_usersUncheckedCreateWithoutWebauthn_credentialsInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
   users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
 }
 
@@ -2762,6 +2813,7 @@ export type auth_usersUpdateWithoutWebauthn_credentialsInput = {
   one_time_tokens?: Prisma.one_time_tokensUpdateManyWithoutUsersNestedInput
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2808,6 +2860,7 @@ export type auth_usersUncheckedUpdateWithoutWebauthn_credentialsInput = {
   one_time_tokens?: Prisma.one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
   users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
@@ -2855,6 +2908,7 @@ export type auth_usersCreateWithoutUsersInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensCreateNestedOneWithoutUsersInput
 }
 
 export type auth_usersUncheckedCreateWithoutUsersInput = {
@@ -2901,6 +2955,7 @@ export type auth_usersUncheckedCreateWithoutUsersInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedCreateNestedOneWithoutUsersInput
 }
 
 export type auth_usersCreateOrConnectWithoutUsersInput = {
@@ -2963,6 +3018,7 @@ export type auth_usersUpdateWithoutUsersInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUpdateOneWithoutUsersNestedInput
 }
 
 export type auth_usersUncheckedUpdateWithoutUsersInput = {
@@ -3009,6 +3065,211 @@ export type auth_usersUncheckedUpdateWithoutUsersInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  password_reset_tokens?: Prisma.password_reset_tokensUncheckedUpdateOneWithoutUsersNestedInput
+}
+
+export type auth_usersCreateWithoutPassword_reset_tokensInput = {
+  instance_id?: string | null
+  id: string
+  aud?: string | null
+  role?: string | null
+  email?: string | null
+  encrypted_password?: string | null
+  email_confirmed_at?: Date | string | null
+  invited_at?: Date | string | null
+  confirmation_token?: string | null
+  confirmation_sent_at?: Date | string | null
+  recovery_token?: string | null
+  recovery_sent_at?: Date | string | null
+  email_change_token_new?: string | null
+  email_change?: string | null
+  email_change_sent_at?: Date | string | null
+  last_sign_in_at?: Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: boolean | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  phone?: string | null
+  phone_confirmed_at?: Date | string | null
+  phone_change?: string | null
+  phone_change_token?: string | null
+  phone_change_sent_at?: Date | string | null
+  confirmed_at?: Date | string | null
+  email_change_token_current?: string | null
+  email_change_confirm_status?: number | null
+  banned_until?: Date | string | null
+  reauthentication_token?: string | null
+  reauthentication_sent_at?: Date | string | null
+  is_sso_user?: boolean
+  deleted_at?: Date | string | null
+  is_anonymous?: boolean
+  identities?: Prisma.identitiesCreateNestedManyWithoutUsersInput
+  mfa_factors?: Prisma.mfa_factorsCreateNestedManyWithoutUsersInput
+  oauth_authorizations?: Prisma.oauth_authorizationsCreateNestedManyWithoutUsersInput
+  oauth_consents?: Prisma.oauth_consentsCreateNestedManyWithoutUsersInput
+  one_time_tokens?: Prisma.one_time_tokensCreateNestedManyWithoutUsersInput
+  sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
+  webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
+  webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  users?: Prisma.public_usersCreateNestedOneWithoutAuth_userInput
+}
+
+export type auth_usersUncheckedCreateWithoutPassword_reset_tokensInput = {
+  instance_id?: string | null
+  id: string
+  aud?: string | null
+  role?: string | null
+  email?: string | null
+  encrypted_password?: string | null
+  email_confirmed_at?: Date | string | null
+  invited_at?: Date | string | null
+  confirmation_token?: string | null
+  confirmation_sent_at?: Date | string | null
+  recovery_token?: string | null
+  recovery_sent_at?: Date | string | null
+  email_change_token_new?: string | null
+  email_change?: string | null
+  email_change_sent_at?: Date | string | null
+  last_sign_in_at?: Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: boolean | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  phone?: string | null
+  phone_confirmed_at?: Date | string | null
+  phone_change?: string | null
+  phone_change_token?: string | null
+  phone_change_sent_at?: Date | string | null
+  confirmed_at?: Date | string | null
+  email_change_token_current?: string | null
+  email_change_confirm_status?: number | null
+  banned_until?: Date | string | null
+  reauthentication_token?: string | null
+  reauthentication_sent_at?: Date | string | null
+  is_sso_user?: boolean
+  deleted_at?: Date | string | null
+  is_anonymous?: boolean
+  identities?: Prisma.identitiesUncheckedCreateNestedManyWithoutUsersInput
+  mfa_factors?: Prisma.mfa_factorsUncheckedCreateNestedManyWithoutUsersInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUncheckedCreateNestedManyWithoutUsersInput
+  oauth_consents?: Prisma.oauth_consentsUncheckedCreateNestedManyWithoutUsersInput
+  one_time_tokens?: Prisma.one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
+  sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
+  webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  users?: Prisma.public_usersUncheckedCreateNestedOneWithoutAuth_userInput
+}
+
+export type auth_usersCreateOrConnectWithoutPassword_reset_tokensInput = {
+  where: Prisma.auth_usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.auth_usersCreateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedCreateWithoutPassword_reset_tokensInput>
+}
+
+export type auth_usersUpsertWithoutPassword_reset_tokensInput = {
+  update: Prisma.XOR<Prisma.auth_usersUpdateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedUpdateWithoutPassword_reset_tokensInput>
+  create: Prisma.XOR<Prisma.auth_usersCreateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedCreateWithoutPassword_reset_tokensInput>
+  where?: Prisma.auth_usersWhereInput
+}
+
+export type auth_usersUpdateToOneWithWhereWithoutPassword_reset_tokensInput = {
+  where?: Prisma.auth_usersWhereInput
+  data: Prisma.XOR<Prisma.auth_usersUpdateWithoutPassword_reset_tokensInput, Prisma.auth_usersUncheckedUpdateWithoutPassword_reset_tokensInput>
+}
+
+export type auth_usersUpdateWithoutPassword_reset_tokensInput = {
+  instance_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  aud?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encrypted_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invited_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmation_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmation_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recovery_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recovery_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_new?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_sign_in_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_current?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_confirm_status?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  banned_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reauthentication_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reauthentication_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_sso_user?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_anonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  identities?: Prisma.identitiesUpdateManyWithoutUsersNestedInput
+  mfa_factors?: Prisma.mfa_factorsUpdateManyWithoutUsersNestedInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUpdateManyWithoutUsersNestedInput
+  oauth_consents?: Prisma.oauth_consentsUpdateManyWithoutUsersNestedInput
+  one_time_tokens?: Prisma.one_time_tokensUpdateManyWithoutUsersNestedInput
+  sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
+  webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  users?: Prisma.public_usersUpdateOneWithoutAuth_userNestedInput
+}
+
+export type auth_usersUncheckedUpdateWithoutPassword_reset_tokensInput = {
+  instance_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  aud?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encrypted_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invited_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmation_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmation_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recovery_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recovery_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_new?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_sign_in_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_current?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_confirm_status?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  banned_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reauthentication_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reauthentication_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_sso_user?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_anonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  identities?: Prisma.identitiesUncheckedUpdateManyWithoutUsersNestedInput
+  mfa_factors?: Prisma.mfa_factorsUncheckedUpdateManyWithoutUsersNestedInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUncheckedUpdateManyWithoutUsersNestedInput
+  oauth_consents?: Prisma.oauth_consentsUncheckedUpdateManyWithoutUsersNestedInput
+  one_time_tokens?: Prisma.one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
+  sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
+  webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  users?: Prisma.public_usersUncheckedUpdateOneWithoutAuth_userNestedInput
 }
 
 
@@ -3149,6 +3410,7 @@ export type auth_usersSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   sessions?: boolean | Prisma.auth_users$sessionsArgs<ExtArgs>
   webauthn_challenges?: boolean | Prisma.auth_users$webauthn_challengesArgs<ExtArgs>
   webauthn_credentials?: boolean | Prisma.auth_users$webauthn_credentialsArgs<ExtArgs>
+  password_reset_tokens?: boolean | Prisma.auth_users$password_reset_tokensArgs<ExtArgs>
   users?: boolean | Prisma.auth_users$usersArgs<ExtArgs>
   _count?: boolean | Prisma.Auth_usersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["auth_users"]>
@@ -3277,6 +3539,7 @@ export type auth_usersInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   sessions?: boolean | Prisma.auth_users$sessionsArgs<ExtArgs>
   webauthn_challenges?: boolean | Prisma.auth_users$webauthn_challengesArgs<ExtArgs>
   webauthn_credentials?: boolean | Prisma.auth_users$webauthn_credentialsArgs<ExtArgs>
+  password_reset_tokens?: boolean | Prisma.auth_users$password_reset_tokensArgs<ExtArgs>
   users?: boolean | Prisma.auth_users$usersArgs<ExtArgs>
   _count?: boolean | Prisma.Auth_usersCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -3294,6 +3557,7 @@ export type $auth_usersPayload<ExtArgs extends runtime.Types.Extensions.Internal
     sessions: Prisma.$sessionsPayload<ExtArgs>[]
     webauthn_challenges: Prisma.$webauthn_challengesPayload<ExtArgs>[]
     webauthn_credentials: Prisma.$webauthn_credentialsPayload<ExtArgs>[]
+    password_reset_tokens: Prisma.$password_reset_tokensPayload<ExtArgs> | null
     users: Prisma.$public_usersPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -3734,6 +3998,7 @@ export interface Prisma__auth_usersClient<T, Null = never, ExtArgs extends runti
   sessions<T extends Prisma.auth_users$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webauthn_challenges<T extends Prisma.auth_users$webauthn_challengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$webauthn_challengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$webauthn_challengesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webauthn_credentials<T extends Prisma.auth_users$webauthn_credentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$webauthn_credentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$webauthn_credentialsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  password_reset_tokens<T extends Prisma.auth_users$password_reset_tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$password_reset_tokensArgs<ExtArgs>>): Prisma.Prisma__password_reset_tokensClient<runtime.Types.Result.GetResult<Prisma.$password_reset_tokensPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   users<T extends Prisma.auth_users$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$usersArgs<ExtArgs>>): Prisma.Prisma__public_usersClient<runtime.Types.Result.GetResult<Prisma.$public_usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4381,6 +4646,25 @@ export type auth_users$webauthn_credentialsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.Webauthn_credentialsScalarFieldEnum | Prisma.Webauthn_credentialsScalarFieldEnum[]
+}
+
+/**
+ * auth_users.password_reset_tokens
+ */
+export type auth_users$password_reset_tokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the password_reset_tokens
+   */
+  select?: Prisma.password_reset_tokensSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the password_reset_tokens
+   */
+  omit?: Prisma.password_reset_tokensOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.password_reset_tokensInclude<ExtArgs> | null
+  where?: Prisma.password_reset_tokensWhereInput
 }
 
 /**

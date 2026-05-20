@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model invoices
- * Track individual NowPayments invoice records for subscription payments
+ * Track individual payment invoice records for subscription payments
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type invoicesModel = runtime.Types.Result.DefaultSelection<Prisma.$invoicesPayload>
@@ -28,13 +28,13 @@ export type AggregateInvoices = {
 }
 
 export type InvoicesAvgAggregateOutputType = {
-  original_price: runtime.Decimal | null
   discount_amount: runtime.Decimal | null
+  original_price: runtime.Decimal | null
 }
 
 export type InvoicesSumAggregateOutputType = {
-  original_price: runtime.Decimal | null
   discount_amount: runtime.Decimal | null
+  original_price: runtime.Decimal | null
 }
 
 export type InvoicesMinAggregateOutputType = {
@@ -48,13 +48,13 @@ export type InvoicesMinAggregateOutputType = {
   payment_status: string | null
   subscription_plan: string | null
   paid_for_month: Date | null
-  original_price: runtime.Decimal | null
-  discount_amount: runtime.Decimal | null
-  payment_method: string | null
-  proof_of_payment_url: string | null
-  mentor_id: string | null
   created_at: Date | null
   updated_at: Date | null
+  discount_amount: runtime.Decimal | null
+  mentor_id: string | null
+  original_price: runtime.Decimal | null
+  payment_method: string | null
+  proof_of_payment_url: string | null
 }
 
 export type InvoicesMaxAggregateOutputType = {
@@ -68,13 +68,13 @@ export type InvoicesMaxAggregateOutputType = {
   payment_status: string | null
   subscription_plan: string | null
   paid_for_month: Date | null
-  original_price: runtime.Decimal | null
-  discount_amount: runtime.Decimal | null
-  payment_method: string | null
-  proof_of_payment_url: string | null
-  mentor_id: string | null
   created_at: Date | null
   updated_at: Date | null
+  discount_amount: runtime.Decimal | null
+  mentor_id: string | null
+  original_price: runtime.Decimal | null
+  payment_method: string | null
+  proof_of_payment_url: string | null
 }
 
 export type InvoicesCountAggregateOutputType = {
@@ -88,25 +88,25 @@ export type InvoicesCountAggregateOutputType = {
   payment_status: number
   subscription_plan: number
   paid_for_month: number
-  original_price: number
-  discount_amount: number
-  payment_method: number
-  proof_of_payment_url: number
-  mentor_id: number
   created_at: number
   updated_at: number
+  discount_amount: number
+  mentor_id: number
+  original_price: number
+  payment_method: number
+  proof_of_payment_url: number
   _all: number
 }
 
 
 export type InvoicesAvgAggregateInputType = {
-  original_price?: true
   discount_amount?: true
+  original_price?: true
 }
 
 export type InvoicesSumAggregateInputType = {
-  original_price?: true
   discount_amount?: true
+  original_price?: true
 }
 
 export type InvoicesMinAggregateInputType = {
@@ -120,13 +120,13 @@ export type InvoicesMinAggregateInputType = {
   payment_status?: true
   subscription_plan?: true
   paid_for_month?: true
-  original_price?: true
-  discount_amount?: true
-  payment_method?: true
-  proof_of_payment_url?: true
-  mentor_id?: true
   created_at?: true
   updated_at?: true
+  discount_amount?: true
+  mentor_id?: true
+  original_price?: true
+  payment_method?: true
+  proof_of_payment_url?: true
 }
 
 export type InvoicesMaxAggregateInputType = {
@@ -140,13 +140,13 @@ export type InvoicesMaxAggregateInputType = {
   payment_status?: true
   subscription_plan?: true
   paid_for_month?: true
-  original_price?: true
-  discount_amount?: true
-  payment_method?: true
-  proof_of_payment_url?: true
-  mentor_id?: true
   created_at?: true
   updated_at?: true
+  discount_amount?: true
+  mentor_id?: true
+  original_price?: true
+  payment_method?: true
+  proof_of_payment_url?: true
 }
 
 export type InvoicesCountAggregateInputType = {
@@ -160,13 +160,13 @@ export type InvoicesCountAggregateInputType = {
   payment_status?: true
   subscription_plan?: true
   paid_for_month?: true
-  original_price?: true
-  discount_amount?: true
-  payment_method?: true
-  proof_of_payment_url?: true
-  mentor_id?: true
   created_at?: true
   updated_at?: true
+  discount_amount?: true
+  mentor_id?: true
+  original_price?: true
+  payment_method?: true
+  proof_of_payment_url?: true
   _all?: true
 }
 
@@ -267,13 +267,13 @@ export type InvoicesGroupByOutputType = {
   payment_status: string
   subscription_plan: string
   paid_for_month: Date | null
-  original_price: runtime.Decimal | null
-  discount_amount: runtime.Decimal | null
-  payment_method: string
-  proof_of_payment_url: string | null
-  mentor_id: string | null
   created_at: Date
   updated_at: Date
+  discount_amount: runtime.Decimal | null
+  mentor_id: string | null
+  original_price: runtime.Decimal | null
+  payment_method: string
+  proof_of_payment_url: string | null
   _count: InvoicesCountAggregateOutputType | null
   _avg: InvoicesAvgAggregateOutputType | null
   _sum: InvoicesSumAggregateOutputType | null
@@ -310,13 +310,13 @@ export type invoicesWhereInput = {
   payment_status?: Prisma.StringFilter<"invoices"> | string
   subscription_plan?: Prisma.StringFilter<"invoices"> | string
   paid_for_month?: Prisma.DateTimeNullableFilter<"invoices"> | Date | string | null
-  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFilter<"invoices"> | string
-  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
-  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
   created_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
+  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
+  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFilter<"invoices"> | string
+  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }
 
@@ -331,13 +331,13 @@ export type invoicesOrderByWithRelationInput = {
   payment_status?: Prisma.SortOrder
   subscription_plan?: Prisma.SortOrder
   paid_for_month?: Prisma.SortOrderInput | Prisma.SortOrder
-  original_price?: Prisma.SortOrderInput | Prisma.SortOrder
-  discount_amount?: Prisma.SortOrderInput | Prisma.SortOrder
-  payment_method?: Prisma.SortOrder
-  proof_of_payment_url?: Prisma.SortOrderInput | Prisma.SortOrder
-  mentor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  discount_amount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mentor_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  original_price?: Prisma.SortOrderInput | Prisma.SortOrder
+  payment_method?: Prisma.SortOrder
+  proof_of_payment_url?: Prisma.SortOrderInput | Prisma.SortOrder
   users?: Prisma.public_usersOrderByWithRelationInput
 }
 
@@ -355,13 +355,13 @@ export type invoicesWhereUniqueInput = Prisma.AtLeast<{
   payment_status?: Prisma.StringFilter<"invoices"> | string
   subscription_plan?: Prisma.StringFilter<"invoices"> | string
   paid_for_month?: Prisma.DateTimeNullableFilter<"invoices"> | Date | string | null
-  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFilter<"invoices"> | string
-  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
-  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
   created_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
+  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
+  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFilter<"invoices"> | string
+  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }, "id" | "invoice_id">
 
@@ -376,13 +376,13 @@ export type invoicesOrderByWithAggregationInput = {
   payment_status?: Prisma.SortOrder
   subscription_plan?: Prisma.SortOrder
   paid_for_month?: Prisma.SortOrderInput | Prisma.SortOrder
-  original_price?: Prisma.SortOrderInput | Prisma.SortOrder
-  discount_amount?: Prisma.SortOrderInput | Prisma.SortOrder
-  payment_method?: Prisma.SortOrder
-  proof_of_payment_url?: Prisma.SortOrderInput | Prisma.SortOrder
-  mentor_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  discount_amount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mentor_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  original_price?: Prisma.SortOrderInput | Prisma.SortOrder
+  payment_method?: Prisma.SortOrder
+  proof_of_payment_url?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.invoicesCountOrderByAggregateInput
   _avg?: Prisma.invoicesAvgOrderByAggregateInput
   _max?: Prisma.invoicesMaxOrderByAggregateInput
@@ -404,13 +404,13 @@ export type invoicesScalarWhereWithAggregatesInput = {
   payment_status?: Prisma.StringWithAggregatesFilter<"invoices"> | string
   subscription_plan?: Prisma.StringWithAggregatesFilter<"invoices"> | string
   paid_for_month?: Prisma.DateTimeNullableWithAggregatesFilter<"invoices"> | Date | string | null
-  original_price?: Prisma.DecimalNullableWithAggregatesFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.DecimalNullableWithAggregatesFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringWithAggregatesFilter<"invoices"> | string
-  proof_of_payment_url?: Prisma.StringNullableWithAggregatesFilter<"invoices"> | string | null
-  mentor_id?: Prisma.UuidNullableWithAggregatesFilter<"invoices"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"invoices"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"invoices"> | Date | string
+  discount_amount?: Prisma.DecimalNullableWithAggregatesFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.UuidNullableWithAggregatesFilter<"invoices"> | string | null
+  original_price?: Prisma.DecimalNullableWithAggregatesFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringWithAggregatesFilter<"invoices"> | string
+  proof_of_payment_url?: Prisma.StringNullableWithAggregatesFilter<"invoices"> | string | null
 }
 
 export type invoicesCreateInput = {
@@ -423,13 +423,13 @@ export type invoicesCreateInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
   users: Prisma.public_usersCreateNestedOneWithoutInvoicesInput
 }
 
@@ -444,13 +444,13 @@ export type invoicesUncheckedCreateInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
 }
 
 export type invoicesUpdateInput = {
@@ -463,13 +463,13 @@ export type invoicesUpdateInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.public_usersUpdateOneRequiredWithoutInvoicesNestedInput
 }
 
@@ -484,13 +484,13 @@ export type invoicesUncheckedUpdateInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type invoicesCreateManyInput = {
@@ -504,13 +504,13 @@ export type invoicesCreateManyInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
 }
 
 export type invoicesUpdateManyMutationInput = {
@@ -523,13 +523,13 @@ export type invoicesUpdateManyMutationInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type invoicesUncheckedUpdateManyInput = {
@@ -543,13 +543,13 @@ export type invoicesUncheckedUpdateManyInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type invoicesCountOrderByAggregateInput = {
@@ -563,18 +563,18 @@ export type invoicesCountOrderByAggregateInput = {
   payment_status?: Prisma.SortOrder
   subscription_plan?: Prisma.SortOrder
   paid_for_month?: Prisma.SortOrder
-  original_price?: Prisma.SortOrder
-  discount_amount?: Prisma.SortOrder
-  payment_method?: Prisma.SortOrder
-  proof_of_payment_url?: Prisma.SortOrder
-  mentor_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  discount_amount?: Prisma.SortOrder
+  mentor_id?: Prisma.SortOrder
+  original_price?: Prisma.SortOrder
+  payment_method?: Prisma.SortOrder
+  proof_of_payment_url?: Prisma.SortOrder
 }
 
 export type invoicesAvgOrderByAggregateInput = {
-  original_price?: Prisma.SortOrder
   discount_amount?: Prisma.SortOrder
+  original_price?: Prisma.SortOrder
 }
 
 export type invoicesMaxOrderByAggregateInput = {
@@ -588,13 +588,13 @@ export type invoicesMaxOrderByAggregateInput = {
   payment_status?: Prisma.SortOrder
   subscription_plan?: Prisma.SortOrder
   paid_for_month?: Prisma.SortOrder
-  original_price?: Prisma.SortOrder
-  discount_amount?: Prisma.SortOrder
-  payment_method?: Prisma.SortOrder
-  proof_of_payment_url?: Prisma.SortOrder
-  mentor_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  discount_amount?: Prisma.SortOrder
+  mentor_id?: Prisma.SortOrder
+  original_price?: Prisma.SortOrder
+  payment_method?: Prisma.SortOrder
+  proof_of_payment_url?: Prisma.SortOrder
 }
 
 export type invoicesMinOrderByAggregateInput = {
@@ -608,18 +608,18 @@ export type invoicesMinOrderByAggregateInput = {
   payment_status?: Prisma.SortOrder
   subscription_plan?: Prisma.SortOrder
   paid_for_month?: Prisma.SortOrder
-  original_price?: Prisma.SortOrder
-  discount_amount?: Prisma.SortOrder
-  payment_method?: Prisma.SortOrder
-  proof_of_payment_url?: Prisma.SortOrder
-  mentor_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  discount_amount?: Prisma.SortOrder
+  mentor_id?: Prisma.SortOrder
+  original_price?: Prisma.SortOrder
+  payment_method?: Prisma.SortOrder
+  proof_of_payment_url?: Prisma.SortOrder
 }
 
 export type invoicesSumOrderByAggregateInput = {
-  original_price?: Prisma.SortOrder
   discount_amount?: Prisma.SortOrder
+  original_price?: Prisma.SortOrder
 }
 
 export type InvoicesListRelationFilter = {
@@ -684,13 +684,13 @@ export type invoicesCreateWithoutUsersInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
 }
 
 export type invoicesUncheckedCreateWithoutUsersInput = {
@@ -703,13 +703,13 @@ export type invoicesUncheckedCreateWithoutUsersInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
 }
 
 export type invoicesCreateOrConnectWithoutUsersInput = {
@@ -752,13 +752,13 @@ export type invoicesScalarWhereInput = {
   payment_status?: Prisma.StringFilter<"invoices"> | string
   subscription_plan?: Prisma.StringFilter<"invoices"> | string
   paid_for_month?: Prisma.DateTimeNullableFilter<"invoices"> | Date | string | null
-  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFilter<"invoices"> | string
-  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
-  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
   created_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"invoices"> | Date | string
+  discount_amount?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.UuidNullableFilter<"invoices"> | string | null
+  original_price?: Prisma.DecimalNullableFilter<"invoices"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFilter<"invoices"> | string
+  proof_of_payment_url?: Prisma.StringNullableFilter<"invoices"> | string | null
 }
 
 export type invoicesCreateManyUsersInput = {
@@ -771,13 +771,13 @@ export type invoicesCreateManyUsersInput = {
   payment_status?: string
   subscription_plan?: string
   paid_for_month?: Date | string | null
-  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: string
-  proof_of_payment_url?: string | null
-  mentor_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  discount_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: string | null
+  original_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: string
+  proof_of_payment_url?: string | null
 }
 
 export type invoicesUpdateWithoutUsersInput = {
@@ -790,13 +790,13 @@ export type invoicesUpdateWithoutUsersInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type invoicesUncheckedUpdateWithoutUsersInput = {
@@ -809,13 +809,13 @@ export type invoicesUncheckedUpdateWithoutUsersInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type invoicesUncheckedUpdateManyWithoutUsersInput = {
@@ -828,13 +828,13 @@ export type invoicesUncheckedUpdateManyWithoutUsersInput = {
   payment_status?: Prisma.StringFieldUpdateOperationsInput | string
   subscription_plan?: Prisma.StringFieldUpdateOperationsInput | string
   paid_for_month?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
-  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discount_amount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  mentor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  original_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  payment_method?: Prisma.StringFieldUpdateOperationsInput | string
+  proof_of_payment_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -850,13 +850,13 @@ export type invoicesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   payment_status?: boolean
   subscription_plan?: boolean
   paid_for_month?: boolean
-  original_price?: boolean
-  discount_amount?: boolean
-  payment_method?: boolean
-  proof_of_payment_url?: boolean
-  mentor_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  discount_amount?: boolean
+  mentor_id?: boolean
+  original_price?: boolean
+  payment_method?: boolean
+  proof_of_payment_url?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoices"]>
 
@@ -871,13 +871,13 @@ export type invoicesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   payment_status?: boolean
   subscription_plan?: boolean
   paid_for_month?: boolean
-  original_price?: boolean
-  discount_amount?: boolean
-  payment_method?: boolean
-  proof_of_payment_url?: boolean
-  mentor_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  discount_amount?: boolean
+  mentor_id?: boolean
+  original_price?: boolean
+  payment_method?: boolean
+  proof_of_payment_url?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoices"]>
 
@@ -892,13 +892,13 @@ export type invoicesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   payment_status?: boolean
   subscription_plan?: boolean
   paid_for_month?: boolean
-  original_price?: boolean
-  discount_amount?: boolean
-  payment_method?: boolean
-  proof_of_payment_url?: boolean
-  mentor_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  discount_amount?: boolean
+  mentor_id?: boolean
+  original_price?: boolean
+  payment_method?: boolean
+  proof_of_payment_url?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invoices"]>
 
@@ -913,16 +913,16 @@ export type invoicesSelectScalar = {
   payment_status?: boolean
   subscription_plan?: boolean
   paid_for_month?: boolean
-  original_price?: boolean
-  discount_amount?: boolean
-  payment_method?: boolean
-  proof_of_payment_url?: boolean
-  mentor_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  discount_amount?: boolean
+  mentor_id?: boolean
+  original_price?: boolean
+  payment_method?: boolean
+  proof_of_payment_url?: boolean
 }
 
-export type invoicesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "invoice_id" | "token_id" | "price_amount" | "price_currency" | "pay_currency" | "payment_status" | "subscription_plan" | "paid_for_month" | "original_price" | "discount_amount" | "payment_method" | "proof_of_payment_url" | "mentor_id" | "created_at" | "updated_at", ExtArgs["result"]["invoices"]>
+export type invoicesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "invoice_id" | "token_id" | "price_amount" | "price_currency" | "pay_currency" | "payment_status" | "subscription_plan" | "paid_for_month" | "created_at" | "updated_at" | "discount_amount" | "mentor_id" | "original_price" | "payment_method" | "proof_of_payment_url", ExtArgs["result"]["invoices"]>
 export type invoicesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }
@@ -949,13 +949,13 @@ export type $invoicesPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     payment_status: string
     subscription_plan: string
     paid_for_month: Date | null
-    original_price: runtime.Decimal | null
-    discount_amount: runtime.Decimal | null
-    payment_method: string
-    proof_of_payment_url: string | null
-    mentor_id: string | null
     created_at: Date
     updated_at: Date
+    discount_amount: runtime.Decimal | null
+    mentor_id: string | null
+    original_price: runtime.Decimal | null
+    payment_method: string
+    proof_of_payment_url: string | null
   }, ExtArgs["result"]["invoices"]>
   composites: {}
 }
@@ -1390,13 +1390,13 @@ export interface invoicesFieldRefs {
   readonly payment_status: Prisma.FieldRef<"invoices", 'String'>
   readonly subscription_plan: Prisma.FieldRef<"invoices", 'String'>
   readonly paid_for_month: Prisma.FieldRef<"invoices", 'DateTime'>
-  readonly original_price: Prisma.FieldRef<"invoices", 'Decimal'>
-  readonly discount_amount: Prisma.FieldRef<"invoices", 'Decimal'>
-  readonly payment_method: Prisma.FieldRef<"invoices", 'String'>
-  readonly proof_of_payment_url: Prisma.FieldRef<"invoices", 'String'>
-  readonly mentor_id: Prisma.FieldRef<"invoices", 'String'>
   readonly created_at: Prisma.FieldRef<"invoices", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"invoices", 'DateTime'>
+  readonly discount_amount: Prisma.FieldRef<"invoices", 'Decimal'>
+  readonly mentor_id: Prisma.FieldRef<"invoices", 'String'>
+  readonly original_price: Prisma.FieldRef<"invoices", 'Decimal'>
+  readonly payment_method: Prisma.FieldRef<"invoices", 'String'>
+  readonly proof_of_payment_url: Prisma.FieldRef<"invoices", 'String'>
 }
     
 

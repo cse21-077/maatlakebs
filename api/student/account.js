@@ -2,11 +2,16 @@
  * POST/DELETE /api/student/account
  * Unified student account management endpoint
  * 
- * Actions:
- * - "provision": Provision new terminal slot (POST)
- * - "upsert": Upsert/link/switch account (POST)
- * - "risk": Upsert risk profile (POST)
- * - "delete": Permanently remove account (DELETE)
+ * Actions (POST):
+ * - "provision": Provision new terminal slot
+ * - "upsert": Upsert/link/switch account
+ * - "risk": Upsert risk profile
+ * 
+ * Actions (GET):
+ * - "unread": Get count of unread support messages
+ * 
+ * Methods (DELETE):
+ * - Delete account
  */
 
 export default async function handler(req, res) {
@@ -17,6 +22,34 @@ export default async function handler(req, res) {
   );
 
   try {
+    // ── Action: Get unread messages count (GET) ──
+    if (req.method === 'GET') {
+      const { user_id, action } = req.query;
+
+      if (action === 'unread') {
+        if (!user_id) {
+          return res.status(400).json({ error: 'user_id is required' });
+        }
+
+        // Count unread messages where is_admin=true (messages from support staff)
+        const { count, error } = await supabase
+          .from('support_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user_id)
+          .eq('is_admin', true)
+          .eq('is_read', false);
+
+        if (error) {
+          console.error('❌ Failed to fetch unread count:', error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json({ unread_count: count || 0 });
+      }
+
+      return res.status(400).json({ error: 'Invalid action or missing user_id' });
+    }
+
     // ── Action: Delete account ──
     if (req.method === 'DELETE') {
       const { user_id, mt5_login } = req.body;

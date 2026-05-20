@@ -122,7 +122,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const fetchUnreadMessages = async () => {
         if (!uid || uid === '00000000-0000-4000-a000-000000000000') return;
         try {
-            const response = await fetch(`/api/unread-messages?user_id=${uid}`);
+            const response = await fetch(`/api/student/account?user_id=${uid}&action=unread`);
             const data = await response.json();
             if (response.ok) {
                 setUnreadMessages(data.unread_count || 0);

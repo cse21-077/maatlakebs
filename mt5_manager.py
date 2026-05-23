@@ -66,7 +66,7 @@ RESULTS_FOLDER   = os.environ.get("RESULTS_FOLDER",   os.path.join(_COMMON_FILES
 RESULT_SCAN_INTERVAL = int(os.environ.get("RESULT_SCAN_INTERVAL", "5"))
 STALE_SIGNAL_SECONDS = int(os.environ.get("STALE_SIGNAL_SECONDS", "60"))
 STUDENT_CACHE_SECONDS = 30
-CONNECTION_CHECK_INTERVAL = 30
+CONNECTION_CHECK_INTERVAL = 300  # 5 min fallback; primary checks are on-demand via /check-connections
 
 session = http_requests.Session()
 retry_strategy = Retry(total=2, backoff_factor=0.2)
@@ -141,16 +141,42 @@ def fetch_active_students(trader_id: str = None, force_refresh: bool = False) ->
 def push_results_to_supabase(results: list):
     if not results:
         return
+    # Strip fields that don't exist in the trade_logs schema to avoid 400 errors
+    allowed_keys = {
+        "user_id", "mentor_ticket", "student_ticket", "symbol", "order_type",
+        "volume", "entry_price", "stop_loss", "take_profit", "status",
+        "strategy_type", "error_message", "executed_at"
+    }
+    cleaned = []
+    for r in results:
+        # Map EA result fields to schema columns
+        mapped = {
+            "user_id": r.get("user_id") or r.get("login"),
+            "mentor_ticket": r.get("mentor_ticket", ""),
+            "student_ticket": str(r.get("exec_ticket", "")) if r.get("exec_ticket") else None,
+            "symbol": r.get("symbol", ""),
+            "order_type": r.get("order_type", ""),
+            "volume": r.get("requested_volume") or r.get("volume"),
+            "entry_price": r.get("exec_price"),
+            "stop_loss": r.get("sl"),
+            "take_profit": r.get("tp"),
+            "status": r.get("status", "failed"),
+            "error_message": r.get("error") or r.get("error_message"),
+            "executed_at": datetime.now(timezone.utc).isoformat()
+        }
+        # Remove None values so Supabase doesn't complain
+        cleaned.append({k: v for k, v in mapped.items() if v is not None})
+    
     try:
         url = f"{SUPABASE_URL}/rest/v1/trade_logs"
         resp = session.post(
-            url, 
-            json=results,
+            url,
+            json=cleaned,
             headers={**supabase_headers(), "Prefer": "return=representation"},
             timeout=15
         )
         if resp.status_code in (200, 201):
-            logger.info(f"Pushed {len(results)} results to Supabase")
+            logger.info(f"Pushed {len(cleaned)} results to Supabase")
         else:
             logger.error(f"Supabase push {resp.status_code}: {resp.text[:200]}")
     except Exception as e:
@@ -334,6 +360,55 @@ def refresh_students():
             "trader_id": trader_id or "all"
         })
     except Exception as e:
+        return jsonify({"status": "failed", "error": str(e)}), 500
+
+@app.route("/check-connections", methods=["POST"])
+def check_connections():
+    """On-demand connection check for ALL active students. Updates Supabase immediately."""
+    try:
+        students = fetch_active_students(force_refresh=True)
+        running_paths = get_running_terminal_paths()
+        
+        updated = []
+        for student in students:
+            user_id = student.get("user_id")
+            folder = student.get("folder_path", "")
+            login = str(student.get("mt5_login", ""))
+            
+            if not folder:
+                update_connection_status(user_id, "DISCONNECTED", "No folder_path assigned")
+                updated.append({"user_id": user_id, "mt5_login": login, "status": "DISCONNECTED", "reason": "no_folder"})
+                continue
+            
+            folder_normalized = folder.replace("/", "\\")
+            is_running = any(folder_normalized in path for path in running_paths)
+            
+            has_recent_activity = False
+            if login:
+                result_file = os.path.join(RESULTS_FOLDER, f"{login}_result.json")
+                if os.path.exists(result_file):
+                    if time.time() - os.path.getmtime(result_file) < 300:
+                        has_recent_activity = True
+            
+            if is_running or has_recent_activity:
+                update_connection_status(user_id, "CONNECTED")
+                updated.append({"user_id": user_id, "mt5_login": login, "status": "CONNECTED"})
+            else:
+                update_connection_status(user_id, "DISCONNECTED", "Terminal not running")
+                updated.append({"user_id": user_id, "mt5_login": login, "status": "DISCONNECTED", "reason": "not_running"})
+        
+        connected_count = sum(1 for u in updated if u["status"] == "CONNECTED")
+        logger.info(f"Live check complete: {connected_count}/{len(updated)} connected")
+        
+        return jsonify({
+            "status": "checked",
+            "total": len(updated),
+            "connected": connected_count,
+            "disconnected": len(updated) - connected_count,
+            "students": updated
+        })
+    except Exception as e:
+        logger.error(f"Check connections error: {e}")
         return jsonify({"status": "failed", "error": str(e)}), 500
 
 @app.route("/provision", methods=["POST"])

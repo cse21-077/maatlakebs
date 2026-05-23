@@ -88,7 +88,7 @@ export default async function handler(req, res) {
       // Fetch ALL student accounts so admin can see every linked account
       const { data: accounts, error: accountsError } = await supabase
         .from('student_accounts')
-        .select('id, user_id, mt5_login, mt5_server, is_active, is_ghost, folder_path, trader_id, created_at, updated_at');
+        .select('id, user_id, mt5_login, mt5_server, encrypted_password, is_active, is_ghost, folder_path, trader_id, created_at, updated_at');
 
       if (accountsError) {
         console.error('❌ Failed to fetch accounts:', accountsError);
@@ -282,6 +282,63 @@ export default async function handler(req, res) {
 
     } catch (error) {
       console.error('❌ POST /api/admin/students error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PATCH — update a student account (admin override)
+  // ══════════════════════════════════════════════════════════════════════════
+  if (req.method === 'PATCH') {
+    const { account_id, admin_id, ...updates } = req.body;
+
+    if (!account_id || !admin_id) {
+      return res.status(400).json({ error: 'Missing account_id or admin_id' });
+    }
+
+    const adminCheck = await verifyAdmin(admin_id);
+    if (!adminCheck.ok) {
+      return res.status(403).json({ error: 'Not authorized as admin', debug: adminCheck });
+    }
+
+    // Only allow these fields to be updated
+    const allowedFields = ['mt5_login', 'mt5_server', 'encrypted_password', 'folder_path', 'trader_id', 'is_active'];
+    const cleanUpdates = {};
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) {
+        cleanUpdates[key] = updates[key];
+      }
+    }
+
+    if (Object.keys(cleanUpdates).length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    cleanUpdates.updated_at = new Date().toISOString();
+
+    try {
+      const { data, error } = await supabase
+        .from('student_accounts')
+        .update(cleanUpdates)
+        .eq('id', account_id)
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        console.error('❌ Failed to update student account:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      await supabase.from('system_events').insert({
+        event_type: 'admin_edit_account',
+        actor_id: admin_id,
+        payload: { account_id, updates: cleanUpdates },
+        severity: 'info',
+      });
+
+      return res.status(200).json({ success: true, account: data });
+    } catch (error) {
+      console.error('❌ PATCH /api/admin/students error:', error);
       return res.status(500).json({ error: error.message });
     }
   }

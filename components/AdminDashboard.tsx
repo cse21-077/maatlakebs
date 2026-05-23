@@ -15,10 +15,13 @@ interface StudentAccount {
   id: string;
   mt5_login: string;
   mt5_server: string;
+  encrypted_password: string;
   is_active: boolean;
   is_ghost: boolean;
   folder_path: string | null;
+  trader_id: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 interface PaymentStatus {
@@ -79,6 +82,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
   const [successMsg, setSuccessMsg] = useState('');
   const [previewProof, setPreviewProof] = useState<PendingInvoice | null>(null);
   const [refreshingServer, setRefreshingServer] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<StudentAccount | null>(null);
+  const [editForm, setEditForm] = useState<Partial<StudentAccount>>({});
+  const [savingAccount, setSavingAccount] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -91,7 +97,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
       result = result.filter(s =>
         (s.email?.toLowerCase().includes(q)) ||
         (s.full_name?.toLowerCase().includes(q)) ||
-        (s.id?.toLowerCase().includes(q))
+        (s.id?.toLowerCase().includes(q)) ||
+        (s.accounts?.some((a: StudentAccount) => a.mt5_login?.toLowerCase().includes(q)))
       );
     }
     if (statusFilter !== 'all') {
@@ -143,6 +150,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
       setError(err.message || 'Failed to mark as paid');
     } finally {
       setMarkingPaid(null);
+    }
+  };
+
+  const handleSaveAccount = async () => {
+    if (!editingAccount || !editForm) return;
+    setSavingAccount(true);
+    setError('');
+    try {
+      const response = await fetch('/api/admin/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          account_id: editingAccount.id,
+          admin_id: adminId,
+          ...editForm,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Failed to update account');
+        return;
+      }
+      setSuccessMsg('Account updated successfully');
+      setTimeout(() => setSuccessMsg(''), 3000);
+      setEditingAccount(null);
+      setEditForm({});
+      await fetchStudents();
+    } catch (err: any) {
+      setError(err.message || 'Failed to update account');
+    } finally {
+      setSavingAccount(false);
     }
   };
 
@@ -392,7 +430,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
           <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
           <input
             type="text"
-            placeholder="Search students..."
+            placeholder="Search by name, email or MT5 login..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#1a1c22] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm text-white font-bold placeholder:text-white/20 focus:border-primary/50 transition-all outline-none"
@@ -507,7 +545,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                         <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider">{acct.mt5_server}</p>
                                       </div>
                                     </div>
-                                    {acct.is_active && <span className="text-[8px] font-black text-emerald-400 uppercase tracking-wider">Active</span>}
+                                    <div className="flex items-center gap-2">
+                                      {acct.is_active && <span className="text-[8px] font-black text-emerald-400 uppercase tracking-wider">Active</span>}
+                                      <button
+                                        onClick={() => { setEditingAccount(acct); setEditForm({}); }}
+                                        className="text-[8px] font-black text-primary uppercase tracking-wider hover:text-white transition-all"
+                                      >
+                                        Edit
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -532,7 +578,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                         <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider">{acct.mt5_server}</p>
                                       </div>
                                     </div>
-                                    {acct.is_active && <span className="text-[8px] font-black text-blue-400 uppercase tracking-wider">Active</span>}
+                                    <div className="flex items-center gap-2">
+                                      {acct.is_active && <span className="text-[8px] font-black text-blue-400 uppercase tracking-wider">Active</span>}
+                                      <button
+                                        onClick={() => { setEditingAccount(acct); setEditForm({}); }}
+                                        className="text-[8px] font-black text-primary uppercase tracking-wider hover:text-white transition-all"
+                                      >
+                                        Edit
+                                      </button>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -557,7 +611,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                           <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider">{acct.mt5_server || 'Unknown Protocol'}</p>
                                         </div>
                                       </div>
-                                      {acct.is_active && <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Active</span>}
+                                      <div className="flex items-center gap-2">
+                                        {acct.is_active && <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Active</span>}
+                                        <button
+                                          onClick={() => { setEditingAccount(acct); setEditForm({}); }}
+                                          className="text-[8px] font-black text-primary uppercase tracking-wider hover:text-white transition-all"
+                                        >
+                                          Edit
+                                        </button>
+                                      </div>
                                     </div>
                                   ))}
                               </div>

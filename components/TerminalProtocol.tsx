@@ -121,12 +121,15 @@ export const TerminalProtocol = ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: uid }),
             });
-            if (!provRes.ok) console.warn('Terminal provisioning might be delayed');
+            const provData = await provRes.json();
+            if (!provRes.ok) {
+                throw new Error(provData.error || 'Terminal provisioning failed. Please contact support.');
+            }
 
-            // 3. Update connection status
+            // 3. Update connection status — start as DISCONNECTED, monitor will flip to CONNECTED when terminal runs
             await (supabase as any).from('connection_status').upsert({
                 user_id: uid,
-                mt5_status: 'UNKNOWN',
+                mt5_status: 'DISCONNECTED',
                 last_checked: new Date().toISOString(),
             });
 
@@ -192,15 +195,19 @@ export const TerminalProtocol = ({
             setShowAddNew(false);
 
             // Provision terminal for the switched account
-            await fetch('/api/provision-terminal', {
+            const provRes = await fetch('/api/provision-terminal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: uid }),
             });
+            const provData = await provRes.json();
+            if (!provRes.ok) {
+                throw new Error(provData.error || 'Terminal provisioning failed. Please contact support.');
+            }
 
             await (supabase as any).from('connection_status').upsert({
                 user_id: uid,
-                mt5_status: 'UNKNOWN',
+                mt5_status: 'DISCONNECTED',
                 last_checked: new Date().toISOString(),
             });
 

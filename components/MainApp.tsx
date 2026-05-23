@@ -108,7 +108,12 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     const fetchStatus = async () => {
         if (!uid) return;
         try {
-            const response = await fetch(`/api/connection-status?user_id=${uid}`);
+            // Live check: asks mt5_manager to check ALL terminals now, returns our status
+            const response = await fetch('/api/connection-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid }),
+            });
             const data = await response.json();
             if (response.ok && data.status) {
                 setConnectionStatus(data.status);
@@ -223,7 +228,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         <div className="min-h-screen bg-[#0d0f14] flex flex-col pt-12 pb-safe animate-fade-in relative overflow-hidden">
             {view === 'BILLING' && <MembershipProtocol uid={uid} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onRefresh={load} />}
             {view === 'SUPPORT' && <SupportProtocol uid={uid} onBack={() => { setView('HOME'); fetchUnreadMessages(); }} prefillMessage={supportMessage} onUnreadChanged={fetchUnreadMessages} />}
-            {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={session.user.user_metadata?.trader_id} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} onOpenSupport={(msg) => { setSupportMessage(msg); setView('SUPPORT'); }} onAccountChanged={load} />}
+            {view === 'CONFIG' && <TerminalProtocol uid={uid} traderId={traderId} mt5Login={mt5Login} riskState={risk} paymentStatus={paymentStatus} onBack={() => setView('HOME')} onSuccess={() => setView('HOME')} onRefresh={(r) => load(r)} onOpenSupport={(msg) => { setSupportMessage(msg); setView('SUPPORT'); }} onAccountChanged={load} />}
 
             {/* Profile Selection Overlay */}
             {showProfileMenu && (
@@ -333,7 +338,8 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                                 ? (() => {
                                                     switch(connectionStatus) {
                                                         case 'CONNECTED': return '● Connected';
-                                                        case 'ERROR': return '◉ Checking...';
+                                                        case 'DISCONNECTED': return '○ Offline';
+                                                        case 'ERROR': return '◉ Error';
                                                         case 'UNKNOWN': return '◉ Verifying...';
                                                         default: return '○ Standby';
                                                     }
@@ -345,7 +351,11 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                                         <button
                                             onClick={async () => {
                                                 try {
-                                                    const res = await fetch(`/api/connection-status?user_id=${uid}`);
+                                                    const res = await fetch('/api/connection-status', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ user_id: uid }),
+                                                    });
                                                     const data = await res.json();
                                                     if (res.ok && data.status) {
                                                         setConnectionStatus(data.status);

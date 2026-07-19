@@ -47,6 +47,17 @@ interface PendingInvoice {
   discount_amount?: number;
 }
 
+interface ConnectionStatus {
+  user_id: string;
+  mt5_status: string | null;
+  balance: number | null;
+  equity: number | null;
+  balance_updated_at: string | null;
+  last_checked: string | null;
+  error_message: string | null;
+  updated_at: string | null;
+}
+
 interface Student {
   id: string;
   email: string;
@@ -60,6 +71,7 @@ interface Student {
   payment_status: PaymentStatus | null;
   pending_invoices: PendingInvoice[];
   has_proof_submitted: boolean;
+  connection_status: ConnectionStatus | null;
 }
 
 interface AdminDashboardProps {
@@ -79,15 +91,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+  const [closingAccount, setClosingAccount] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
   const [previewProof, setPreviewProof] = useState<PendingInvoice | null>(null);
   const [refreshingServer, setRefreshingServer] = useState(false);
   const [editingAccount, setEditingAccount] = useState<StudentAccount | null>(null);
   const [editForm, setEditForm] = useState<Partial<StudentAccount>>({});
   const [savingAccount, setSavingAccount] = useState(false);
+  const [runningOverdueCheck, setRunningOverdueCheck] = useState(false);
 
   useEffect(() => {
     fetchStudents();
+  }, []);
+
+  useEffect(() => {
+    const channel = supabase.channel('admin-dashboard-connection-status');
+
+    const subscription = channel
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'connection_status' },
+        (payload) => {
+          const updatedStatus = (payload.new ?? payload.old) as ConnectionStatus & { user_id?: string };
+          if (!updatedStatus?.user_id) return;
+
+          setStudents((prev) => prev.map((student) =>
+            student.id === updatedStatus.user_id
+              ? { ...student, connection_status: { ...(student.connection_status || {}), ...updatedStatus } as ConnectionStatus }
+              : student
+          ));
+          setFilteredStudents((prev) => prev.map((student) =>
+            student.id === updatedStatus.user_id
+              ? { ...student, connection_status: { ...(student.connection_status || {}), ...updatedStatus } as ConnectionStatus }
+              : student
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -104,7 +148,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
     if (statusFilter !== 'all') {
       result = result.filter(s => {
         const status = s.payment_status?.subscription_status || 'trial';
-        return status === statusFilter;
+        const overdue = isOverdue(s);
+        const displayStatus = overdue && status !== 'overdue' ? 'overdue' : status;
+        return displayStatus === statusFilter;
       });
     }
     setFilteredStudents(result);
@@ -150,6 +196,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
       setError(err.message || 'Failed to mark as paid');
     } finally {
       setMarkingPaid(null);
+    }
+  };
+
+  const handleCloseAccount = async (userId: string) => {
+    if (!confirm('Are you sure you want to close this account?\n\nThis will cancel the subscription, deactivate all linked trading accounts, and stop copy-trading. The account data will be retained.')) {
+      return;
+    }
+    try {
+      setClosingAccount(userId);
+      setError('');
+      const response = await fetch('/api/admin/students', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, admin_id: adminId }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Failed to close account');
+        return;
+      }
+      setSuccessMsg('Account closed successfully. Subscription cancelled and trading disabled.');
+      setTimeout(() => setSuccessMsg(''), 4000);
+      await fetchStudents();
+    } catch (err: any) {
+      setError(err.message || 'Failed to close account');
+    } finally {
+      setClosingAccount(null);
     }
   };
 
@@ -203,6 +276,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
     }
   };
 
+  const handleRunOverdueCheck = async () => {
+    try {
+      setRunningOverdueCheck(true);
+      const response = await fetch('/api/admin/students', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ admin_id: adminId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to run overdue check');
+      setSuccessMsg(`Success: ${data.message || 'Updated overdue users.'}`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+      await fetchStudents();
+    } catch (err: any) {
+      setError(err.message || 'Failed to run overdue check');
+      setTimeout(() => setError(''), 4000);
+    } finally {
+      setRunningOverdueCheck(false);
+    }
+  };
+
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'active': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
@@ -226,6 +320,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
   const isOverdue = (student: Student) => {
     if (!student.payment_status?.next_due) return false;
     return new Date(student.payment_status.next_due) < new Date();
+  };
+
+  const formatCurrency = (value: number | null | undefined) => {
+    if (value === null || value === undefined || Number.isNaN(value)) return '—';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(value);
+  };
+
+  const getBalanceDisplay = (student: Student) => {
+    const isConnected = student.connection_status?.mt5_status === 'CONNECTED';
+    if (!isConnected) return 'Not connected';
+    if (student.connection_status?.balance === null || student.connection_status?.balance === undefined) return 'Waiting for snapshot';
+    return formatCurrency(student.connection_status?.balance);
+  };
+
+  const getEquityDisplay = (student: Student) => {
+    const isConnected = student.connection_status?.mt5_status === 'CONNECTED';
+    if (!isConnected) return 'Not connected';
+    if (student.connection_status?.equity === null || student.connection_status?.equity === undefined) return 'Waiting for snapshot';
+    return formatCurrency(student.connection_status?.equity);
   };
 
   // ── Proof Preview Modal ───────────────────────────────────────────────────
@@ -395,6 +508,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
             <span className="hidden sm:inline">Refresh</span>
           </button>
           <button
+            onClick={handleRunOverdueCheck}
+            disabled={runningOverdueCheck}
+            className="flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 text-amber-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500/20 transition-all disabled:opacity-50"
+            title="Auto-Mark Overdue Users"
+          >
+            {runningOverdueCheck ? <Loader size={14} className="animate-spin" /> : <AlertCircle size={14} />}
+            <span className="hidden sm:inline">Check Overdue</span>
+          </button>
+          <button
             onClick={handleLogout}
             className="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
             title="Logout"
@@ -408,8 +530,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
       <div className="px-4 sm:px-6 py-3 sm:py-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 shrink-0">
         {[
           { label: 'Total', value: students.length, icon: Users, color: 'text-blue-400' },
-          { label: 'Active', value: students.filter(s => s.payment_status?.subscription_status === 'active').length, icon: ShieldCheck, color: 'text-emerald-400' },
-          { label: 'Trial', value: students.filter(s => s.payment_status?.subscription_status === 'trial').length, icon: Clock, color: 'text-blue-400' },
+          { label: 'Active', value: students.filter(s => s.payment_status?.subscription_status === 'active' && !isOverdue(s)).length, icon: ShieldCheck, color: 'text-emerald-400' },
+          { label: 'Trial', value: students.filter(s => s.payment_status?.subscription_status === 'trial' && !isOverdue(s)).length, icon: Clock, color: 'text-blue-400' },
           { label: 'Overdue', value: students.filter(s => s.payment_status?.subscription_status === 'overdue' || isOverdue(s)).length, icon: AlertCircle, color: 'text-red-400' },
         ].map((stat, i) => (
           <div key={i} className="bg-[#1a1c22] border border-white/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
@@ -529,9 +651,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
                           {/* Live Accounts */}
                           <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
-                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-1.5">
-                              <TrendingUp size={10} /> Live Accounts ({student.live_accounts.length})
-                            </p>
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
+                              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                                <TrendingUp size={10} /> Live Accounts ({student.live_accounts.length})
+                              </p>
+                              <div className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-white/70">
+                                  <span className="text-white/30 uppercase tracking-wider">Bal</span> {getBalanceDisplay(student)}
+                                </div>
+                                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-white/70">
+                                  <span className="text-white/30 uppercase tracking-wider">Eq</span> {getEquityDisplay(student)}
+                                </div>
+                              </div>
+                            </div>
                             {student.live_accounts.length === 0 ? (
                               <p className="text-[10px] text-white/20 font-bold">No live accounts linked</p>
                             ) : (
@@ -562,9 +694,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
 
                           {/* Demo Accounts */}
                           <div className="bg-dark/50 rounded-xl p-3 sm:p-4 border border-white/5">
-                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 sm:mb-3 flex items-center gap-1.5">
-                              <Smartphone size={10} /> Demo Accounts ({student.demo_accounts.length})
-                            </p>
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
+                              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                                <Smartphone size={10} /> Demo Accounts ({student.demo_accounts.length})
+                              </p>
+                              <div className="flex items-center gap-2 text-[9px] sm:text-[10px]">
+                                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-white/70">
+                                  <span className="text-white/30 uppercase tracking-wider">Bal</span> {getBalanceDisplay(student)}
+                                </div>
+                                <div className="rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-white/70">
+                                  <span className="text-white/30 uppercase tracking-wider">Eq</span> {getEquityDisplay(student)}
+                                </div>
+                              </div>
+                            </div>
                             {student.demo_accounts.length === 0 ? (
                               <p className="text-[10px] text-white/20 font-bold">No demo accounts linked</p>
                             ) : (
@@ -743,6 +885,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
                                 <><CheckCircle className="w-4 h-4 mr-2" /> Mark as Paid (+30 Days)</>
                               )}
                             </Button>
+                          </div>
+                        )}
+
+                        {/* Close Account — soft-close action */}
+                        {status !== 'cancelled' && (
+                          <div className="bg-red-500/5 rounded-xl p-3 sm:p-4 border border-red-500/10">
+                            <p className="text-[10px] text-red-400/60 font-black uppercase tracking-widest mb-2 sm:mb-3">Danger Zone</p>
+                            <Button
+                              onClick={() => handleCloseAccount(student.id)}
+                              disabled={closingAccount === student.id}
+                              className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 disabled:bg-slate-700 text-xs sm:text-sm"
+                            >
+                              {closingAccount === student.id ? (
+                                <><Loader className="w-4 h-4 animate-spin mr-2" /> Processing...</>
+                              ) : (
+                                <><XCircle className="w-4 h-4 mr-2" /> Close Account</>
+                              )}
+                            </Button>
+                            <p className="text-[9px] text-white/20 font-bold mt-2 leading-relaxed">
+                              Cancels subscription, deactivates trading accounts, and stops copy-trading. Data is retained.
+                            </p>
                           </div>
                         )}
                       </div>

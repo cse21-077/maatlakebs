@@ -470,14 +470,6 @@ export type Enumsubscription_statusFieldUpdateOperationsInput = {
   set?: $Enums.subscription_status
 }
 
-export type NullableDecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
-  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
 export type payment_statusCreateNestedOneWithoutUsersInput = {
   create?: Prisma.XOR<Prisma.payment_statusCreateWithoutUsersInput, Prisma.payment_statusUncheckedCreateWithoutUsersInput>
   connectOrCreate?: Prisma.payment_statusCreateOrConnectWithoutUsersInput

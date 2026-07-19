@@ -20,8 +20,20 @@ export type connection_statusModel = runtime.Types.Result.DefaultSelection<Prism
 
 export type AggregateConnection_status = {
   _count: Connection_statusCountAggregateOutputType | null
+  _avg: Connection_statusAvgAggregateOutputType | null
+  _sum: Connection_statusSumAggregateOutputType | null
   _min: Connection_statusMinAggregateOutputType | null
   _max: Connection_statusMaxAggregateOutputType | null
+}
+
+export type Connection_statusAvgAggregateOutputType = {
+  balance: runtime.Decimal | null
+  equity: runtime.Decimal | null
+}
+
+export type Connection_statusSumAggregateOutputType = {
+  balance: runtime.Decimal | null
+  equity: runtime.Decimal | null
 }
 
 export type Connection_statusMinAggregateOutputType = {
@@ -31,6 +43,9 @@ export type Connection_statusMinAggregateOutputType = {
   last_checked: Date | null
   error_message: string | null
   updated_at: Date | null
+  balance: runtime.Decimal | null
+  equity: runtime.Decimal | null
+  balance_updated_at: Date | null
 }
 
 export type Connection_statusMaxAggregateOutputType = {
@@ -40,6 +55,9 @@ export type Connection_statusMaxAggregateOutputType = {
   last_checked: Date | null
   error_message: string | null
   updated_at: Date | null
+  balance: runtime.Decimal | null
+  equity: runtime.Decimal | null
+  balance_updated_at: Date | null
 }
 
 export type Connection_statusCountAggregateOutputType = {
@@ -49,9 +67,22 @@ export type Connection_statusCountAggregateOutputType = {
   last_checked: number
   error_message: number
   updated_at: number
+  balance: number
+  equity: number
+  balance_updated_at: number
   _all: number
 }
 
+
+export type Connection_statusAvgAggregateInputType = {
+  balance?: true
+  equity?: true
+}
+
+export type Connection_statusSumAggregateInputType = {
+  balance?: true
+  equity?: true
+}
 
 export type Connection_statusMinAggregateInputType = {
   id?: true
@@ -60,6 +91,9 @@ export type Connection_statusMinAggregateInputType = {
   last_checked?: true
   error_message?: true
   updated_at?: true
+  balance?: true
+  equity?: true
+  balance_updated_at?: true
 }
 
 export type Connection_statusMaxAggregateInputType = {
@@ -69,6 +103,9 @@ export type Connection_statusMaxAggregateInputType = {
   last_checked?: true
   error_message?: true
   updated_at?: true
+  balance?: true
+  equity?: true
+  balance_updated_at?: true
 }
 
 export type Connection_statusCountAggregateInputType = {
@@ -78,6 +115,9 @@ export type Connection_statusCountAggregateInputType = {
   last_checked?: true
   error_message?: true
   updated_at?: true
+  balance?: true
+  equity?: true
+  balance_updated_at?: true
   _all?: true
 }
 
@@ -119,6 +159,18 @@ export type Connection_statusAggregateArgs<ExtArgs extends runtime.Types.Extensi
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: Connection_statusAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: Connection_statusSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: Connection_statusMinAggregateInputType
@@ -149,6 +201,8 @@ export type connection_statusGroupByArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   _count?: Connection_statusCountAggregateInputType | true
+  _avg?: Connection_statusAvgAggregateInputType
+  _sum?: Connection_statusSumAggregateInputType
   _min?: Connection_statusMinAggregateInputType
   _max?: Connection_statusMaxAggregateInputType
 }
@@ -160,7 +214,12 @@ export type Connection_statusGroupByOutputType = {
   last_checked: Date
   error_message: string | null
   updated_at: Date
+  balance: runtime.Decimal | null
+  equity: runtime.Decimal | null
+  balance_updated_at: Date | null
   _count: Connection_statusCountAggregateOutputType | null
+  _avg: Connection_statusAvgAggregateOutputType | null
+  _sum: Connection_statusSumAggregateOutputType | null
   _min: Connection_statusMinAggregateOutputType | null
   _max: Connection_statusMaxAggregateOutputType | null
 }
@@ -190,6 +249,9 @@ export type connection_statusWhereInput = {
   last_checked?: Prisma.DateTimeFilter<"connection_status"> | Date | string
   error_message?: Prisma.StringNullableFilter<"connection_status"> | string | null
   updated_at?: Prisma.DateTimeFilter<"connection_status"> | Date | string
+  balance?: Prisma.DecimalNullableFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.DecimalNullableFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.DateTimeNullableFilter<"connection_status"> | Date | string | null
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }
 
@@ -200,6 +262,9 @@ export type connection_statusOrderByWithRelationInput = {
   last_checked?: Prisma.SortOrder
   error_message?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  balance?: Prisma.SortOrderInput | Prisma.SortOrder
+  equity?: Prisma.SortOrderInput | Prisma.SortOrder
+  balance_updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   users?: Prisma.public_usersOrderByWithRelationInput
 }
 
@@ -213,6 +278,9 @@ export type connection_statusWhereUniqueInput = Prisma.AtLeast<{
   last_checked?: Prisma.DateTimeFilter<"connection_status"> | Date | string
   error_message?: Prisma.StringNullableFilter<"connection_status"> | string | null
   updated_at?: Prisma.DateTimeFilter<"connection_status"> | Date | string
+  balance?: Prisma.DecimalNullableFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.DecimalNullableFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.DateTimeNullableFilter<"connection_status"> | Date | string | null
   users?: Prisma.XOR<Prisma.Public_usersScalarRelationFilter, Prisma.public_usersWhereInput>
 }, "id" | "user_id">
 
@@ -223,9 +291,14 @@ export type connection_statusOrderByWithAggregationInput = {
   last_checked?: Prisma.SortOrder
   error_message?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  balance?: Prisma.SortOrderInput | Prisma.SortOrder
+  equity?: Prisma.SortOrderInput | Prisma.SortOrder
+  balance_updated_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.connection_statusCountOrderByAggregateInput
+  _avg?: Prisma.connection_statusAvgOrderByAggregateInput
   _max?: Prisma.connection_statusMaxOrderByAggregateInput
   _min?: Prisma.connection_statusMinOrderByAggregateInput
+  _sum?: Prisma.connection_statusSumOrderByAggregateInput
 }
 
 export type connection_statusScalarWhereWithAggregatesInput = {
@@ -238,6 +311,9 @@ export type connection_statusScalarWhereWithAggregatesInput = {
   last_checked?: Prisma.DateTimeWithAggregatesFilter<"connection_status"> | Date | string
   error_message?: Prisma.StringNullableWithAggregatesFilter<"connection_status"> | string | null
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"connection_status"> | Date | string
+  balance?: Prisma.DecimalNullableWithAggregatesFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.DecimalNullableWithAggregatesFilter<"connection_status"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"connection_status"> | Date | string | null
 }
 
 export type connection_statusCreateInput = {
@@ -246,6 +322,9 @@ export type connection_statusCreateInput = {
   last_checked?: Date | string
   error_message?: string | null
   updated_at?: Date | string
+  balance?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Date | string | null
   users: Prisma.public_usersCreateNestedOneWithoutConnection_statusInput
 }
 
@@ -256,6 +335,9 @@ export type connection_statusUncheckedCreateInput = {
   last_checked?: Date | string
   error_message?: string | null
   updated_at?: Date | string
+  balance?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Date | string | null
 }
 
 export type connection_statusUpdateInput = {
@@ -264,6 +346,9 @@ export type connection_statusUpdateInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   users?: Prisma.public_usersUpdateOneRequiredWithoutConnection_statusNestedInput
 }
 
@@ -274,6 +359,9 @@ export type connection_statusUncheckedUpdateInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type connection_statusCreateManyInput = {
@@ -283,6 +371,9 @@ export type connection_statusCreateManyInput = {
   last_checked?: Date | string
   error_message?: string | null
   updated_at?: Date | string
+  balance?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Date | string | null
 }
 
 export type connection_statusUpdateManyMutationInput = {
@@ -291,6 +382,9 @@ export type connection_statusUpdateManyMutationInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type connection_statusUncheckedUpdateManyInput = {
@@ -300,6 +394,9 @@ export type connection_statusUncheckedUpdateManyInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type connection_statusCountOrderByAggregateInput = {
@@ -309,6 +406,14 @@ export type connection_statusCountOrderByAggregateInput = {
   last_checked?: Prisma.SortOrder
   error_message?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  balance?: Prisma.SortOrder
+  equity?: Prisma.SortOrder
+  balance_updated_at?: Prisma.SortOrder
+}
+
+export type connection_statusAvgOrderByAggregateInput = {
+  balance?: Prisma.SortOrder
+  equity?: Prisma.SortOrder
 }
 
 export type connection_statusMaxOrderByAggregateInput = {
@@ -318,6 +423,9 @@ export type connection_statusMaxOrderByAggregateInput = {
   last_checked?: Prisma.SortOrder
   error_message?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  balance?: Prisma.SortOrder
+  equity?: Prisma.SortOrder
+  balance_updated_at?: Prisma.SortOrder
 }
 
 export type connection_statusMinOrderByAggregateInput = {
@@ -327,6 +435,14 @@ export type connection_statusMinOrderByAggregateInput = {
   last_checked?: Prisma.SortOrder
   error_message?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  balance?: Prisma.SortOrder
+  equity?: Prisma.SortOrder
+  balance_updated_at?: Prisma.SortOrder
+}
+
+export type connection_statusSumOrderByAggregateInput = {
+  balance?: Prisma.SortOrder
+  equity?: Prisma.SortOrder
 }
 
 export type Connection_statusNullableScalarRelationFilter = {
@@ -336,6 +452,14 @@ export type Connection_statusNullableScalarRelationFilter = {
 
 export type Enummt5_connection_statusFieldUpdateOperationsInput = {
   set?: $Enums.mt5_connection_status
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type connection_statusCreateNestedOneWithoutUsersInput = {
@@ -376,6 +500,9 @@ export type connection_statusCreateWithoutUsersInput = {
   last_checked?: Date | string
   error_message?: string | null
   updated_at?: Date | string
+  balance?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Date | string | null
 }
 
 export type connection_statusUncheckedCreateWithoutUsersInput = {
@@ -384,6 +511,9 @@ export type connection_statusUncheckedCreateWithoutUsersInput = {
   last_checked?: Date | string
   error_message?: string | null
   updated_at?: Date | string
+  balance?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Date | string | null
 }
 
 export type connection_statusCreateOrConnectWithoutUsersInput = {
@@ -408,6 +538,9 @@ export type connection_statusUpdateWithoutUsersInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type connection_statusUncheckedUpdateWithoutUsersInput = {
@@ -416,6 +549,9 @@ export type connection_statusUncheckedUpdateWithoutUsersInput = {
   last_checked?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  balance?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  equity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  balance_updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -427,6 +563,9 @@ export type connection_statusSelect<ExtArgs extends runtime.Types.Extensions.Int
   last_checked?: boolean
   error_message?: boolean
   updated_at?: boolean
+  balance?: boolean
+  equity?: boolean
+  balance_updated_at?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["connection_status"]>
 
@@ -437,6 +576,9 @@ export type connection_statusSelectCreateManyAndReturn<ExtArgs extends runtime.T
   last_checked?: boolean
   error_message?: boolean
   updated_at?: boolean
+  balance?: boolean
+  equity?: boolean
+  balance_updated_at?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["connection_status"]>
 
@@ -447,6 +589,9 @@ export type connection_statusSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   last_checked?: boolean
   error_message?: boolean
   updated_at?: boolean
+  balance?: boolean
+  equity?: boolean
+  balance_updated_at?: boolean
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["connection_status"]>
 
@@ -457,9 +602,12 @@ export type connection_statusSelectScalar = {
   last_checked?: boolean
   error_message?: boolean
   updated_at?: boolean
+  balance?: boolean
+  equity?: boolean
+  balance_updated_at?: boolean
 }
 
-export type connection_statusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "mt5_status" | "last_checked" | "error_message" | "updated_at", ExtArgs["result"]["connection_status"]>
+export type connection_statusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "mt5_status" | "last_checked" | "error_message" | "updated_at" | "balance" | "equity" | "balance_updated_at", ExtArgs["result"]["connection_status"]>
 export type connection_statusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.public_usersDefaultArgs<ExtArgs>
 }
@@ -482,6 +630,9 @@ export type $connection_statusPayload<ExtArgs extends runtime.Types.Extensions.I
     last_checked: Date
     error_message: string | null
     updated_at: Date
+    balance: runtime.Decimal | null
+    equity: runtime.Decimal | null
+    balance_updated_at: Date | null
   }, ExtArgs["result"]["connection_status"]>
   composites: {}
 }
@@ -912,6 +1063,9 @@ export interface connection_statusFieldRefs {
   readonly last_checked: Prisma.FieldRef<"connection_status", 'DateTime'>
   readonly error_message: Prisma.FieldRef<"connection_status", 'String'>
   readonly updated_at: Prisma.FieldRef<"connection_status", 'DateTime'>
+  readonly balance: Prisma.FieldRef<"connection_status", 'Decimal'>
+  readonly equity: Prisma.FieldRef<"connection_status", 'Decimal'>
+  readonly balance_updated_at: Prisma.FieldRef<"connection_status", 'DateTime'>
 }
     
 

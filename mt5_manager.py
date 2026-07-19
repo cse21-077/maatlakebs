@@ -63,7 +63,9 @@ _COMMON_FILES = os.path.join(
 )
 SIGNALS_FOLDER   = os.environ.get("SIGNALS_FOLDER",   os.path.join(_COMMON_FILES, "MaatlaKebs", "signals"))
 RESULTS_FOLDER   = os.environ.get("RESULTS_FOLDER",   os.path.join(_COMMON_FILES, "MaatlaKebs", "results"))
+STATUS_FOLDER    = os.environ.get("STATUS_FOLDER",    os.path.join(_COMMON_FILES, "MaatlaKebs", "status"))
 RESULT_SCAN_INTERVAL = int(os.environ.get("RESULT_SCAN_INTERVAL", "5"))
+STATUS_SCAN_INTERVAL = int(os.environ.get("STATUS_SCAN_INTERVAL", "30"))
 STALE_SIGNAL_SECONDS = int(os.environ.get("STALE_SIGNAL_SECONDS", "60"))
 STUDENT_CACHE_SECONDS = 30
 CONNECTION_CHECK_INTERVAL = 300  # 5 min fallback; primary checks are on-demand via /check-connections
@@ -76,6 +78,7 @@ session.mount("https://", adapter)
 
 os.makedirs(SIGNALS_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
+os.makedirs(STATUS_FOLDER, exist_ok=True)
 
 # ── Threading Locks ───────────────────────────────────────────
 _signal_locks = {}
@@ -91,6 +94,10 @@ def _get_lock(login: str) -> threading.Lock:
 _students_cache = []
 _students_cache_time = 0
 _students_cache_lock = threading.Lock()
+
+_running_logins_cache = (set(), 0.0)
+_running_logins_lock = threading.Lock()
+
 
 # ── Helpers ───────────────────────────────────────────────────
 def supabase_headers():
@@ -182,7 +189,14 @@ def push_results_to_supabase(results: list):
     except Exception as e:
         logger.error(f"Supabase push exception: {e}")
 
-def update_connection_status(user_id: str, status: str, error_message: str = None):
+def update_connection_status(
+    user_id: str,
+    status: str,
+    error_message: str = None,
+    balance: float = None,
+    equity: float = None,
+    balance_updated_at: str = None,
+):
     try:
         payload = {
             "user_id":       user_id,
@@ -191,6 +205,12 @@ def update_connection_status(user_id: str, status: str, error_message: str = Non
             "error_message": error_message,
             "updated_at":    datetime.now(timezone.utc).isoformat()
         }
+        if balance is not None:
+            payload["balance"] = balance
+        if equity is not None:
+            payload["equity"] = equity
+        if balance_updated_at is not None:
+            payload["balance_updated_at"] = balance_updated_at
         patch_url = f"{SUPABASE_URL}/rest/v1/connection_status?user_id=eq.{user_id}"
         resp = session.patch(patch_url, json=payload, headers=supabase_headers(), timeout=5)
         if resp.status_code == 404:
@@ -214,25 +234,57 @@ def cleanup_stale_files():
                 os.remove(f)
         except Exception:
             pass
+    for f in glob.glob(os.path.join(STATUS_FOLDER, "*.json")):
+        try:
+            if now - os.path.getmtime(f) > 300:
+                os.remove(f)
+        except Exception:
+            pass
 
-def get_running_terminal_paths() -> list:
-    """Get list of running terminal64.exe executable paths via WMIC."""
+def get_running_logins() -> set:
+    """Query all running terminal64.exe processes and read Login= from their startup.ini.
+    Returns a set of MT5 login numbers (as strings) that are currently active.
+    This is the ONLY reliable way to know which account is logged into each terminal.
+    """
+    ps_cmd = (
+        "Get-CimInstance Win32_Process -Filter \"name='terminal64.exe'\" | ForEach-Object { "
+        "$folder = Split-Path $_.ExecutablePath -Parent; "
+        "$ini = Join-Path $folder 'startup.ini'; "
+        "if (Test-Path $ini) { "
+        "$m = (Get-Content $ini -Raw | Select-String 'Login=(\\d+)').Matches; "
+        "if ($m) { $m.Groups[1].Value } } }"
+    )
     try:
         result = subprocess.run(
-            ["wmic", "process", "where", "name=\"terminal64.exe\"", "get", "ExecutablePath", "/value"],
-            capture_output=True, text=True, timeout=10
+            ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_cmd],
+            capture_output=True, text=True, timeout=15
         )
-        paths = []
-        for line in result.stdout.split("\n"):
+        logins = set()
+        for line in result.stdout.splitlines():
             line = line.strip()
-            if line.startswith("ExecutablePath="):
-                path = line.split("=", 1)[1].strip()
-                if path:
-                    paths.append(path.replace("/", "\\"))
-        return paths
+            if line and line.isdigit():
+                logins.add(line)
+        if logins:
+            logger.info(f"Detected {len(logins)} active logins from running terminals")
+        return logins
     except Exception as e:
-        logger.error(f"Failed to query running terminals: {e}")
-        return []
+        logger.error(f"Failed to query running terminal logins: {e}")
+        return set()
+
+
+def get_running_logins_cached(ttl: int = 10) -> set:
+    global _running_logins_cache
+    now = time.time()
+    with _running_logins_lock:
+        cached_logins, cached_ts = _running_logins_cache
+        if now - cached_ts < ttl:
+            return cached_logins
+
+    fresh = get_running_logins()
+    with _running_logins_lock:
+        _running_logins_cache = (fresh, now)
+    return fresh
+
 
 def write_signal_files(signal_data: dict, students: list) -> tuple:
     batch_id = str(uuid.uuid4())
@@ -364,38 +416,39 @@ def refresh_students():
 
 @app.route("/check-connections", methods=["POST"])
 def check_connections():
-    """On-demand connection check for ALL active students. Updates Supabase immediately."""
+    """On-demand connection check for ALL active students. Updates Supabase immediately.
+    Matches by MT5 login ID read from each running terminal's startup.ini —
+    this is the only way to know the CORRECT account is logged in.
+    """
     try:
         students = fetch_active_students(force_refresh=True)
-        running_paths = get_running_terminal_paths()
+        running_logins = get_running_logins_cached()
         
         updated = []
         for student in students:
             user_id = student.get("user_id")
-            folder = student.get("folder_path", "")
             login = str(student.get("mt5_login", ""))
+            folder = student.get("folder_path", "")
             
             if not folder:
                 update_connection_status(user_id, "DISCONNECTED", "No folder_path assigned")
                 updated.append({"user_id": user_id, "mt5_login": login, "status": "DISCONNECTED", "reason": "no_folder"})
                 continue
             
-            folder_normalized = folder.replace("/", "\\")
-            is_running = any(folder_normalized in path for path in running_paths)
+            # The ONLY reliable check: is this login active in a running terminal?
+            is_connected = login in running_logins
             
-            has_recent_activity = False
-            if login:
-                result_file = os.path.join(RESULTS_FOLDER, f"{login}_result.json")
-                if os.path.exists(result_file):
-                    if time.time() - os.path.getmtime(result_file) < 300:
-                        has_recent_activity = True
-            
-            if is_running or has_recent_activity:
-                update_connection_status(user_id, "CONNECTED")
-                updated.append({"user_id": user_id, "mt5_login": login, "status": "CONNECTED"})
+            if is_connected:
+                status = "CONNECTED"
+                error_msg = None
+                logger.info(f"CONNECTED {login}")
             else:
-                update_connection_status(user_id, "DISCONNECTED", "Terminal not running")
-                updated.append({"user_id": user_id, "mt5_login": login, "status": "DISCONNECTED", "reason": "not_running"})
+                status = "DISCONNECTED"
+                error_msg = "Terminal not running or wrong account logged in"
+                logger.info(f"DISCONNECTED {login}")
+            
+            update_connection_status(user_id, status, error_msg)
+            updated.append({"user_id": user_id, "mt5_login": login, "status": status, "error": error_msg})
         
         connected_count = sum(1 for u in updated if u["status"] == "CONNECTED")
         logger.info(f"Live check complete: {connected_count}/{len(updated)} connected")
@@ -468,10 +521,11 @@ def result_collector_loop():
                         # any files written before FILE_ANSI was added to the EA
                         try:
                             with open(fp, "r", encoding="utf-8-sig") as f:
-                                batch.append(json.load(f))
+                                data = json.load(f)
                         except (UnicodeDecodeError, ValueError):
                             with open(fp, "r", encoding="utf-16") as f:
-                                batch.append(json.load(f))
+                                data = json.load(f)
+                        batch.append(data)
                         os.remove(fp)
                     except Exception as e:
                         logger.error(f"Bad result file {fp}: {e}")
@@ -486,12 +540,14 @@ def result_collector_loop():
         time.sleep(RESULT_SCAN_INTERVAL)
 
 def connection_monitor_loop():
-    """Monitor running MT5 terminals and update connection_status in Supabase."""
+    """Monitor running MT5 terminals and update connection_status in Supabase.
+    Matches by MT5 login ID read from each terminal's startup.ini.
+    """
     logger.info("Connection monitor started")
     while True:
         try:
             students = fetch_active_students(force_refresh=True)
-            running_paths = get_running_terminal_paths()
+            running_logins = get_running_logins_cached()
             
             for student in students:
                 user_id = student.get("user_id")
@@ -502,27 +558,74 @@ def connection_monitor_loop():
                     update_connection_status(user_id, "DISCONNECTED", "No folder_path assigned")
                     continue
                 
-                # Check if terminal process is running from this folder
-                folder_normalized = folder.replace("/", "\\")
-                is_running = any(folder_normalized in path for path in running_paths)
-                
-                # Also check for recent EA activity (result files)
-                has_recent_activity = False
-                if login:
-                    result_file = os.path.join(RESULTS_FOLDER, f"{login}_result.json")
-                    if os.path.exists(result_file):
-                        if time.time() - os.path.getmtime(result_file) < 300:
-                            has_recent_activity = True
-                
-                if is_running or has_recent_activity:
+                is_connected = login in running_logins
+                if is_connected:
                     update_connection_status(user_id, "CONNECTED")
                 else:
-                    update_connection_status(user_id, "DISCONNECTED", "Terminal not running")
+                    update_connection_status(user_id, "DISCONNECTED", "Terminal not running or wrong account logged in")
                     
         except Exception as e:
             logger.error(f"Connection monitor error: {e}")
         
         time.sleep(CONNECTION_CHECK_INTERVAL)
+
+
+def status_collector_loop():
+    """Collect periodic status snapshots from the shared status folder.
+    Only accepts files for accounts that are currently logged into a running terminal.
+    """
+    logger.info("Status collector started")
+    while True:
+        try:
+            students = fetch_active_students(force_refresh=True)
+            student_map = {
+                str(student.get("mt5_login", "")): student.get("user_id")
+                for student in students
+                if student.get("mt5_login")
+            }
+            running_logins = get_running_logins_cached()
+
+            files = glob.glob(os.path.join(STATUS_FOLDER, "*.json"))
+            if files:
+                for fp in files:
+                    try:
+                        with open(fp, "r", encoding="utf-8-sig") as handle:
+                            data = json.load(handle)
+                    except Exception as exc:
+                        logger.warning(f"Bad status file {fp}: {exc}")
+                        continue
+
+                    login = str(data.get("login", "") or "")
+                    if not login or login not in running_logins:
+                        continue
+
+                    user_id = student_map.get(login)
+                    if not user_id:
+                        continue
+
+                    balance = data.get("balance")
+                    equity = data.get("equity")
+                    timestamp = data.get("timestamp")
+                    balance_updated_at = None
+                    if timestamp is not None:
+                        try:
+                            balance_updated_at = datetime.fromtimestamp(int(timestamp), tz=timezone.utc).isoformat()
+                        except (TypeError, ValueError):
+                            balance_updated_at = None
+
+                    update_connection_status(
+                        user_id,
+                        "CONNECTED",
+                        None,
+                        None if balance is None else float(balance),
+                        None if equity is None else float(equity),
+                        balance_updated_at,
+                    )
+                    os.remove(fp)
+            cleanup_stale_files()
+        except Exception as e:
+            logger.error(f"Status collector error: {e}")
+        time.sleep(STATUS_SCAN_INTERVAL)
 
 # ── Entry Point ───────────────────────────────────────────────
 if __name__ == "__main__":
@@ -535,6 +638,7 @@ if __name__ == "__main__":
     
     threading.Thread(target=result_collector_loop, daemon=True).start()
     threading.Thread(target=connection_monitor_loop, daemon=True).start()
+    threading.Thread(target=status_collector_loop, daemon=True).start()
     
     try:
         from waitress import serve

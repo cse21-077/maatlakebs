@@ -117,6 +117,16 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: invoicesError.message });
       }
 
+      // Fetch connection status snapshots for the dashboard
+      const { data: connectionStatuses, error: connectionStatusError } = await supabase
+        .from('connection_status')
+        .select('user_id, mt5_status, balance, equity, balance_updated_at, last_checked, error_message, updated_at');
+
+      if (connectionStatusError) {
+        console.error('❌ Failed to fetch connection status:', connectionStatusError);
+        return res.status(500).json({ error: connectionStatusError.message });
+      }
+
       // Build lookup maps
       const accountsByUser = {};
       const ghostOnlyUsers = new Set();
@@ -144,6 +154,11 @@ export default async function handler(req, res) {
         invoicesByUser[inv.user_id].push(inv);
       }
 
+      const connectionStatusByUser = {};
+      for (const status of connectionStatuses || []) {
+        connectionStatusByUser[status.user_id] = status;
+      }
+
       // Enrich students — hide ghost-only users and filter out ghost accounts
       const enriched = (students || [])
         .filter(student => !ghostOnlyUsers.has(student.id))
@@ -160,6 +175,7 @@ export default async function handler(req, res) {
             payment_status: paymentByUser[student.id] || null,
             pending_invoices: invoicesByUser[student.id] || [],
             has_proof_submitted: (invoicesByUser[student.id] || []).some(i => i.payment_status === 'proof_submitted' && i.proof_of_payment_url),
+            connection_status: connectionStatusByUser[student.id] || null,
           };
         });
 
@@ -339,6 +355,149 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, account: data });
     } catch (error) {
       console.error('❌ PATCH /api/admin/students error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DELETE — soft-close a student account
+  // ══════════════════════════════════════════════════════════════════════════
+  if (req.method === 'DELETE') {
+    const { user_id, admin_id } = req.body;
+
+    if (!user_id || !admin_id) {
+      return res.status(400).json({ error: 'Missing user_id or admin_id' });
+    }
+
+    const adminCheck = await verifyAdmin(admin_id);
+    if (!adminCheck.ok) {
+      return res.status(403).json({ error: 'Not authorized as admin', debug: adminCheck });
+    }
+
+    try {
+      const nowIso = new Date().toISOString();
+
+      // Cancel subscription
+      const { error: paymentError } = await supabase
+        .from('payment_status')
+        .upsert(
+          { user_id, subscription_status: 'cancelled', updated_at: nowIso },
+          { onConflict: 'user_id' }
+        );
+
+      if (paymentError) {
+        console.error('❌ Failed to cancel payment_status:', paymentError);
+        return res.status(500).json({ error: paymentError.message });
+      }
+
+      // Deactivate all trading accounts
+      const { error: accountsError } = await supabase
+        .from('student_accounts')
+        .update({ is_active: false, updated_at: nowIso })
+        .eq('user_id', user_id);
+
+      if (accountsError) {
+        console.error('❌ Failed to deactivate student_accounts:', accountsError);
+        return res.status(500).json({ error: accountsError.message });
+      }
+
+      // Ensure copy-trading is paused
+      const { error: riskError } = await supabase
+        .from('risk_profiles')
+        .update({ pause_copy: true, updated_at: nowIso })
+        .eq('user_id', user_id);
+
+      if (riskError) {
+        console.error('❌ Failed to pause risk_profile:', riskError);
+        return res.status(500).json({ error: riskError.message });
+      }
+
+      // Best-effort: stop the MT5 terminal on Contabo (do not fail the request)
+      const mt5ManagerUrl = process.env.MT5_MANAGER_URL;
+      const provisionSecret = process.env.PROVISION_SECRET;
+      if (mt5ManagerUrl && provisionSecret) {
+        try {
+          const depRes = await fetch(`${mt5ManagerUrl}/deprovision`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Provision-Secret': provisionSecret,
+            },
+            body: JSON.stringify({ user_id }),
+          });
+          const depData = await depRes.json();
+          if (!depRes.ok) {
+            console.warn('⚠️ MT5 deprovision returned error:', depData.error);
+          } else {
+            console.log('✅ MT5 deprovisioned:', depData.folder_path);
+          }
+        } catch (depErr) {
+          console.warn('⚠️ Could not reach MT5 manager for deprovision:', depErr.message);
+        }
+      }
+
+      await supabase.from('system_events').insert({
+        event_type: 'admin_close_account',
+        actor_id: admin_id,
+        payload: { user_id },
+        severity: 'warning',
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Account closed. Subscription cancelled, trading disabled, and MT5 terminal deprovisioned.',
+      });
+    } catch (error) {
+      console.error('❌ DELETE /api/admin/students error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PUT — mark active subscriptions as overdue when next_due has passed
+  // ══════════════════════════════════════════════════════════════════════════
+  if (req.method === 'PUT') {
+    const { admin_id, cron_secret } = req.body;
+    const cronEnvSecret = process.env.CRON_SECRET;
+
+    let authorized = false;
+    if (cron_secret && cronEnvSecret && cron_secret === cronEnvSecret) {
+      authorized = true;
+    } else if (admin_id) {
+      const adminCheck = await verifyAdmin(admin_id);
+      authorized = adminCheck.ok;
+    }
+
+    if (!authorized) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    try {
+      const nowIso = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('payment_status')
+        .update({ subscription_status: 'overdue', updated_at: nowIso })
+        .eq('subscription_status', 'active')
+        .lt('next_due', nowIso)
+        .not('next_due', 'is', null)
+        .select('id');
+
+      if (error) {
+        console.error('❌ Failed to mark overdue subscriptions:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      const count = data ? data.length : 0;
+      console.log(`✅ Marked ${count} subscription(s) as overdue`);
+
+      return res.status(200).json({
+        success: true,
+        overdue_count: count,
+        message: `${count} subscription(s) marked as overdue.`,
+      });
+    } catch (error) {
+      console.error('❌ PUT /api/admin/students error:', error);
       return res.status(500).json({ error: error.message });
     }
   }

@@ -3177,7 +3177,8 @@ export const Custom_oauth_providersScalarFieldEnum = {
   userinfo_url: 'userinfo_url',
   jwks_uri: 'jwks_uri',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  custom_claims_allowlist: 'custom_claims_allowlist'
 } as const
 
 export type Custom_oauth_providersScalarFieldEnum = (typeof Custom_oauth_providersScalarFieldEnum)[keyof typeof Custom_oauth_providersScalarFieldEnum]
@@ -3525,7 +3526,10 @@ export const Connection_statusScalarFieldEnum = {
   mt5_status: 'mt5_status',
   last_checked: 'last_checked',
   error_message: 'error_message',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  balance: 'balance',
+  equity: 'equity',
+  balance_updated_at: 'balance_updated_at'
 } as const
 
 export type Connection_statusScalarFieldEnum = (typeof Connection_statusScalarFieldEnum)[keyof typeof Connection_statusScalarFieldEnum]
@@ -4003,6 +4007,20 @@ export type ListEnummt5_connection_statusFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
  * Reference to a field of type 'heartbeat_status'
  */
 export type Enumheartbeat_statusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'heartbeat_status'>
@@ -4027,20 +4045,6 @@ export type Enumsubscription_statusFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'subscription_status[]'
  */
 export type ListEnumsubscription_statusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'subscription_status[]'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 

@@ -12,13 +12,21 @@ import { supabase } from '../lib/supabase';
 import { DEFAULT_TRADER_ID } from '../lib/database.types';
 import type { SubscriptionStatus, ConnectionState, RiskProfileRow, StudentAccountRow, PaymentStatusRow } from '../lib/database.types';
 import { Button } from './shared';
-
 import { TerminalProtocol } from './TerminalProtocol';
 import { MembershipProtocol } from './MembershipProtocol';
 import { SupportProtocol } from './SupportProtocol';
 import { TechSupportDashboard } from './TechSupportDashboard';
 import { AdminDashboard } from './AdminDashboard';
 import { ChangePassword } from './ChangePassword';
+
+// ── Payment status helpers ───────────────────────────────────────────────────
+function isSubscriptionActive(status: PaymentStatusRow | null | undefined): boolean {
+    if (!status) return false;
+    // Only 'active' subscriptions with a future next_due are considered confirmed.
+    if (status.subscription_status !== 'active') return false;
+    if (!status.next_due) return false;
+    return new Date(status.next_due) > new Date();
+}
 
 type AppView = 'HOME' | 'CONFIG' | 'BILLING' | 'SUPPORT';
 type UIPaymentStatus = 'UNPAID' | 'CONFIRMED';
@@ -71,7 +79,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             // Fetch relevant data in parallel for speed
             const [acctRes, payRes, riskRes, userRes] = await Promise.all([
                 supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).eq('is_active', true).maybeSingle() as any,
-                supabase.from('payment_status').select('subscription_status').eq('user_id', uid).maybeSingle() as any,
+                supabase.from('payment_status').select('subscription_status, next_due').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('users').select('role').eq('id', uid).maybeSingle() as any,
             ]);
@@ -85,7 +93,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
             }
 
             if (payRes.data) {
-                setPaymentStatus(payRes.data.subscription_status === 'active' ? 'CONFIRMED' : 'UNPAID');
+                setPaymentStatus(isSubscriptionActive(payRes.data) ? 'CONFIRMED' : 'UNPAID');
             }
 
             if (riskRes.data) {

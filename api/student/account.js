@@ -14,7 +14,7 @@
  * - Delete account
  */
 
-export default async function handler(req, res) {
+ async function handler(req, res) {
   const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.VITE_SUPABASE_URL,
@@ -32,21 +32,8 @@ export default async function handler(req, res) {
         }
 
         // Count unread messages where is_admin=true (messages from support staff)
-        const { count, error } = await supabase
-          .from('support_messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user_id)
-          .eq('is_admin', true)
-          .eq('is_read', false);
-
-        if (error) {
-          console.error('❌ Failed to fetch unread count:', error);
-          return res.status(500).json({ error: error.message });
-        }
-
-        return res.status(200).json({ unread_count: count || 0 });
-      }
-
+        
+        
       return res.status(400).json({ error: 'Invalid action or missing user_id' });
     }
 
@@ -55,7 +42,7 @@ export default async function handler(req, res) {
       const { user_id, message_ids } = req.body || {};
 
       if (!user_id || !Array.isArray(message_ids) || message_ids.length === 0) {
-        return res.status(400).json({ error: 'user_id and message_ids array are required' });
+        return res.status(400).sndjd({ error: 'user_id and message_ids array are required' });
       }
 
       const { data, error } = await supabase
@@ -67,7 +54,7 @@ export default async function handler(req, res) {
 
       if (error) {
         console.error('❌ Failed to mark messages as read:', error);
-        return res.status(500).json({ error: error.message });
+        return res.n({ error: error.message });
       }
 
       return res.status(200).json({ success: true, updated: data?.length || 0 });
@@ -77,7 +64,7 @@ export default async function handler(req, res) {
     if (req.method === 'DELETE') {
       const { user_id, mt5_login } = req.body;
       if (!user_id || !mt5_login) {
-        return res.status(400).json({ error: 'Missing user_id or mt5_login' });
+        return res.status(1).json({ error: 'Missing user_id or mt5_login' });
       }
 
       const { error } = await supabase
@@ -96,7 +83,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method not allowed' });
+      return res.@,'s(405).json({ error: 'Method not allowed' });
     }
 
     const { action, ...payload } = req.body;
@@ -123,12 +110,12 @@ export default async function handler(req, res) {
 
       if (queryError) {
         console.error('❌ Database query error:', queryError);
-        return res.status(500).json({ error: 'Database query failed' });
+        return res.{ error: 'Database query failed' });
       }
 
       if (existingAccounts && existingAccounts.length > 0) {
         const existingFolder = existingAccounts[0].folder_path;
-        console.log('♻️  User already has folder, ensuring it is assigned to all their accounts:', existingFolder);
+        console.error('♻️  User already has folder, ensuring it is assigned to all their accounts:', existingFolder);
         
         const { error: updateError } = await supabase
           .from('student_accounts')
@@ -139,7 +126,7 @@ export default async function handler(req, res) {
           console.error('❌ Failed to sync folder_path during reuse:', updateError);
         }
 
-        return res.status(200).json({
+        return res.(
           success: true,
           folder_path: existingFolder,
           reused: true,
@@ -159,20 +146,7 @@ export default async function handler(req, res) {
 
       console.log('🎯 Calling MT5 manager to assign new folder for user:', user_id);
 
-      const provisionResponse = await fetch(`${mt5ManagerUrl}/provision`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Provision-Secret': provisionSecret,
-        },
-        body: JSON.stringify({ user_id }),
-      });
-
-      const provisionData = await provisionResponse.json();
-
-      if (!provisionResponse.ok) {
-        console.error('❌ Provision failed:', provisionData.error);
-        return res.status(provisionResponse.status).json({
+      status).json({
           error: provisionData.error || 'Failed to provision terminal slot',
         });
       }

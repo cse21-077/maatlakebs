@@ -1,3 +1,14 @@
+/**
+ * Provision a terminal for a student's active MT5 account.
+ *
+ * POST /api/provision-terminal  { user_id }
+ *
+ * The bridge (final/bridge.py on the Windows VPS) clones a terminal slot,
+ * installs the Student EA, writes startup.ini and launches MT5. Copying does
+ * NOT start here — the account is enrolled without a mentor assignment; an
+ * admin approves payment and assigns the mentor separately.
+ */
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -10,20 +21,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'user_id is required' });
     }
 
-    // Import Supabase client
     const { createClient } = await import('@supabase/supabase-js');
     const supabase = createClient(
-      process.env.SUPABASE_URL,
+      process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_KEY
     );
 
-    // ── Step 1: Check if user already has a folder (folder reuse for demo→real flow) ──
-    console.log('🔍 Checking if user has existing folder:', user_id);
-    const { data: existingAccounts, error: queryError } = await supabase
+    // The account that should be running: the user's active one
+    const { data: accounts, error: queryError } = await supabase
       .from('student_accounts')
-      .select('folder_path')
+      .select('id, mt5_login, mt5_server, encrypted_password, folder_path')
       .eq('user_id', user_id)
-      .not('folder_path', 'is', null)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (queryError) {
@@ -31,64 +41,59 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Database query failed' });
     }
 
-    if (existingAccounts && existingAccounts.length > 0) {
-      const existingFolder = existingAccounts[0].folder_path;
-      console.log('♻️  User already has folder, ensuring it is assigned to all their accounts:', existingFolder);
-      
-      // Update ALL accounts for this user to ensure the active one gets the folder
-      const { error: updateError } = await supabase
-        .from('student_accounts')
-        .update({ folder_path: existingFolder })
-        .eq('user_id', user_id);
+    if (!accounts || accounts.length === 0) {
+      return res.status(404).json({ error: 'No active MT5 account found for this user' });
+    }
 
-      if (updateError) {
-        console.error('❌ Failed to sync folder_path during reuse:', updateError);
-        // We continue anyway as the UI might retry or the path might already be there
+    const account = accounts[0];
+
+    if (!account.encrypted_password) {
+      return res.status(400).json({ error: 'Account has no password stored; re-enter MT5 credentials' });
+    }
+
+    const { bridgeFetch } = await import('./_lib/bridge.js');
+
+    let bridge;
+    try {
+      bridge = await bridgeFetch('/v1/accounts', {
+        method: 'POST',
+        body: {
+          login: String(account.mt5_login),
+          password: account.encrypted_password,
+          server: account.mt5_server,
+        },
+        timeoutMs: 60000, // slot clone + terminal launch can be slow
+      });
+    } catch (err) {
+      if (err.code === 'BRIDGE_NOT_CONFIGURED') {
+        return res.status(503).json({ error: err.message });
       }
+      console.error('❌ Bridge unreachable during provision:', err.message);
+      return res.status(502).json({ error: 'MT5 bridge unreachable', details: err.message });
+    }
 
-      return res.status(200).json({
-        success: true,
-        folder_path: existingFolder,
-        reused: true,
+    if (!bridge.ok) {
+      console.error('❌ Bridge provision failed:', bridge.data);
+      return res.status(bridge.status >= 400 && bridge.status < 600 ? bridge.status : 502).json({
+        error: bridge.data?.error || 'Failed to provision terminal',
       });
     }
 
-    // ── Step 2: No folder exists, call mt5_manager to assign new one ──
-    const mt5ManagerUrl = process.env.MT5_MANAGER_URL;
-    const provisionSecret = process.env.PROVISION_SECRET;
+    const folderPath = bridge.data?.folder_path || account.folder_path;
 
-    if (!mt5ManagerUrl || !provisionSecret) {
-      console.warn('⚠️ MT5_MANAGER_URL or PROVISION_SECRET not configured');
-      return res.status(503).json({ 
-        error: 'MT5 manager not configured',
-        note: 'Set MT5_MANAGER_URL and PROVISION_SECRET environment variables'
-      });
+    // Remember the slot the bridge assigned
+    if (folderPath && folderPath !== account.folder_path) {
+      await supabase
+        .from('student_accounts')
+        .update({ folder_path: folderPath })
+        .eq('id', account.id);
     }
 
-    console.log('🎯 Calling MT5 manager to assign new folder for user:', user_id);
-
-    const provisionResponse = await fetch(`${mt5ManagerUrl}/provision`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Provision-Secret': provisionSecret,
-      },
-      body: JSON.stringify({ user_id }),
-    });
-
-    const provisionData = await provisionResponse.json();
-
-    if (!provisionResponse.ok) {
-      console.error('❌ Provision failed:', provisionData.error);
-      return res.status(provisionResponse.status).json({
-        error: provisionData.error || 'Failed to provision terminal slot',
-      });
-    }
-
-    console.log('✅ Terminal provisioned:', provisionData.folder_path);
-    res.status(200).json({
+    console.log(`✅ Terminal provisioned for login ${account.mt5_login}:`, folderPath);
+    return res.status(200).json({
       success: true,
-      folder_path: provisionData.folder_path,
+      folder_path: folderPath,
+      launched: bridge.data?.launched !== false,
       reused: false,
     });
 
@@ -96,7 +101,7 @@ export default async function handler(req, res) {
     console.error('❌ Provision error:', error);
     res.status(500).json({
       error: error.message,
-      details: 'Failed to provision terminal slot',
+      details: 'Failed to provision terminal',
     });
   }
 }

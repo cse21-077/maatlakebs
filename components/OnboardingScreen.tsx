@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle2, CheckCircle, ShieldAlert } from 'lucide-reac
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_TRADER_ID } from '../lib/database.types';
-import { Button } from './shared';
+import { Button, parseJson } from './shared';
 
 interface Props { session: Session; onComplete: () => void; }
 
@@ -30,7 +30,10 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
         const isGuest = session.user.id === '00000000-0000-4000-a000-000000000000';
 
         if (!isGuest) {
-            // Create or update risk profile via backend API (RLS bypass)
+            // Risk profile creation is currently disabled during terms acceptance.
+            // The API call is intentionally commented out until backend onboarding
+            // behavior is restored.
+            /*
             const riskRes = await fetch('/api/upsert-risk-profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -46,7 +49,7 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
             });
 
             if (!riskRes.ok) {
-                const riskErr = await riskRes.json();
+                const riskErr = await parseJson(riskRes).catch((err: Error) => ({ error: err.message }));
                 console.error('Onboarding Error:', riskErr);
                 setError('System error: ' + (riskErr.error || 'Failed to create risk profile'));
                 setLoading(false);
@@ -65,6 +68,7 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
                 setLoading(false);
                 return;
             }
+            */
         }
 
         setLoading(false);

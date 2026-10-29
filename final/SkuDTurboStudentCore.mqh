@@ -1,0 +1,633 @@
+// SkuD student execution EA. Runs only on VPS-managed follower accounts.
+#property strict
+#property version "8.10"
+
+input string BridgeUrl = "http://127.0.0.1:8765";
+// Fixed at compile time on purpose. Chart profiles (.chr) can only override
+// `input` parameters — a plain global cannot be touched — so a stale token
+// saved in a chart profile can never lock a terminal out with 401s again.
+input string EaToken = "";
+input int PollSeconds = 1;
+input int SlippagePoints = 20;
+// Fixed list, not an input: chart profiles cannot override it, so a stale
+// .chr can never resurrect old symbol names or typos on any terminal. Full
+// Deriv coverage (30 forex/metals + 19 synthetic indices by their MT5 names).
+string ReportSymbols = "EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,AUDUSD,NZDUSD,EURGBP,EURJPY,GBPJPY,EURCHF,EURCAD,EURAUD,EURNZD,GBPCHF,GBPCAD,GBPAUD,GBPNZD,AUDJPY,AUDCHF,AUDCAD,AUDNZD,CADJPY,CADCHF,CHFJPY,NZDJPY,NZDCHF,NZDCAD,XAUUSD,XAGUSD,Volatility 10 Index,Volatility 25 Index,Volatility 50 Index,Volatility 75 Index,Volatility 100 Index,Volatility 10 (1s) Index,Volatility 25 (1s) Index,Volatility 50 (1s) Index,Volatility 75 (1s) Index,Volatility 100 (1s) Index,Boom 500 Index,Boom 1000 Index,Crash 500 Index,Crash 1000 Index,Step Index 10,Step Index 25,Step Index 50,Step Index 75,Step Index 100";
+input int ReportSeconds = 3;
+
+ulong g_last_status_ms = 0;
+ulong g_last_report_ms = 0;
+ulong g_last_report_warn_ms = 0;
+ulong g_last_symbol_warn_ms = 0;
+ulong g_last_status_warn_ms = 0;
+string g_last_response_headers = "";
+string g_pending_result_id = "";
+string g_pending_result_path = "";
+string g_pending_result_body = "";
+string g_order_comment = "SkuD Turbo";
+
+int OnInit()
+{
+   if(PollSeconds < 1 || ReportSeconds < 1 || StringLen(EaToken) < 32)
+      return INIT_PARAMETERS_INCORRECT;
+   EventSetTimer(PollSeconds);
+   Print("SkuD Student EA build 8.10 ready. MT5 login: ", (long)AccountInfoInteger(ACCOUNT_LOGIN));
+   Print("Allow WebRequest for ", BridgeUrl, " in MT5 Options > Expert Advisors.");
+   return INIT_SUCCEEDED;
+}
+
+void OnDeinit(const int reason)
+{
+   EventKillTimer();
+}
+
+void OnTimer()
+{
+   if(GetTickCount64() - g_last_status_ms >= 10000)
+   {
+      SendStatus();
+      g_last_status_ms = GetTickCount64();
+   }
+   if(!TerminalInfoInteger(TERMINAL_CONNECTED) || AccountInfoInteger(ACCOUNT_LOGIN) <= 0)
+      return;
+   if(GetTickCount64() - g_last_report_ms >= (ulong)ReportSeconds * 1000)
+   {
+      g_last_report_ms = GetTickCount64();
+      ReportPrices();
+   }
+   PollBridge();
+   PollCloses();
+}
+
+string AuthHeaders()
+{
+   return "Authorization: Bearer " + EaToken + "\r\nContent-Type: application/json\r\n";
+}
+
+bool HttpRequest(const string method, const string url, const string body,
+                 string &response, int &http_status)
+{
+   char data[];
+   char result[];
+   string result_headers;
+   if(StringLen(body) > 0)
+   {
+      StringToCharArray(body, data, 0, WHOLE_ARRAY, CP_UTF8);
+      if(ArraySize(data) > 0 && data[ArraySize(data) - 1] == 0)
+         ArrayResize(data, ArraySize(data) - 1);
+   }
+   else
+      ArrayResize(data, 0);
+
+   ResetLastError();
+   http_status = WebRequest(method, url, AuthHeaders(), 5000, data, result, result_headers);
+   g_last_response_headers = result_headers;
+   if(http_status == -1)
+   {
+      Print("SkuD WebRequest failed: ", GetLastError(), " (check MT5 WebRequest allowlist)");
+      response = "";
+      return false;
+   }
+   response = CharArrayToString(result, 0, WHOLE_ARRAY, CP_UTF8);
+   return true;
+}
+
+void PollBridge()
+{
+   if(StringLen(g_pending_result_id) > 0)
+   {
+      string retry_response;
+      int retry_status;
+      if(!HttpRequest("POST", BridgeUrl + g_pending_result_path,
+                      g_pending_result_body, retry_response, retry_status) || retry_status != 200)
+      {
+         Print("SkuD result retry pending for command ", g_pending_result_id,
+               ", HTTP ", retry_status, ", response: ", retry_response);
+         return;
+      }
+      Print("SkuD result retry acknowledged for command ", g_pending_result_id);
+      g_pending_result_id = "";
+      g_pending_result_path = "";
+      g_pending_result_body = "";
+   }
+
+   // Drain the queue in a tight loop: claim -> execute -> ack, until the bridge
+   // returns 204 (empty), an error, or the per-tick cap. This is what lets a
+   // 100-order batch land in seconds instead of one order per timer tick.
+   int processed = 0;
+   while(processed < 150)
+   {
+      string url = BridgeUrl + "/v1/commands/next?login=" + IntegerToString((int)AccountInfoInteger(ACCOUNT_LOGIN));
+      string response;
+      int status;
+      if(!HttpRequest("GET", url, "", response, status)) break;
+      if(status == 204 || status == 401 || status == 403) break;
+      if(status != 200 || StringLen(response) == 0) break;
+
+      string fields[];
+      ushort separator = StringGetCharacter("|", 0);
+      int count = StringSplit(response, separator, fields);
+      if(count != 9 && count != 10)
+      {
+         Print("SkuD received malformed command: ", response);
+         break;
+      }
+
+      string command_id = fields[0];
+      string symbol = fields[1];
+      string order_type = fields[2];
+      double volume = StringToDouble(fields[3]);
+      double entry_price = StringToDouble(fields[4]);
+      bool tp_enabled = fields[5] == "1";
+      double tp_distance = StringToDouble(fields[6]);
+      bool sl_enabled = fields[7] == "1";
+      double sl_distance = StringToDouble(fields[8]);
+      g_order_comment = "SkuD Turbo";
+      if(count == 10 && StringLen(fields[9]) > 0)
+         g_order_comment = StringSubstr(fields[9], 0, 25);
+
+      Print("SkuD processing ", order_type, " ", symbol, " volume ", DoubleToString(volume, 2),
+         " entry ", DoubleToString(entry_price, 8), " command ", command_id);
+      string message;
+      ulong ticket = 0;
+      bool placed = ExecuteOrder(symbol, order_type, volume, entry_price, tp_enabled, tp_distance,
+                                 sl_enabled, sl_distance, ticket, message);
+      Print("SkuD execution ", (placed ? "accepted" : "rejected"), " command ", command_id,
+         ": ", message);
+      if(!SendResult(command_id, placed, ticket, message))
+         break; // ack will be retried on the next timer tick before claiming more
+      processed++;
+   }
+   if(processed > 0)
+      Print("SkuD command batch complete: ", processed, " order(s) this tick");
+}
+
+bool ExecuteOrder(const string symbol, const string order_type, const double requested_volume,
+                  const double requested_entry, const bool tp_enabled, const double tp_distance,
+                  const bool sl_enabled, const double sl_distance,
+                  ulong &ticket, string &message)
+{
+   ticket = 0;
+   if(!SymbolSelect(symbol, true))
+   {
+      message = "Could not select broker symbol: " + symbol;
+      return false;
+   }
+   MqlTick tick;
+   if(!SymbolInfoTick(symbol, tick))
+   {
+      message = "No current quote for " + symbol;
+      return false;
+   }
+
+   double min_volume = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double max_volume = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   double volume_step = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
+   if(requested_volume < min_volume || requested_volume > max_volume || volume_step <= 0)
+   {
+      message = "Volume " + DoubleToString(requested_volume, 4) + " is outside broker limits for " + symbol +
+             " (min " + DoubleToString(min_volume, 4) + ", max " + DoubleToString(max_volume, 4) +
+             ", step " + DoubleToString(volume_step, 4) + ").";
+      return false;
+   }
+   double volume = MathFloor(requested_volume / volume_step + 1e-8) * volume_step;
+   if(MathAbs(volume - requested_volume) > 1e-8)
+   {
+      message = "Volume does not match this symbol's volume step.";
+      return false;
+   }
+
+   int digits = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   double tp = 0;
+   double sl = 0;
+   bool is_buy = StringFind(order_type, "BUY") >= 0;
+   bool market = StringFind(order_type, "MARKET_") == 0;
+   double stops_distance = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL) * SymbolInfoDouble(symbol, SYMBOL_POINT);
+   double reference = market ? (is_buy ? tick.ask : tick.bid) : requested_entry;
+   if(tp_enabled)
+   {
+      tp = NormalizeDouble((is_buy ? reference + tp_distance : reference - tp_distance), digits);
+      if((is_buy && tp - reference <= stops_distance) || (!is_buy && reference - tp <= stops_distance))
+      {
+         message = "TP distance is inside the broker's minimum stop distance from the entry price.";
+         return false;
+      }
+   }
+   if(sl_enabled)
+   {
+      sl = NormalizeDouble((is_buy ? reference - sl_distance : reference + sl_distance), digits);
+      if((is_buy && reference - sl <= stops_distance) || (!is_buy && sl - reference <= stops_distance))
+      {
+         message = "SL distance is inside the broker's minimum stop distance from the entry price.";
+         return false;
+      }
+   }
+
+   MqlTradeRequest request = {};
+   MqlTradeResult result = {};
+   request.symbol = symbol;
+   request.volume = volume;
+   request.magic = 26060401;
+   request.deviation = SlippagePoints;
+   request.type_time = ORDER_TIME_GTC;
+   request.tp = tp;
+   request.sl = sl;
+
+   if(order_type == "MARKET_BUY" || order_type == "MARKET_SELL")
+   {
+      request.action = TRADE_ACTION_DEAL;
+      request.type = is_buy ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+      request.price = is_buy ? tick.ask : tick.bid;
+      request.type_filling = GetMarketFilling(symbol);
+   }
+   else
+   {
+      request.action = TRADE_ACTION_PENDING;
+      request.price = NormalizeDouble(requested_entry, digits);
+      request.type_filling = ORDER_FILLING_RETURN;
+      if(order_type == "BUY_LIMIT") request.type = ORDER_TYPE_BUY_LIMIT;
+      else if(order_type == "SELL_LIMIT") request.type = ORDER_TYPE_SELL_LIMIT;
+      else if(order_type == "BUY_STOP") request.type = ORDER_TYPE_BUY_STOP;
+      else if(order_type == "SELL_STOP") request.type = ORDER_TYPE_SELL_STOP;
+      else { message = "Unsupported order type."; return false; }
+   }
+
+   request.comment = g_order_comment;
+   ResetLastError();
+   if(!OrderSend(request, result))
+   {
+      message = "OrderSend failed, error " + IntegerToString(GetLastError());
+      return false;
+   }
+   if(result.retcode != TRADE_RETCODE_DONE && result.retcode != TRADE_RETCODE_PLACED && result.retcode != TRADE_RETCODE_DONE_PARTIAL)
+   {
+      message = "Broker rejected order, retcode " + IntegerToString((int)result.retcode) + ": " + result.comment;
+      return false;
+   }
+   ticket = result.order;
+   if(market && result.deal > 0 && HistoryDealSelect(result.deal))
+   {
+      ulong position_id = (ulong)HistoryDealGetInteger(result.deal, DEAL_POSITION_ID);
+      for(int index = 0; index < PositionsTotal(); index++)
+      {
+         ulong position_ticket = PositionGetTicket(index);
+         if(position_ticket > 0 && (ulong)PositionGetInteger(POSITION_IDENTIFIER) == position_id)
+         {
+            ticket = position_ticket;
+            break;
+         }
+      }
+   }
+   message = "Accepted by MT5, retcode " + IntegerToString((int)result.retcode);
+   return true;
+}
+
+ENUM_ORDER_TYPE_FILLING GetMarketFilling(const string symbol)
+{
+   long mode = SymbolInfoInteger(symbol, SYMBOL_FILLING_MODE);
+   if((mode & SYMBOL_FILLING_FOK) != 0) return ORDER_FILLING_FOK;
+   if((mode & SYMBOL_FILLING_IOC) != 0) return ORDER_FILLING_IOC;
+   return ORDER_FILLING_RETURN;
+}
+
+string JsonEscape(const string value)
+{
+   string output = "";
+   for(int i = 0; i < StringLen(value); i++)
+   {
+      ushort ch = StringGetCharacter(value, i);
+      if(ch == '"' || ch == '\\') output += "\\" + ShortToString(ch);
+      else if(ch == '\n') output += "\\n";
+      else if(ch >= 32) output += ShortToString(ch);
+   }
+   return output;
+}
+
+bool SendResult(const string id, const bool placed, const ulong ticket, const string message)
+{
+   g_pending_result_id = id;
+   g_pending_result_path = "/v1/commands/" + id + "/result";
+   g_pending_result_body = "{\"status\":\"" + (placed ? "placed" : "rejected") + "\",\"ticket\":\"" +
+                 (string)ticket + "\",\"message\":\"" + JsonEscape(message) + "\"}";
+   string response;
+   int status;
+   bool sent = HttpRequest("POST", BridgeUrl + g_pending_result_path,
+                           g_pending_result_body, response, status);
+   if(!sent || status != 200)
+   {
+      Print("SkuD result acknowledgement failed, HTTP ", status, ", response: ", response,
+            ", headers: ", g_last_response_headers);
+      return false; // g_pending_result_* stays set; PollBridge retries before claiming more
+   }
+   g_pending_result_id = "";
+   g_pending_result_path = "";
+   g_pending_result_body = "";
+   return true;
+}
+
+void PollCloses()
+{
+   if(StringLen(g_pending_result_id) > 0)
+      return; // an order result retry is still in flight; try again next timer tick
+   string url = BridgeUrl + "/v1/closes/next?login=" + IntegerToString((int)AccountInfoInteger(ACCOUNT_LOGIN));
+   string response;
+   int status;
+   if(!HttpRequest("GET", url, "", response, status)) return;
+   if(status == 204 || status == 401 || status == 403) return;
+   if(status != 200 || StringLen(response) == 0) return;
+
+   string fields[];
+   ushort separator = StringGetCharacter("|", 0);
+   if(StringSplit(response, separator, fields) != 3)
+   {
+         Print("SkuD received malformed close request: ", response);
+      return;
+   }
+
+   string close_id = fields[0];
+   ulong ticket = (ulong)StringToInteger(fields[1]);
+   string action = fields[2];
+   Print("SkuD processing ", action, " request ", close_id,
+         ticket == 0 ? " (all)" : " (ticket " + (string)ticket + ")");
+   string message;
+   bool ok = false;
+   if(action == "cancel")
+      ok = ExecuteCancel(ticket, message);
+   else
+      ok = ExecuteClose(ticket, message);
+   Print("SkuD ", action, " ", close_id, ok ? " succeeded" : " failed", ": ", message);
+   SendCloseResult(close_id, ok, message);
+}
+
+bool ExecuteCancel(const ulong ticket, string &message)
+{
+   if(ticket == 0)
+   {
+      int removed = 0;
+      int failed = 0;
+      string first_failure = "";
+      for(int i = OrdersTotal() - 1; i >= 0; i--)
+      {
+         ulong order_ticket = OrderGetTicket(i);
+         if(order_ticket == 0)
+            continue;
+         ENUM_ORDER_TYPE order_type = (ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE);
+         if(order_type == ORDER_TYPE_BUY || order_type == ORDER_TYPE_SELL)
+            continue; // market position, not a pending order
+         string one_message;
+         if(RemoveOnePending(order_ticket, one_message))
+            removed++;
+         else
+         {
+            failed++;
+            if(StringLen(first_failure) == 0)
+               first_failure = one_message;
+         }
+      }
+      message = "Removed " + IntegerToString(removed) + " pending order(s)" +
+                (failed > 0 ? ", " + IntegerToString(failed) + " failed: " + first_failure : "");
+      return failed == 0 && removed > 0;
+   }
+   if(!OrderSelect(ticket))
+   {
+      message = "Order " + (string)ticket + " not found; it may already be filled or cancelled.";
+      return false;
+   }
+   ENUM_ORDER_TYPE order_type = (ENUM_ORDER_TYPE)OrderGetInteger(ORDER_TYPE);
+   if(order_type == ORDER_TYPE_BUY || order_type == ORDER_TYPE_SELL)
+   {
+      message = "Ticket " + (string)ticket + " is a market position, not a pending order.";
+      return false;
+   }
+   return RemoveOnePending(ticket, message);
+}
+
+bool RemoveOnePending(const ulong order_ticket, string &message)
+{
+   MqlTradeRequest request = {};
+   MqlTradeResult result = {};
+   request.action = TRADE_ACTION_REMOVE;
+   request.order = order_ticket;
+   ResetLastError();
+   if(!OrderSend(request, result))
+   {
+      message = "OrderSend failed, error " + IntegerToString(GetLastError());
+      return false;
+   }
+   if(result.retcode != TRADE_RETCODE_DONE)
+   {
+      message = "Broker rejected removal, retcode " + IntegerToString((int)result.retcode) + ": " + result.comment;
+      return false;
+   }
+   message = "Removed pending order " + (string)order_ticket;
+   return true;
+}
+
+bool ExecuteClose(const ulong ticket, string &message)
+{
+   if(ticket == 0)
+   {
+      int closed = 0;
+      int failed = 0;
+      string first_failure = "";
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+      {
+         ulong pos_ticket = PositionGetTicket(i);
+         if(pos_ticket == 0)
+            continue;
+         string one_message;
+         if(CloseOnePosition(pos_ticket, one_message))
+            closed++;
+         else
+         {
+            failed++;
+            if(StringLen(first_failure) == 0)
+               first_failure = one_message;
+         }
+      }
+      message = "Closed " + IntegerToString(closed) + " position(s)" +
+                (failed > 0 ? ", " + IntegerToString(failed) + " failed: " + first_failure : "");
+      return failed == 0 && closed > 0;
+   }
+   if(!PositionSelectByTicket(ticket))
+   {
+      message = "Position " + (string)ticket + " not found; it may already be closed.";
+      return false;
+   }
+   return CloseOnePosition(ticket, message);
+}
+
+bool CloseOnePosition(const ulong pos_ticket, string &message)
+{
+   if(!PositionSelectByTicket(pos_ticket))
+   {
+      message = "Position " + (string)pos_ticket + " not found.";
+      return false;
+   }
+   string symbol = PositionGetString(POSITION_SYMBOL);
+   long pos_type = PositionGetInteger(POSITION_TYPE);
+   double volume = PositionGetDouble(POSITION_VOLUME);
+   MqlTick tick;
+   if(!SymbolInfoTick(symbol, tick))
+   {
+      message = "No current quote for " + symbol;
+      return false;
+   }
+
+   MqlTradeRequest request = {};
+   MqlTradeResult result = {};
+   request.action = TRADE_ACTION_DEAL;
+   request.position = pos_ticket;
+   request.symbol = symbol;
+   request.volume = volume;
+   request.magic = 26060401;
+   request.deviation = SlippagePoints;
+   request.type = (pos_type == POSITION_TYPE_BUY) ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
+   request.price = (request.type == ORDER_TYPE_SELL) ? tick.bid : tick.ask;
+   request.type_filling = GetMarketFilling(symbol);
+   request.comment = "SkuD Turbo close";
+   ResetLastError();
+   if(!OrderSend(request, result))
+   {
+      message = "OrderSend failed, error " + IntegerToString(GetLastError());
+      return false;
+   }
+   if(result.retcode != TRADE_RETCODE_DONE && result.retcode != TRADE_RETCODE_DONE_PARTIAL)
+   {
+      message = "Broker rejected close, retcode " + IntegerToString((int)result.retcode) + ": " + result.comment;
+      return false;
+   }
+   message = "Closed position " + (string)pos_ticket + ", retcode " + IntegerToString((int)result.retcode);
+   return true;
+}
+
+void SendCloseResult(const string id, const bool closed, const string message)
+{
+   g_pending_result_id = id;
+   g_pending_result_path = "/v1/closes/" + id + "/result";
+   g_pending_result_body = "{\"status\":\"" + (closed ? "closed" : "failed") +
+                 "\",\"message\":\"" + JsonEscape(message) + "\"}";
+   string response;
+   int status;
+   bool sent = HttpRequest("POST", BridgeUrl + g_pending_result_path,
+                           g_pending_result_body, response, status);
+   if(!sent || status != 200)
+   {
+      Print("SkuD close acknowledgement failed, HTTP ", status, ", response: ", response,
+            ", headers: ", g_last_response_headers);
+      return;
+   }
+   g_pending_result_id = "";
+   g_pending_result_path = "";
+   g_pending_result_body = "";
+}
+
+void SendStatus()
+{
+   string login = IntegerToString((int)AccountInfoInteger(ACCOUNT_LOGIN));
+   string server = AccountInfoString(ACCOUNT_SERVER);
+   bool authorized = TerminalInfoInteger(TERMINAL_CONNECTED) &&
+                     AccountInfoInteger(ACCOUNT_LOGIN) > 0 &&
+                     AccountInfoInteger(ACCOUNT_TRADE_ALLOWED);
+   string message = authorized
+      ? "MT5 login successful on " + server
+      : "MT5 disconnected or login failed on " + server;
+   double balance = authorized ? AccountInfoDouble(ACCOUNT_BALANCE) : 0;
+   string currency = authorized ? AccountInfoString(ACCOUNT_CURRENCY) : "";
+   string body = "{\"login\":\"" + login + "\",\"connected\":" +
+                 (authorized ? "true" : "false") +
+                 ",\"message\":\"" + JsonEscape(message) + "\"," +
+                 "\"server\":\"" + JsonEscape(server) + "\"," +
+                 "\"balance\":" + DoubleToString(balance, 2) +
+                 ",\"currency\":\"" + JsonEscape(currency) + "\"}";
+   string response;
+   int status;
+   bool sent = HttpRequest("POST", BridgeUrl + "/v1/terminal/status", body, response, status);
+   if((!sent || status != 200) && GetTickCount64() - g_last_status_warn_ms >= 30000)
+   {
+      g_last_status_warn_ms = GetTickCount64();
+      Print("SkuD heartbeat failed: login ", login, ", MT5 server '", server,
+            "', terminal connected ", (TerminalInfoInteger(TERMINAL_CONNECTED) ? "yes" : "no"),
+            ", account trade allowed ", (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) ? "yes" : "no"),
+            ", HTTP ", status, ", response: ", response, ", headers: ", g_last_response_headers);
+   }
+}
+
+void ReportPrices()
+{
+   string names[];
+   ushort separator = StringGetCharacter(",", 0);
+   int count = StringSplit(ReportSymbols, separator, names);
+   if(count <= 0)
+      return;
+
+   string ticks = "";
+   string positions = "";
+   string skipped = "";
+   int reported = 0;
+   for(int i = 0; i < count && reported < 200; i++)
+   {
+      string name = names[i];
+      StringTrimLeft(name);
+      StringTrimRight(name);
+      if(StringLen(name) == 0)
+         continue;
+      if(!SymbolSelect(name, true))
+      {
+         if(StringLen(skipped) > 0) skipped += ", ";
+         skipped += name + " (select failed)";
+         continue;
+      }
+      MqlTick tick;
+      if(!SymbolInfoTick(name, tick))
+      {
+         if(StringLen(skipped) > 0) skipped += ", ";
+         skipped += name + " (no tick)";
+         continue;
+      }
+      double volume_min = SymbolInfoDouble(name, SYMBOL_VOLUME_MIN);
+      double volume_max = SymbolInfoDouble(name, SYMBOL_VOLUME_MAX);
+      double volume_step = SymbolInfoDouble(name, SYMBOL_VOLUME_STEP);
+      if(reported > 0)
+         ticks += ",";
+      ticks += "{\"symbol\":\"" + JsonEscape(name) + "\",\"bid\":" + DoubleToString(tick.bid, 8) +
+               ",\"ask\":" + DoubleToString(tick.ask, 8) +
+               ",\"volume_min\":" + DoubleToString(volume_min, 4) +
+               ",\"volume_max\":" + DoubleToString(volume_max, 4) +
+               ",\"volume_step\":" + DoubleToString(volume_step, 4) + "}";
+      reported++;
+   }
+   for(int i = PositionsTotal() - 1; i >= 0 && i < 200; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0)
+         continue;
+      if(StringLen(positions) > 0)
+         positions += ",";
+      string position_type = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "buy" : "sell";
+      positions += "{\"ticket\":\"" + (string)ticket + "\",\"symbol\":\"" +
+                   JsonEscape(PositionGetString(POSITION_SYMBOL)) + "\",\"type\":\"" + position_type +
+                   "\",\"volume\":" + DoubleToString(PositionGetDouble(POSITION_VOLUME), 8) + "}";
+   }
+   if(StringLen(skipped) > 0 && GetTickCount64() - g_last_symbol_warn_ms >= 60000)
+   {
+      g_last_symbol_warn_ms = GetTickCount64();
+      Print("SkuD symbols unavailable in this terminal: ", skipped);
+   }
+   if(reported == 0)
+      return;
+
+   string login = IntegerToString((int)AccountInfoInteger(ACCOUNT_LOGIN));
+   string body = "{\"login\":\"" + login + "\",\"ticks\":[" + ticks + "],\"positions\":[" + positions + "]}";
+   string response;
+   int status;
+   bool sent = HttpRequest("POST", BridgeUrl + "/v1/prices", body, response, status);
+   if(!sent)
+      return;
+   if(status != 200 && GetTickCount64() - g_last_report_warn_ms >= 60000)
+   {
+      g_last_report_warn_ms = GetTickCount64();
+      Print("SkuD price report failed, HTTP ", status, ", response: ", response,
+            ", headers: ", g_last_response_headers);
+   }
+}

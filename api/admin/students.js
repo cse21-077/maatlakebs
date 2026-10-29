@@ -4,6 +4,12 @@
  * GET  /api/admin/students?admin_id=<uuid>  → fetch all students with accounts & payment status
  * POST /api/admin/students                   → manually mark a student as paid (admin override)
  *   body: { user_id, admin_id, amount?, currency?, notes? }
+ * PUT  /api/admin/students                   → mark expired subscriptions overdue + cut bridge access
+ *
+ * Every mutation that changes whether a student may copy also syncs the
+ * SkuD bridge (final/bridge.py on the Windows VPS): marking paid provisions
+ * the terminal and assigns the mentor; overdue/close/deactivate stops it.
+ * Bridge calls are best-effort and never block the Supabase write.
  */
 
 export default async function handler(req, res) {
@@ -26,7 +32,7 @@ export default async function handler(req, res) {
   async function verifyAdmin(adminId) {
     if (!adminId) {
       console.warn('⚠️ verifyAdmin called with empty adminId');
-      return { ok: false, reason: 'empty adminId' };
+      return { ok: false, reason: 'emptyAdminId' };
     }
 
     const { data, error } = await supabase
@@ -52,6 +58,22 @@ export default async function handler(req, res) {
     }
 
     return { ok: true };
+  }
+
+  // ── Admin mentor accounts (stored in system_flags by api/admin/mt5) ────────
+  async function readMentorAccounts() {
+    const { data } = await supabase
+      .from('system_flags')
+      .select('value')
+      .eq('key', 'admin_mt5_mentors')
+      .maybeSingle();
+
+    try {
+      const parsed = JSON.parse(data?.value || '{}');
+      return Array.isArray(parsed.accounts) ? parsed.accounts : [];
+    } catch {
+      return [];
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -281,11 +303,57 @@ export default async function handler(req, res) {
         // Non-fatal — payment_status was updated
       }
 
+      // Re-enable copying on the bridge: make sure the student's terminal is
+      // provisioned (it may have been stopped when the sub went overdue), then
+      // assign the mentor matching the student's broker (the admin's Weltrade
+      // or Deriv mentor account), falling back to an explicit trader_id, then
+      // the platform default.
+      let bridge_enabled = 0;
+      try {
+        const { data: activeAccounts } = await supabase
+          .from('student_accounts')
+          .select('mt5_login, mt5_server, encrypted_password, trader_id')
+          .eq('user_id', user_id)
+          .eq('is_active', true);
+
+        const { bridgeTry, defaultMentorId, detectBroker, mentorIdForBroker, DEFAULT_MENTOR_ID } = await import('../_lib/bridge.js');
+
+        const adminMentors = await readMentorAccounts(supabase);
+        const mentorByBroker = {};
+        for (const m of adminMentors) {
+          if (m.broker && m.mentor_id) mentorByBroker[m.broker] = m.mentor_id;
+        }
+
+        for (const acct of activeAccounts || []) {
+          if (!acct.encrypted_password) continue;
+          const ensured = await bridgeTry('/v1/accounts', {
+            method: 'POST',
+            body: {
+              login: String(acct.mt5_login),
+              password: acct.encrypted_password,
+              server: acct.mt5_server,
+            },
+          });
+          const broker = detectBroker(acct.mt5_server);
+          const mentorId = mentorByBroker[broker]
+            || (acct.trader_id && acct.trader_id !== DEFAULT_MENTOR_ID ? acct.trader_id : null)
+            || defaultMentorId();
+          const assigned = await bridgeTry(`/v1/accounts/${encodeURIComponent(String(acct.mt5_login))}/mentor`, {
+            method: 'POST',
+            body: { mentor_id: mentorId, volume_multiplier: 1 },
+          });
+          if (assigned.attempted && assigned.ok) bridge_enabled += 1;
+          else console.warn(`⚠️ Bridge mentor assign failed for ${acct.mt5_login}:`, assigned.error || (assigned.data && assigned.data.error));
+        }
+      } catch (bridgeErr) {
+        console.warn('⚠️ Bridge re-enable failed (subscription is active but copying may not resume):', bridgeErr.message);
+      }
+
       // Log system event
       await supabase.from('system_events').insert({
         event_type: 'admin_mark_paid',
         actor_id: admin_id,
-        payload: { user_id, amount: priceAmount, currency: priceCurrency, notes: notes || null },
+        payload: { user_id, amount: priceAmount, currency: priceCurrency, notes: notes || null, bridge_enabled },
         severity: 'info',
       });
 
@@ -294,6 +362,7 @@ export default async function handler(req, res) {
         success: true,
         message: 'Student marked as paid. Subscription extended for 30 days.',
         next_due: nextDue.toISOString(),
+        bridge_enabled,
       });
 
     } catch (error) {
@@ -345,6 +414,31 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message });
       }
 
+      // Keep the bridge in sync: deactivation stops the terminal; reactivation
+      // or credential changes re-provision it with the new details
+      if (data) {
+        try {
+          const { bridgeTry } = await import('../_lib/bridge.js');
+          const loginPath = encodeURIComponent(String(data.mt5_login));
+          if (updates.is_active === false) {
+            await bridgeTry(`/v1/accounts/${loginPath}/deactivate`, { method: 'POST' });
+          } else if (updates.is_active === true || updates.encrypted_password !== undefined || updates.mt5_server !== undefined) {
+            if (data.encrypted_password) {
+              await bridgeTry('/v1/accounts', {
+                method: 'POST',
+                body: {
+                  login: String(data.mt5_login),
+                  password: data.encrypted_password,
+                  server: data.mt5_server,
+                },
+              });
+            }
+          }
+        } catch (bridgeErr) {
+          console.warn('⚠️ Bridge sync after account edit failed:', bridgeErr.message);
+        }
+      }
+
       await supabase.from('system_events').insert({
         event_type: 'admin_edit_account',
         actor_id: admin_id,
@@ -390,6 +484,13 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: paymentError.message });
       }
 
+      // Collect logins before deactivating — the bridge needs them to stop
+      // the right terminals
+      const { data: userAccounts } = await supabase
+        .from('student_accounts')
+        .select('mt5_login')
+        .eq('user_id', user_id);
+
       // Deactivate all trading accounts
       const { error: accountsError } = await supabase
         .from('student_accounts')
@@ -412,27 +513,13 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: riskError.message });
       }
 
-      // Best-effort: stop the MT5 terminal on Contabo (do not fail the request)
-      const mt5ManagerUrl = process.env.MT5_MANAGER_URL;
-      const provisionSecret = process.env.PROVISION_SECRET;
-      if (mt5ManagerUrl && provisionSecret) {
+      // Best-effort: stop the MT5 terminals on the bridge (do not fail the request)
+      for (const acct of userAccounts || []) {
         try {
-          const depRes = await fetch(`${mt5ManagerUrl}/deprovision`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Provision-Secret': provisionSecret,
-            },
-            body: JSON.stringify({ user_id }),
-          });
-          const depData = await depRes.json();
-          if (!depRes.ok) {
-            console.warn('⚠️ MT5 deprovision returned error:', depData.error);
-          } else {
-            console.log('✅ MT5 deprovisioned:', depData.folder_path);
-          }
+          const { bridgeTry } = await import('../_lib/bridge.js');
+          await bridgeTry(`/v1/accounts/${encodeURIComponent(String(acct.mt5_login))}/deactivate`, { method: 'POST' });
         } catch (depErr) {
-          console.warn('⚠️ Could not reach MT5 manager for deprovision:', depErr.message);
+          console.warn('⚠️ Could not reach bridge for deprovision:', depErr.message);
         }
       }
 
@@ -445,7 +532,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         success: true,
-        message: 'Account closed. Subscription cancelled, trading disabled, and MT5 terminal deprovisioned.',
+        message: 'Account closed. Subscription cancelled, trading disabled, and MT5 terminals stopped.',
       });
     } catch (error) {
       console.error('❌ DELETE /api/admin/students error:', error);
@@ -481,7 +568,7 @@ export default async function handler(req, res) {
         .eq('subscription_status', 'active')
         .lt('next_due', nowIso)
         .not('next_due', 'is', null)
-        .select('id');
+        .select('id, user_id');
 
       if (error) {
         console.error('❌ Failed to mark overdue subscriptions:', error);
@@ -491,10 +578,41 @@ export default async function handler(req, res) {
       const count = data ? data.length : 0;
       console.log(`✅ Marked ${count} subscription(s) as overdue`);
 
+      // Cut bridge access for the newly-overdue: mark their accounts inactive
+      // and stop their terminals so nothing copies until they pay again
+      const bridge_cut = { terminals_stopped: 0, warnings: [] };
+      const overdueUserIds = [...new Set((data || []).map(r => r.user_id).filter(Boolean))];
+
+      if (overdueUserIds.length > 0) {
+        const { data: overdueAccounts } = await supabase
+          .from('student_accounts')
+          .select('mt5_login')
+          .in('user_id', overdueUserIds)
+          .eq('is_active', true);
+
+        await supabase
+          .from('student_accounts')
+          .update({ is_active: false, updated_at: nowIso })
+          .in('user_id', overdueUserIds);
+
+        const { bridgeTry } = await import('../_lib/bridge.js');
+        for (const acct of overdueAccounts || []) {
+          const r = await bridgeTry(`/v1/accounts/${encodeURIComponent(String(acct.mt5_login))}/deactivate`, { method: 'POST' });
+          if (r.attempted && r.ok) {
+            bridge_cut.terminals_stopped += 1;
+          } else {
+            const reason = r.error || (r.data && r.data.error) || `HTTP ${r.status}`;
+            bridge_cut.warnings.push(`${acct.mt5_login}: ${reason}`);
+            console.warn(`⚠️ Bridge deactivate failed for ${acct.mt5_login}:`, reason);
+          }
+        }
+      }
+
       return res.status(200).json({
         success: true,
         overdue_count: count,
-        message: `${count} subscription(s) marked as overdue.`,
+        message: `${count} subscription(s) marked as overdue${bridge_cut.terminals_stopped ? `, ${bridge_cut.terminals_stopped} terminal(s) stopped` : ''}${bridge_cut.warnings.length ? ` (${bridge_cut.warnings.length} bridge warning(s))` : ''}.`,
+        bridge_cut,
       });
     } catch (error) {
       console.error('❌ PUT /api/admin/students error:', error);

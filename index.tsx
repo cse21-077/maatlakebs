@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   ShieldCheck, Zap, Smartphone, AlertCircle, CheckCircle2
@@ -9,6 +9,7 @@ import { AuthScreen } from './components/AuthScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { MainApp } from './components/MainApp';
 import { Button, Card } from './components/shared';
+import './styles.css';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type View = 'LANDING' | 'SPLASH' | 'AUTH' | 'ONBOARDING' | 'APP';
@@ -516,7 +517,7 @@ const App = () => {
                         window.location.search.includes('code=') ||
                         window.location.search.includes('type=recovery');
 
-  const [view, setView] = useState<View>(isPWA ? 'SPLASH' : 'LANDING');
+  const [view, setView] = useState<View>('AUTH');
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
 
@@ -548,16 +549,17 @@ const App = () => {
     const initialize = async () => {
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
-        if (s) { 
-          setSession(s); 
-          await checkOnboarding(s); 
+        if (s) {
+          // Startup always begins on login, even if a session already exists.
+          setSession(null);
+          setView('AUTH');
         } else {
-          setView(isPWA ? 'SPLASH' : 'LANDING');
+          setView('AUTH');
         }
       } catch (err) {
         console.error('Session initialization failed:', err);
-        // Fallback to auth screen so user isn't stuck on splash
-        setView(isPWA ? 'AUTH' : 'LANDING');
+        // Fallback to auth screen so user isn't stuck on homepage
+        setView('AUTH');
       } finally {
         setBooting(false);
       }
@@ -583,22 +585,15 @@ const App = () => {
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">
-      {/* Strict PWA Enforcement: block all non-PWA access (desktop + mobile).
-          Only dev bypass (?dev=1 or localStorage mk_dev=1) can access on web. */}
-      {(!isPWA && !isDev) ? (
-        <LandingPage isPWA={false} hasAuthParams={hasAuthParams} onLaunch={() => {}} />
-      ) : (
-        <>
-          {view === 'LANDING' && <LandingPage isPWA={isPWA} hasAuthParams={hasAuthParams} onLaunch={() => setView('SPLASH')} />}
-          {view === 'SPLASH' && <SplashScreen onFinish={() => setView('AUTH')} />}
-          {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
-            if (s) { setSession(s); setView('ONBOARDING'); return; }
-            supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); setView('ONBOARDING'); } });
-          }} />}
-          {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
-          {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}
-        </>
-      )}
+      {/* Landing page is disabled for both web and PWA. Start at login only. */}
+      <>
+        {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
+          if (s) { setSession(s); setView('ONBOARDING'); return; }
+          supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); setView('ONBOARDING'); } });
+        }} />}
+        {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
+        {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}
+      </>
     </div>
   );
 };

@@ -1,0 +1,6 @@
+data/skud.sqlite3
+data/skud.sqlite3-shm
+data/skud.sqlite3-wal
+__pycache__/
+secrets/
+data/

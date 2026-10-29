@@ -1,14 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronLeft, CheckCircle2, Zap, ShieldCheck,
   Crown, Star, X, Upload, FileImage, Clock, AlertCircle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { parseJson } from './shared';
 
 const ORIGINAL_PRICE = 150;
 const CURRENT_PRICE = 100;
 const DISCOUNT_AMT = 50;
 const DISCOUNT_PCT = Math.round((DISCOUNT_AMT / ORIGINAL_PRICE) * 100);
+
+// Submission types — the client picks how they paid so the admin verifies
+// against the right channel
+const PAYMENT_METHODS = [
+  { value: 'binance_pay', label: 'Binance Pay' },
+  { value: 'bank_transfer', label: 'Bank Transfer (FNB etc.)' },
+  { value: 'orange_money', label: 'Orange Money' },
+  { value: 'paypal', label: 'PayPal' },
+  { value: 'crypto', label: 'Crypto (USDT etc.)' },
+  { value: 'cash_deposit', label: 'Cash Deposit' },
+  { value: 'ewallet', label: 'E-Wallet' },
+  { value: 'other', label: 'Other / Mentor Arranged' },
+];
+
+const methodLabel = (value: string) => PAYMENT_METHODS.find(m => m.value === value)?.label || value;
 
 interface MembershipProtocolProps {
   uid: string;
@@ -30,10 +46,35 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
 
   // Proof upload state
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [method, setMethod] = useState('binance_pay');
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [reviewNotice, setReviewNotice] = useState('');
   const [uploadError, setUploadError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // One submission at a time: if a proof is already under review, show the
+  // waiting state instead of the form (also enforced server-side, 409)
+  useEffect(() => {
+    if (!uid) return;
+    (async () => {
+      try {
+        const { data } = await (supabase as any)
+          .from('invoices')
+          .select('invoice_id, created_at')
+          .eq('user_id', uid)
+          .in('payment_status', ['pending', 'proof_submitted'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0) {
+          setReviewNotice('Your payment proof is already under review. The team will approve or reject it within 24 hours — you can only have one submission at a time.');
+          setSubmitted(true);
+        }
+      } catch {
+        // RLS may block the read — the server-side 409 still protects the flow
+      }
+    })();
+  }, [uid]);
 
   const handleProofUpload = async () => {
     if (!proofFile) { setUploadError('Please select a file first'); return; }
@@ -62,15 +103,24 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
           price_amount: CURRENT_PRICE,
           price_currency: 'usd',
           subscription_plan: 'active',
-          payment_method: 'proof_upload',
+          payment_method: method,
           payment_status: 'proof_submitted',
           original_price: ORIGINAL_PRICE,
           discount_amount: DISCOUNT_AMT,
           proof_of_payment_url: publicUrl,
         }),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      const json = await parseJson(res).catch((err: Error) => ({ error: err.message }));
+      if (!res.ok) {
+        if (res.status === 409) {
+          // Already have a submission under review — switch to waiting state
+          setReviewNotice(json.error || 'You already have a payment submission under review.');
+          setSubmitted(true);
+          return;
+        }
+        throw new Error(json.error || `Invoice submission failed (${res.status})`);
+      }
+      setReviewNotice(`Submitted via ${methodLabel(method)}. The team will review and activate your subscription within 24 hours.`);
       setSubmitted(true);
     } catch (err: any) {
       setUploadError(err.message || 'Upload failed. Please try again.');
@@ -167,7 +217,7 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
               We accept <span className="text-white font-bold">all payment methods</span> including FNB Bank Transfer, Orange Money, PayPal, Crypto, Cash Deposit, E-Wallet, or any method arranged directly through your Mentor.
             </p>
             <p className="text-xs text-white/60 leading-relaxed">
-              Simply make your payment and upload the proof (screenshot, receipt, or PDF) below. Our team will verify and activate your subscription within 24 hours.
+              Select the method you paid with, then upload your proof (screenshot, receipt, or PDF). Our team will verify and activate your subscription within 24 hours. You can only have one submission under review at a time.
             </p>
           </div>
 
@@ -178,13 +228,23 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   <Clock size={28} className="text-primary" />
                 </div>
-                <p className="font-black text-white text-lg">Proof Submitted!</p>
-                <p className="text-xs text-white/50 leading-relaxed">Your payment proof has been uploaded. The team will review and activate your subscription within 24 hours.</p>
-                <button onClick={() => { setSubmitted(false); setProofFile(null); }}
-                  className="text-xs text-primary font-bold mt-2">Submit another</button>
+                <p className="font-black text-white text-lg">Proof Under Review</p>
+                <p className="text-xs text-white/50 leading-relaxed">{reviewNotice || 'Your payment proof has been uploaded. The team will review and activate your subscription within 24 hours.'}</p>
               </div>
             ) : (
               <>
+                {/* Submission type */}
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-white/50 uppercase tracking-widest">Payment Method Used</p>
+                  <select
+                    value={method}
+                    onChange={e => setMethod(e.target.value)}
+                    className="w-full bg-dark/50 border border-white/10 rounded-2xl py-4 px-4 text-white text-sm font-bold appearance-none transition-all focus:border-primary outline-none"
+                  >
+                    {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                  </select>
+                </div>
+
                 <p className="text-xs font-black text-white/50 uppercase tracking-widest">Upload Proof of Payment</p>
 
                 {/* File picker */}
@@ -239,7 +299,7 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
                   )}
                 </button>
                 <p className="text-[10px] text-white/30 text-center leading-relaxed">
-                  Your proof will be reviewed by our team. Activation happens within 24 hours of approval.
+                  Only one submission can be under review at a time. If your proof is rejected you will be able to submit a new one.
                 </p>
               </>
             )}

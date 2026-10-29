@@ -1,5 +1,21 @@
 import React from 'react';
 
+export const parseJson = async (res: Response) => {
+    const text = await res.text();
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+        throw new Error(text || `Unexpected response (${res.status})`);
+    }
+    if (!text) {
+        throw new Error(`Empty JSON response (${res.status})`);
+    }
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        throw new Error(text || 'Invalid JSON response');
+    }
+};
+
 export const Button = ({ children, onClick, variant = 'primary', className = '', loading = false, disabled = false }: any) => {
     const variants: Record<string, string> = {
         primary: 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/20',
@@ -19,3 +35,23 @@ export const Button = ({ children, onClick, variant = 'primary', className = '',
 export const Card = ({ children, className = '' }: any) => (
     <div className={`glass rounded-2xl p-5 ${className}`}>{children}</div>
 );
+
+// Known MT5 server names, offered as autofill suggestions. The input stays
+// free-text because brokers add/rename servers — always allow custom values.
+export const DERIV_SERVERS = [
+    'Deriv-Demo',
+    'DerivBVI-Demo',
+    'DerivSVG-Demo',
+    'DerivSVG-Server',
+    'DerivSVG-Server-02',
+    'DerivSVG-Server-03',
+    'DerivBVI-Server',
+    'DerivBVI-Server-02',
+    'DerivBVI-Server-03',
+];
+
+export const MT5_SERVER_PRESETS = [
+    'Weltrade-Real',
+    'Weltrade-Demo',
+    ...DERIV_SERVERS,
+];

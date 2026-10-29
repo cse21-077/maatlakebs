@@ -10,6 +10,7 @@ import { Button } from './shared';
 import { AdminPaymentReview } from './AdminPaymentReview';
 import { AdminSupportPanel } from './AdminSupportPanel';
 import { ProofImage } from './ProofImage';
+import { AdminMT5 } from './AdminMT5';
 
 interface StudentAccount {
   id: string;
@@ -79,7 +80,7 @@ interface AdminDashboardProps {
   onBack?: () => void;
 }
 
-type AdminTab = 'students' | 'payments' | 'support';
+type AdminTab = 'students' | 'payments' | 'support' | 'mt5';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('students');
@@ -400,6 +401,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
               <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
               <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Payments</button>
               <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Support</button>
+              <button onClick={() => setActiveTab('mt5')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">MT5</button>
             </div>
             <button
               onClick={handleRefreshServer}
@@ -449,6 +451,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
               <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
               <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
               <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Support</button>
+              <button onClick={() => setActiveTab('mt5')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">MT5</button>
             </div>
             <button
               onClick={handleRefreshServer}
@@ -476,6 +479,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
     );
   }
 
+  // ── MT5 Tab — admin's own mentor account ──────────────────────────────────
+  if (activeTab === 'mt5') {
+    return (
+      <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
+        <header className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 border-b border-white/5 gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {onBack && (
+              <button onClick={onBack} className="w-9 h-9 sm:w-10 sm:h-10 bg-white/5 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 transition-all">
+                ✕
+              </button>
+            )}
+            <div>
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Admin</p>
+              <h1 className="text-lg sm:text-xl font-black text-white tracking-tighter">Dashboard</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-[#1a1c22] rounded-xl p-1 border border-white/5">
+              <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Students</button>
+              <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
+              <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Support</button>
+              <button onClick={() => setActiveTab('mt5')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">MT5</button>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-all"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto max-w-3xl mx-auto w-full">
+          <AdminMT5 adminId={adminId} />
+        </main>
+      </div>
+    );
+  }
+
   // ── Students Tab ──────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0d0f14] flex flex-col safe-top">
@@ -497,6 +540,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ adminId, onBack 
             <button onClick={() => setActiveTab('students')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest bg-primary text-white shadow-lg shadow-primary/20">Students</button>
             <button onClick={() => setActiveTab('payments')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Payments</button>
             <button onClick={() => setActiveTab('support')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">Support</button>
+            <button onClick={() => setActiveTab('mt5')} className="px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all">MT5</button>
           </div>
           <button
             onClick={handleRefreshServer}

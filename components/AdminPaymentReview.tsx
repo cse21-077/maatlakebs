@@ -17,11 +17,26 @@ interface PendingPayment {
   price_amount: string;
   price_currency: string;
   subscription_plan: string;
+  payment_method?: string;
   proof_of_payment_url: string;
   created_at: string;
   original_price?: number;
   discount_amount?: number;
 }
+
+const METHOD_LABELS: Record<string, string> = {
+  binance_pay: 'Binance Pay',
+  bank_transfer: 'Bank Transfer',
+  orange_money: 'Orange Money',
+  paypal: 'PayPal',
+  crypto: 'Crypto',
+  cash_deposit: 'Cash Deposit',
+  ewallet: 'E-Wallet',
+  other: 'Other',
+  proof_upload: 'Proof Upload',
+};
+
+const methodLabel = (value?: string) => (value && METHOD_LABELS[value]) || 'Proof Upload';
 
 interface AdminPaymentReviewProps {
   adminId: string;
@@ -191,6 +206,9 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
             <strong>Plan:</strong> {selectedProof.subscription_plan}
           </p>
           <p className="text-sm text-slate-600">
+            <strong>Method:</strong> {methodLabel(selectedProof.payment_method)}
+          </p>
+          <p className="text-sm text-slate-600">
             <strong>Amount:</strong> ${selectedProof.price_amount} {selectedProof.price_currency}
           </p>
           <p className="text-sm text-slate-600">
@@ -341,9 +359,10 @@ export const AdminPaymentReview: React.FC<AdminPaymentReviewProps> = ({ adminId,
 
               {/* Proof Status */}
               <div>
-                <p className="text-xs text-slate-500 uppercase font-bold">Proof</p>
-                <p className="text-xs text-slate-600">
-                  {payment.proof_of_payment_url?.endsWith('.pdf') ? 'PDF' : 'Image'}
+                <p className="text-xs text-slate-500 uppercase font-bold">Method</p>
+                <p className="text-sm text-slate-900">{methodLabel(payment.payment_method)}</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {payment.proof_of_payment_url?.endsWith('.pdf') ? 'PDF proof' : 'Image proof'}
                 </p>
               </div>
 

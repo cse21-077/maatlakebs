@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Maatla Kebs</string>
+    <string name="title_activity_main">Maatla Kebs</string>
+    <string name="package_name">com.maatla.kebs</string>
+    <string name="custom_url_scheme">com.maatla.kebs</string>
+</resources>

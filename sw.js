@@ -7,9 +7,7 @@ const PRECACHE_ASSETS = [
   '/index.html',
   '/index.tsx',
   '/logo.png',
-  '/manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+  '/manifest.json'
 ];
 
 // Install event - cache essential assets
@@ -42,9 +40,8 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
+  // Skip cross-origin requests that are not app resources, fonts, or ESM dependencies
   if (!event.request.url.startsWith(self.location.origin) && 
-      !event.request.url.includes('cdn.tailwindcss.com') &&
       !event.request.url.includes('fonts.googleapis.com') &&
       !event.request.url.includes('esm.sh')) {
     return;

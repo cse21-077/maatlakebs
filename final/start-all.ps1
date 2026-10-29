@@ -2,7 +2,9 @@ param([switch]$OpenMaster, [switch]$RefreshTerminals)
 
 $ErrorActionPreference = 'Stop'
 
-$masterDirectory = if ($env:SKUD_TERMINAL_MASTER) {
+$masterDirectory = if ($env:MK_TERMINAL_MASTER) {
+    $env:MK_TERMINAL_MASTER
+} elseif ($env:SKUD_TERMINAL_MASTER) {
     $env:SKUD_TERMINAL_MASTER
 } else {
     'C:\skud\mt5-master'

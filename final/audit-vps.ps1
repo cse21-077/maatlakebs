@@ -1,7 +1,7 @@
 param(
     [string]$FinalDirectory = $PSScriptRoot,
-    [string]$MasterDirectory = $(if ($env:SKUD_TERMINAL_MASTER) { $env:SKUD_TERMINAL_MASTER } else { 'C:\skud\mt5-master' }),
-    [string]$TerminalsDirectory = $(if ($env:SKUD_TERMINALS_DIR) { $env:SKUD_TERMINALS_DIR } else { 'C:\skud\terminals' }),
+    [string]$MasterDirectory = $(if ($env:MK_TERMINAL_MASTER) { $env:MK_TERMINAL_MASTER } elseif ($env:SKUD_TERMINAL_MASTER) { $env:SKUD_TERMINAL_MASTER } else { 'C:\skud\mt5-master' }),
+    [string]$TerminalsDirectory = $(if ($env:MK_TERMINALS_DIR) { $env:MK_TERMINALS_DIR } elseif ($env:SKUD_TERMINALS_DIR) { $env:SKUD_TERMINALS_DIR } else { 'C:\skud\terminals' }),
     [switch]$NoPause
 )
 

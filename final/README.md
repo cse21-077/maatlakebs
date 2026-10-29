@@ -22,27 +22,27 @@ controlled VPS only.
 - Student portable terminals: `C:\skud\terminals\SlotNNN`
 - Bridge database: `C:\skud\final\data\skud.sqlite3`
 - Persistent DPAPI bridge key: `C:\ProgramData\SkuD\bridge-key.dpapi`
-- Public bridge URL: `https://<SKUD_BRIDGE_HOST>` (default `skud.toporapula.dev`)
+- Public bridge URL: `https://<MK_BRIDGE_HOST>` (default `skud.toporapula.dev`)
 - Website: `https://skudturbo.vercel.app`
 
 `start-bridge.ps1` and `start-all.ps1` use these paths by default. Optional
-`SKUD_TERMINAL_MASTER`, `SKUD_TERMINALS_DIR`, `SKUD_EA_SOURCE`, and
-`SKUD_CHART_TEMPLATE` environment variables override them — but all four EA and
+`MK_TERMINAL_MASTER`, `MK_TERMINALS_DIR`, `MK_EA_SOURCE`, and
+`MK_CHART_TEMPLATE` environment variables override them — but all four EA and
 chart variables are **auto-discovered** when unset (or when they point at a
 missing file): the bridge finds `MaatlaKebsStudentEA.ex5` /
 `MaatlaKebsMentorEA.ex5` in the master terminal's `MQL5\Experts` and locates the
 saved chart profiles by scanning `MQL5\Profiles\Charts` for the chart that has
 each EA attached. It prints what it found at startup. Set the variables only to
 override the discovery. Mentor-hosted terminals use three additional optional
-variables: `SKUD_MENTOR_EA_SOURCE` (compiled `MaatlaKebsMentorEA.ex5`) and
-`SKUD_MENTOR_CHART_TEMPLATE` (a chart profile with the Mentor EA attached).
-Managed mentor terminals receive `SKUD_BRIDGE_KEY` in the EA's `BridgeKey`
+variables: `MK_MENTOR_EA_SOURCE` (compiled `MaatlaKebsMentorEA.ex5`) and
+`MK_MENTOR_CHART_TEMPLATE` (a chart profile with the Mentor EA attached).
+Managed mentor terminals receive `MK_BRIDGE_KEY` in the EA's `BridgeKey`
 input. A manually managed Mentor EA uses the same platform key; there is no
 separate mentor token.
 
-The public hostname is controlled by the `SKUD_BRIDGE_HOST` environment
+The public hostname is controlled by the `MK_BRIDGE_HOST` environment
 variable (Caddyfile; falls back to `skud.toporapula.dev`). The app never talks
-to an IP directly — it uses `SKUD_BRIDGE_URL` on Vercel — so moving servers is
+to an IP directly — it uses `MK_BRIDGE_URL` on Vercel — so moving servers is
 a DNS change, not a code change.
 
 ## 0. Moving to a new VPS (or changing the bridge IP / hostname)
@@ -53,11 +53,11 @@ files on the machine. To move (e.g. old VPS → new VPS):
 1. **New VPS**: upload this folder, then run
    `powershell -ExecutionPolicy Bypass -File .\setup-new-vps.ps1 -BridgeHost <hostname>`.
    It creates the layout, checks Python, downloads Caddy, opens firewall 80/443,
-   persists `SKUD_BRIDGE_HOST`, and prints a fresh **bridge key**.
+   persists `MK_BRIDGE_HOST`, and prints a fresh **bridge key**.
 2. **DNS**: point the A record for `<hostname>` at the new VPS public IP
    (or pick a new hostname for a new project — `setup-new-vps.ps1` takes any).
    Wait for propagation.
-3. **Vercel**: set `SKUD_BRIDGE_URL=https://<hostname>` and `SKUD_BRIDGE_KEY`
+3. **Vercel**: set `MK_BRIDGE_URL=https://<hostname>` and `MK_BRIDGE_KEY`
    to the new key; redeploy. Nothing else in the app changes.
 4. **EAs**: the new bridge has a new key — recompile `MaatlaKebsStudentEA.mq5`
    with the new `EaToken`, and re-register mentors (old tokens are hashed in
@@ -97,7 +97,7 @@ student slots directory.
    .\start-bridge.ps1 -InitializeKey
    ```
 
-   Copy the printed key into Vercel as the server-only `SKUD_BRIDGE_KEY`. Never
+   Copy the printed key into Vercel as the server-only `MK_BRIDGE_KEY`. Never
    put it in a `NEXT_PUBLIC_` variable or source control. The key is saved under
    `C:\ProgramData\SkuD` for the current Windows account; keep using that same
    account to run the bridge. This is a one-time setup; normal bridge starts
@@ -136,7 +136,7 @@ saved charts, so the next login starts from a fresh template chart.
 
 ## 3. DNS, Caddy, and firewall
 
-The Caddyfile serves `{$SKUD_BRIDGE_HOST:skud.toporapula.dev}` and proxies to
+The Caddyfile serves `{$MK_BRIDGE_HOST:skud.toporapula.dev}` and proxies to
 `127.0.0.1:8765`. Its A record must point at the VPS public IP (see section 0
 when moving servers). Keep the existing
 JoeMoney hostname `bridge.toporapula.dev` unchanged. Allow inbound TCP 80 and
@@ -161,12 +161,12 @@ Set these **server-only** variables on the `skudturbo.vercel.app` Vercel project
 then redeploy. Keep the bridge key and mentor setup code private.
 
 ```text
-SKUD_BRIDGE_URL=https://skud.toporapula.dev
-SKUD_BRIDGE_KEY=<same key used by bridge and EA>
-SKUD_DEFAULT_MENTOR_ID=mentor-skud-01
-SKUD_ALLOW_DEMO_STUDENT_ENROLLMENT=true
-SKUD_ALLOW_LIVE_STUDENT_ACCOUNTS=false
-SKUD_MENTOR_SETUP_CODE=<separate long random operator code>
+MK_BRIDGE_URL=https://skud.toporapula.dev
+MK_BRIDGE_KEY=<same key used by bridge and EA>
+MK_DEFAULT_MENTOR_ID=mentor-skud-01
+MK_ALLOW_DEMO_STUDENT_ENROLLMENT=true
+MK_ALLOW_LIVE_STUDENT_ACCOUNTS=false
+MK_MENTOR_SETUP_CODE=<separate long random operator code>
 ```
 
 Never enable live student accounts for this pilot. The bridge key is server-only;
@@ -205,8 +205,8 @@ Set-Location C:\skud\final
 ## 6. Register the mentor and test a demo student
 
 After the bridge health check succeeds, register the mentor through the
-protected `POST /api/admin/mentors` route using `SKUD_MENTOR_SETUP_CODE`. The
-The Mentor EA uses the platform `SKUD_BRIDGE_KEY`; managed terminals receive it
+protected `POST /api/admin/mentors` route using `MK_MENTOR_SETUP_CODE`. The
+The Mentor EA uses the platform `MK_BRIDGE_KEY`; managed terminals receive it
 automatically. For a manually managed terminal, enter the same key in the EA's
 `BridgeKey` input. Compile the Mentor EA and allow WebRequest to
 `https://skud.toporapula.dev` in MT5.
@@ -240,12 +240,12 @@ Invoke-RestMethod -Method Post https://skud.toporapula.dev/v1/mentors `
 
 When `password` is present (empty or 6-128 characters) the bridge:
 
-1. Claims a terminal slot (`SKUD_TERMINAL_MASTER` clone or a free slot, exactly
+1. Claims a terminal slot (`MK_TERMINAL_MASTER` clone or a free slot, exactly
    like student provisioning) and upserts an `accounts` row with
    `role='mentor'` and `mentor_id` pointing at the mentor.
-2. Installs the Mentor EA (`SKUD_MENTOR_EA_SOURCE`) and the mentor chart
-   template (`SKUD_MENTOR_CHART_TEMPLATE`), rewriting `BridgeKey=`
-   (`SKUD_BRIDGE_KEY`), `MentorId=`,
+2. Installs the Mentor EA (`MK_MENTOR_EA_SOURCE`) and the mentor chart
+   template (`MK_MENTOR_CHART_TEMPLATE`), rewriting `BridgeKey=`
+   (`MK_BRIDGE_KEY`), `MentorId=`,
    and `MentorName=` inside the copied `.chr` (UTF-16 aware, same as the
    student `EaToken` rewrite).
 3. Launches the terminal with `startup.ini` auto-login and returns a
@@ -297,3 +297,13 @@ Additional endpoints (all require the bridge key except where noted):
   30 symbols from EURUSD through XAGUSD. Deriv synthetic indices are still
   excluded from copy trading.
 - Do not share bridge keys, mentor tokens, or MT5 passwords.
+
+## Environment variable names
+
+The configuration variables are prefixed `MK_` (for MaatlaKebs). The previous
+`SKUD_`-prefixed names are still accepted everywhere — `MK_*` wins when both
+are set — so existing VPS setups keep working during the transition. Rename at
+your own pace: `MK_BRIDGE_KEY`, `MK_BRIDGE_URL`, `MK_DB_PATH`, `MK_EA_TOKEN`,
+`MK_ALLOWED_ORIGIN`, `MK_HOST`, `MK_PORT`, `MK_TERMINALS_DIR`, `MK_TERMINAL_MASTER`,
+`MK_EA_SOURCE`, `MK_CHART_TEMPLATE`, `MK_MENTOR_EA_SOURCE`,
+`MK_MENTOR_CHART_TEMPLATE`, `MK_LAUNCH_STAGGER_SEC`, `MK_RECONCILE_ON_BOOT`.

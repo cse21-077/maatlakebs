@@ -15,10 +15,19 @@ import threading
 import time
 from pathlib import Path
 
-TERMINALS_DIR = Path(os.environ.get("SKUD_TERMINALS_DIR", r"C:\skud\terminals"))
-MENTOR_BRIDGE_KEY = os.environ.get("SKUD_BRIDGE_KEY", "")
-TERMINAL_MASTER = os.environ.get("SKUD_TERMINAL_MASTER", r"C:\skud\mt5-master")
-LAUNCH_STAGGER_SEC = float(os.environ.get("SKUD_LAUNCH_STAGGER_SEC", "5"))
+def _env(*names, default=""):
+    """First non-empty value among MK_* (new) then legacy SKUD_* names."""
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return default
+
+
+TERMINALS_DIR = Path(_env("MK_TERMINALS_DIR", "SKUD_TERMINALS_DIR", default=r"C:\skud\terminals"))
+MENTOR_BRIDGE_KEY = _env("MK_BRIDGE_KEY", "SKUD_BRIDGE_KEY")
+TERMINAL_MASTER = _env("MK_TERMINAL_MASTER", "SKUD_TERMINAL_MASTER", default=r"C:\skud\mt5-master")
+LAUNCH_STAGGER_SEC = float(_env("MK_LAUNCH_STAGGER_SEC", "SKUD_LAUNCH_STAGGER_SEC", default="5"))
 
 
 def _read_text_any_encoding(raw: bytes) -> str:
@@ -46,8 +55,9 @@ def _discover_ea(expert_name: str) -> str:
 def _discover_chart_template(expert_name: str) -> str:
     """Find a saved chart profile that has the given EA attached.
 
-    Scans the master terminal's Profiles/Charts folders so the SKUD_*_CHART_TEMPLATE
-    variables only need to be set to override what the bridge finds on its own.
+    Scans the master terminal's Profiles/Charts folders so the MK_*_CHART_TEMPLATE
+    variables (legacy SKUD_*_CHART_TEMPLATE) only need to be set to override what
+    the bridge finds on its own.
     """
     charts_root = Path(TERMINAL_MASTER) / "MQL5" / "Profiles" / "Charts"
     if not charts_root.is_dir():
@@ -62,23 +72,25 @@ def _discover_chart_template(expert_name: str) -> str:
     return ""
 
 
-def _resolve_env_path(name: str, discovered: str) -> str:
+def _resolve_env_path(discovered: str, *names: str) -> str:
     """Env var wins only when it points at a real file; otherwise use discovery.
 
-    This keeps a mangled or stale setx value from shadowing a good auto-discovery.
+    Names are checked in order (MK_* first, then legacy SKUD_*). This keeps a
+    mangled or stale setx value from shadowing a good auto-discovery.
     """
-    configured = os.environ.get(name) or ""
-    if configured and Path(configured).exists():
-        return configured
+    for name in names:
+        configured = os.environ.get(name) or ""
+        if configured and Path(configured).exists():
+            return configured
     return discovered
 
 
 # MaatlaKebs EA names are primary; the old SkuD names keep working during
 # the transition (an existing master terminal may still hold the old ex5).
-EA_SOURCE = _resolve_env_path("SKUD_EA_SOURCE", _discover_ea("MaatlaKebsStudentEA") or _discover_ea("SkuDTurboStudentEA"))
-CHART_TEMPLATE = _resolve_env_path("SKUD_CHART_TEMPLATE", _discover_chart_template("MaatlaKebsStudentEA") or _discover_chart_template("SkuDTurboStudentEA"))
-MENTOR_EA_SOURCE = _resolve_env_path("SKUD_MENTOR_EA_SOURCE", _discover_ea("MaatlaKebsMentorEA") or _discover_ea("SkuDTurboMentorEA"))
-MENTOR_CHART_TEMPLATE = _resolve_env_path("SKUD_MENTOR_CHART_TEMPLATE", _discover_chart_template("MaatlaKebsMentorEA") or _discover_chart_template("SkuDTurboMentorEA"))
+EA_SOURCE = _resolve_env_path(_discover_ea("MaatlaKebsStudentEA") or _discover_ea("SkuDTurboStudentEA"), "MK_EA_SOURCE", "SKUD_EA_SOURCE")
+CHART_TEMPLATE = _resolve_env_path(_discover_chart_template("MaatlaKebsStudentEA") or _discover_chart_template("SkuDTurboStudentEA"), "MK_CHART_TEMPLATE", "SKUD_CHART_TEMPLATE")
+MENTOR_EA_SOURCE = _resolve_env_path(_discover_ea("MaatlaKebsMentorEA") or _discover_ea("SkuDTurboMentorEA"), "MK_MENTOR_EA_SOURCE", "SKUD_MENTOR_EA_SOURCE")
+MENTOR_CHART_TEMPLATE = _resolve_env_path(_discover_chart_template("MaatlaKebsMentorEA") or _discover_chart_template("SkuDTurboMentorEA"), "MK_MENTOR_CHART_TEMPLATE", "SKUD_MENTOR_CHART_TEMPLATE")
 
 if EA_SOURCE:
     print(f"SkuD terminal manager: student EA = {EA_SOURCE}")
@@ -204,7 +216,7 @@ def assign_slot(used_folders: set[str]) -> Path:
     master = Path(TERMINAL_MASTER) if TERMINAL_MASTER else None
     if not master or not (master / "terminal64.exe").exists():
         raise RuntimeError(
-            "No free terminal slot and SKUD_TERMINAL_MASTER is not configured to a folder "
+            "No free terminal slot and MK_TERMINAL_MASTER (legacy SKUD_TERMINAL_MASTER) is not configured to a folder "
             "containing terminal64.exe. Seed the master terminal first."
         )
     TERMINALS_DIR.mkdir(parents=True, exist_ok=True)
@@ -281,7 +293,7 @@ def _chart_profile_name(template_path: str) -> str:
 
 def sync_chart_token(chart_path: Path) -> None:
     """Force the EA token stored inside a student chart profile to the configured key."""
-    token = os.environ.get("SKUD_EA_TOKEN") or os.environ.get("SKUD_BRIDGE_KEY") or ""
+    token = os.environ.get("MK_EA_TOKEN") or os.environ.get("SKUD_EA_TOKEN") or os.environ.get("MK_BRIDGE_KEY") or os.environ.get("SKUD_BRIDGE_KEY") or ""
     if token:
         sync_chart_inputs(chart_path, {"EaToken": token})
 

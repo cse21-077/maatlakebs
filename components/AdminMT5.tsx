@@ -176,7 +176,7 @@ export const AdminMT5: React.FC<AdminMT5Props> = ({ adminId }) => {
         </p>
         {!bridgeConfigured && (
           <p className="mt-3 text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
-            Bridge not configured — set SKUD_BRIDGE_URL and SKUD_BRIDGE_KEY.
+            Bridge not configured — set MK_BRIDGE_URL and MK_BRIDGE_KEY.
           </p>
         )}
       </div>

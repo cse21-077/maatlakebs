@@ -1,6 +1,6 @@
 """SkuD MT5 command bridge. Uses only the Python standard library.
 
-A single static bridge key (SKUD_BRIDGE_KEY) protects every endpoint; the same
+A single static bridge key (MK_BRIDGE_KEY; legacy SKUD_BRIDGE_KEY also accepted) protects every endpoint; the same
 key is baked into the private PWA build, so clients never authenticate by hand.
 MT5 accounts are registered over HTTPS; the bridge stores credentials in the local
 SQLite database, launches portable MT5 terminals with startup.ini auto-login, and
@@ -29,10 +29,20 @@ from uuid import uuid4
 import terminal_manager as tm
 
 ROOT = Path(__file__).resolve().parent
-DB_PATH = Path(os.environ.get("SKUD_DB_PATH", ROOT / "data" / "skud.sqlite3"))
-BRIDGE_KEY = os.environ.get("SKUD_BRIDGE_KEY", "")
-EA_TOKEN = os.environ.get("SKUD_EA_TOKEN", "")
-ALLOWED_ORIGIN = os.environ.get("SKUD_ALLOWED_ORIGIN", "http://localhost:3000")
+def _env(*names, default=""):
+    """First non-empty value among the given env var names (MK_* first, then
+    the legacy SKUD_* names, so old VPS configurations keep working)."""
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return default
+
+
+DB_PATH = Path(_env("MK_DB_PATH", "SKUD_DB_PATH", default=ROOT / "data" / "skud.sqlite3"))
+BRIDGE_KEY = _env("MK_BRIDGE_KEY", "SKUD_BRIDGE_KEY")
+EA_TOKEN = _env("MK_EA_TOKEN", "SKUD_EA_TOKEN")
+ALLOWED_ORIGIN = _env("MK_ALLOWED_ORIGIN", "SKUD_ALLOWED_ORIGIN", default="http://localhost:3000")
 MAX_BATCH_SIZE = 100
 MAX_TICK_BATCH_SIZE = 200
 ORDER_TYPES = {
@@ -1420,13 +1430,13 @@ class BridgeHandler(BaseHTTPRequestHandler):
 
 def main() -> None:
     if len(BRIDGE_KEY) < 32:
-        raise SystemExit("Set SKUD_BRIDGE_KEY (32+ characters) before starting.")
+        raise SystemExit("Set MK_BRIDGE_KEY (32+ characters) before starting (legacy SKUD_BRIDGE_KEY also accepted).")
     with db_session():
         pass
-    if os.environ.get("SKUD_RECONCILE_ON_BOOT", "1") == "1":
+    if _env("MK_RECONCILE_ON_BOOT", "SKUD_RECONCILE_ON_BOOT", default="1") == "1":
         reconcile_on_boot()
-    host = os.environ.get("SKUD_HOST", "127.0.0.1")
-    port = int(os.environ.get("SKUD_PORT", "8765"))
+    host = _env("MK_HOST", "SKUD_HOST", default="127.0.0.1")
+    port = int(_env("MK_PORT", "SKUD_PORT", default="8765"))
     server = ThreadingHTTPServer((host, port), BridgeHandler)
     print("SkuD bridge listening at http://%s:%d" % (host, port))
     server.serve_forever()

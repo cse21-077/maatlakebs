@@ -5,7 +5,7 @@
 #   powershell -ExecutionPolicy Bypass -File .\setup-new-vps.ps1 -BridgeHost skud.toporapula.dev
 #
 # What it does: layout folders, checks Python, downloads Caddy, opens firewall
-# 80/443, persists SKUD_BRIDGE_HOST, initializes the bridge key.
+# 80/443, persists MK_BRIDGE_HOST (legacy SKUD_BRIDGE_HOST), initializes the bridge key.
 # What it cannot do (manual, listed at the end): MT5 master terminal prep,
 # MetaEditor EA compile, DNS A record, Vercel env vars.
 
@@ -81,8 +81,10 @@ foreach ($rule in @(
 }
 
 # --- 5. Hostname env var ----------------------------------------------------
-Write-Step "Persisting SKUD_BRIDGE_HOST=$BridgeHost"
+Write-Step "Persisting MK_BRIDGE_HOST=$BridgeHost"
+[Environment]::SetEnvironmentVariable('MK_BRIDGE_HOST', $BridgeHost, 'Machine')
 [Environment]::SetEnvironmentVariable('SKUD_BRIDGE_HOST', $BridgeHost, 'Machine')
+$env:MK_BRIDGE_HOST = $BridgeHost
 $env:SKUD_BRIDGE_HOST = $BridgeHost
 Write-Host "Set for new shells via setx/Machine env. Current shell updated too." -ForegroundColor Green
 
@@ -105,8 +107,8 @@ Remaining manual steps (see README.md):
 3. MetaEditor: open MaatlaKebsStudentEA.mq5, set EaToken to the bridge key
    printed above, compile (F7), attach to a chart, save profile as 'SkuD'
    (README section 2). Repeat compile for MaatlaKebsMentorEA.mq5.
-4. Vercel: set SKUD_BRIDGE_URL=https://$BridgeHost and SKUD_BRIDGE_KEY to the
-   key printed above, then redeploy.
+4. Vercel: set MK_BRIDGE_URL=https://$BridgeHost and MK_BRIDGE_KEY to the
+   key printed above (legacy SKUD_BRIDGE_URL / SKUD_BRIDGE_KEY also work), then redeploy.
 5. Start services:  .\start-all.ps1
 6. Verify:  Invoke-RestMethod https://$BridgeHost/health
 7. Register the mentor and enroll a demo student (README section 6).

@@ -48,7 +48,7 @@ function Get-OrCreateProtectedToken([string]$Name) {
 $bridgeKey = Get-OrCreateProtectedToken 'bridge-key'
 if ($InitializeKey) {
     Write-Host ''
-    Write-Host 'Persistent SkuD bridge key (copy to Vercel as server-only SKUD_BRIDGE_KEY and into the Student EA EaToken input):' -ForegroundColor Yellow
+    Write-Host 'Persistent MaatlaKebs bridge key (copy to Vercel as server-only MK_BRIDGE_KEY and into the Student EA EaToken input):' -ForegroundColor Yellow
     Write-Host $bridgeKey
     Write-Host ''
     Write-Host "Key saved for Windows user $env:USERNAME at $secretsDirectory\bridge-key.dpapi. Keep using this same Windows account."
@@ -75,13 +75,19 @@ if ($pythonMajor -lt 3 -or ($pythonMajor -eq 3 -and $pythonMinor -lt 10)) {
 }
 Write-Host "Using $($pythonVersionText.Trim()) via $($pythonCommand.Name)." -ForegroundColor Green
 
-# --- SkuD terminal infrastructure (seed once on the VPS, see README) ---
+# --- MaatlaKebs terminal infrastructure (seed once on the VPS, see README) ---
 # Defaults match the runbook: master terminal at C:\skud\mt5-master.
-# Override any of them with environment variables before running this script.
-$terminalsDir    = if ($env:SKUD_TERMINALS_DIR)    { $env:SKUD_TERMINALS_DIR }    else { 'C:\skud\terminals' }
-$terminalMaster  = if ($env:SKUD_TERMINAL_MASTER)  { $env:SKUD_TERMINAL_MASTER }  else { 'C:\skud\mt5-master' }
-$eaSource        = if ($env:SKUD_EA_SOURCE)        { $env:SKUD_EA_SOURCE }        else { 'C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5' }
-$chartTemplate   = if ($env:SKUD_CHART_TEMPLATE)   { $env:SKUD_CHART_TEMPLATE }   else { 'C:\skud\mt5-master\MQL5\Profiles\Charts\SkuD\chart01.chr' }
+# Override any of them with MK_* environment variables (legacy SKUD_* still work).
+function Get-EnvCompat {
+    param([string]$Name, [string]$LegacyName)
+    if (Test-Path "Env:$Name") { return (Get-Item "Env:$Name").Value }
+    if (Test-Path "Env:$LegacyName") { return (Get-Item "Env:$LegacyName").Value }
+    return $null
+}
+$terminalsDir    = if (Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR')    { Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR' }    else { 'C:\skud\terminals' }
+$terminalMaster  = if (Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER')  { Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER' }  else { 'C:\skud\mt5-master' }
+$eaSource        = if (Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE')              { Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE' }              else { 'C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5' }
+$chartTemplate   = if (Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE')    { Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE' }    else { 'C:\skud\mt5-master\MQL5\Profiles\Charts\SkuD\chart01.chr' }
 
 New-Item -ItemType Directory -Force -Path $terminalsDir | Out-Null
 if (-not (Test-Path (Join-Path $terminalMaster 'terminal64.exe'))) {
@@ -94,20 +100,32 @@ if (-not (Test-Path $chartTemplate)) {
     throw "Student chart template not found at $chartTemplate. Attach MaatlaKebsStudentEA to a master chart and save the profile as SkuD before starting student terminals. The persistent bridge key is already initialized."
 }
 
-$env:SKUD_TERMINALS_DIR   = $terminalsDir
+# Export both names: MK_* is current, SKUD_* is the legacy alias the old
+# tooling may still read. bridge.py/terminal_manager.py accept either.
+$env:MK_TERMINALS_DIR   = $terminalsDir
+$env:SKUD_TERMINALS_DIR = $terminalsDir
+$env:MK_TERMINAL_MASTER = $terminalMaster
 $env:SKUD_TERMINAL_MASTER = $terminalMaster
-$env:SKUD_EA_SOURCE       = $eaSource
-$env:SKUD_CHART_TEMPLATE  = $chartTemplate
+$env:MK_EA_SOURCE       = $eaSource
+$env:SKUD_EA_SOURCE     = $eaSource
+$env:MK_CHART_TEMPLATE  = $chartTemplate
+$env:SKUD_CHART_TEMPLATE = $chartTemplate
 
 # One shared key protects the bridge and EA. It is created once, DPAPI-protected
 # for this Windows user, and stored outside the app folder for reuse after updates.
+$env:MK_BRIDGE_KEY = $bridgeKey
 $env:SKUD_BRIDGE_KEY = $bridgeKey
+$env:MK_EA_TOKEN = $bridgeKey
 $env:SKUD_EA_TOKEN = $bridgeKey
+$env:MK_ALLOWED_ORIGIN = 'https://skudturbo.vercel.app'
 $env:SKUD_ALLOWED_ORIGIN = 'https://skudturbo.vercel.app'
+$env:MK_HOST = '127.0.0.1'
 $env:SKUD_HOST = '127.0.0.1'
+$env:MK_PORT = '8765'
 $env:SKUD_PORT = '8765'
-$env:SKUD_DB_PATH = Join-Path $PSScriptRoot 'data\skud.sqlite3'
-New-Item -ItemType Directory -Force -Path (Split-Path $env:SKUD_DB_PATH) | Out-Null
+$env:MK_DB_PATH = Join-Path $PSScriptRoot 'data\skud.sqlite3'
+$env:SKUD_DB_PATH = $env:MK_DB_PATH
+New-Item -ItemType Directory -Force -Path (Split-Path $env:MK_DB_PATH) | Out-Null
 
 Write-Host ''
 Write-Host 'SkuD MT5 bridge is starting.' -ForegroundColor Green

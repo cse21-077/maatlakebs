@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
       if (!bridgeConfig().configured) {
         return res.status(503).json({
-          error: 'MT5 bridge not configured: set SKUD_BRIDGE_URL and SKUD_BRIDGE_KEY',
+          error: 'MT5 bridge not configured: set MK_BRIDGE_URL and MK_BRIDGE_KEY',
         });
       }
 

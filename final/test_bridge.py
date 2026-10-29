@@ -248,7 +248,7 @@ class BridgeTests(unittest.TestCase):
 
     def test_chart_token_sync_rewrites_utf16_and_utf8_bom_profiles(self):
         token = "replacement-bridge-token"
-        with patch.dict(bridge.os.environ, {"SKUD_EA_TOKEN": token}):
+        with patch.dict(bridge.os.environ, {"MK_EA_TOKEN": token}):
             for encoding in ("utf-16", "utf-8-sig"):
                 chart = Path(self.temp_dir.name) / f"profile-{encoding}.chr"
                 chart.write_text("[Experts]\r\nEaToken=old-token\r\nOther=keep\r\n", encoding=encoding)

@@ -3,23 +3,24 @@
  *
  * The bridge (final/bridge.py on the Windows VPS) owns all MT5 state:
  * accounts, terminals, orders and liveness. Every api route that needs
- * MT5 talks to it with `Authorization: Bearer SKUD_BRIDGE_KEY`.
+ * MT5 talks to it with `Authorization: Bearer MK_BRIDGE_KEY`.
  *
  * Config (server-side env, never exposed to the browser):
- *   SKUD_BRIDGE_URL  e.g. https://skud.toporapula.dev
- *   SKUD_BRIDGE_KEY  >= 32 chars, same value the bridge was started with
+ *   MK_BRIDGE_URL  e.g. https://bridge.example.com   (legacy SKUD_BRIDGE_URL)
+ *   MK_BRIDGE_KEY  >= 32 chars, same value the bridge was started with
+ *                  (legacy SKUD_BRIDGE_KEY)
  */
 
 const DEFAULT_MENTOR_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 export function bridgeConfig() {
-  const base = (process.env.SKUD_BRIDGE_URL || '').replace(/\/+$/, '');
-  const key = process.env.SKUD_BRIDGE_KEY || '';
+  const base = (process.env.MK_BRIDGE_URL || process.env.SKUD_BRIDGE_URL || '').replace(/\/+$/, '');
+  const key = process.env.MK_BRIDGE_KEY || process.env.SKUD_BRIDGE_KEY || '';
   return { base, key, configured: Boolean(base && key) };
 }
 
 export function defaultMentorId() {
-  return process.env.SKUD_DEFAULT_MENTOR_ID || DEFAULT_MENTOR_ID;
+  return process.env.MK_DEFAULT_MENTOR_ID || process.env.SKUD_DEFAULT_MENTOR_ID || DEFAULT_MENTOR_ID;
 }
 
 export { DEFAULT_MENTOR_ID };
@@ -49,7 +50,7 @@ export async function bridgeFetch(path, { method = 'GET', body, timeoutMs = 1500
   const { base, key, configured } = bridgeConfig();
 
   if (!configured) {
-    const err = new Error('MT5 bridge not configured: set SKUD_BRIDGE_URL and SKUD_BRIDGE_KEY');
+    const err = new Error('MT5 bridge not configured: set MK_BRIDGE_URL and MK_BRIDGE_KEY');
     err.code = 'BRIDGE_NOT_CONFIGURED';
     throw err;
   }

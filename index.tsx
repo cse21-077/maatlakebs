@@ -550,9 +550,16 @@ const App = () => {
     const initialize = async () => {
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
-        // Startup always begins on login, even if a session already exists.
-        setSession(null);
-        setView('AUTH');
+        if (s) {
+          // Returning session (incl. Google OAuth callback): go straight to
+          // onboarding check — never stomp a live session back to the login
+          // screen, which could also desync view/session into a blank page
+          setSession(s);
+          await checkOnboarding(s);
+        } else {
+          setSession(null);
+          setView('AUTH');
+        }
       } catch (err) {
         console.error('Session initialization failed:', err);
         // Fallback to auth screen so user isn't stuck on homepage
@@ -569,7 +576,7 @@ const App = () => {
         setSession(null);
         setView('AUTH');
       }
-      if (event === 'SIGNED_IN' && s) {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && s) {
         setSession(s);
         checkOnboarding(s);
       }

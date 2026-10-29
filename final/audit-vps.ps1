@@ -52,9 +52,9 @@ $requiredBridgeFiles = @(
     'start-bridge.ps1',
     'start-caddy.ps1',
     'Caddyfile',
-    'SkuDTurboStudentCore.mqh',
-    'SkuDTurboMentorEA.mq5',
-    'SkuDTurboStudentEA.mq5',
+    'MaatlaKebsStudentCore.mqh',
+    'MaatlaKebsMentorEA.mq5',
+    'MaatlaKebsStudentEA.mq5',
     'test_bridge.py'
 )
 foreach ($name in $requiredBridgeFiles) {
@@ -113,7 +113,7 @@ if (Test-Path -LiteralPath $caddyFile -PathType Leaf) {
 }
 
 $masterExe = Join-Path $MasterDirectory 'terminal64.exe'
-$masterEa = Join-Path $MasterDirectory 'MQL5\Experts\SkuDTurboStudentEA.ex5'
+$masterEa = Join-Path $MasterDirectory 'MQL5\Experts\MaatlaKebsStudentEA.ex5'
 $masterChart = Join-Path $MasterDirectory 'MQL5\Profiles\Charts\SkuD\chart01.chr'
 Test-RequiredFile $masterExe 'MT5 master terminal'
 Test-RequiredFile $masterEa 'Compiled student EA'
@@ -179,7 +179,7 @@ $warnCount = @($checks | Where-Object Status -eq 'WARN').Count
 $passCount = @($checks | Where-Object Status -eq 'PASS').Count
 Write-Host "Summary: $passCount pass, $warnCount warning(s), $failCount missing/failed check(s)." -ForegroundColor Cyan
 Write-Host ''
-Write-Host 'Portable MT5 readiness requires all three master items: terminal64.exe, compiled SkuDTurboStudentEA.ex5, and the saved SkuD chart01.chr.'
+Write-Host 'Portable MT5 readiness requires all three master items: terminal64.exe, compiled MaatlaKebsStudentEA.ex5, and the saved SkuD chart01.chr.'
 Write-Host 'The SkuD Student EA and chart template are copied into each student account slot. The Mentor EA runs separately on the mentor laptop; the Python bridge relays events.'
 Write-Host 'This script does not inspect or print credentials, bridge keys, EA tokens, or startup.ini contents.'
 

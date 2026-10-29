@@ -16,7 +16,7 @@ export const ProofImage: React.FC<ProofImageProps> = ({ url, alt = 'Proof of pay
     if (loading || signedUrl) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/proof-url?url=${encodeURIComponent(originalUrl)}`);
+      const res = await fetch(`/api/admin/payments?url=${encodeURIComponent(originalUrl)}`);
       const data = await res.json();
       if (res.ok && data.signedUrl) {
         setSignedUrl(data.signedUrl);

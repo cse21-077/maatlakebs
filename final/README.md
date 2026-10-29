@@ -11,7 +11,7 @@ This deployment has three distinct parts:
    events on that logged-in student account.
 
 There is no separate "Bridge EA." The EA deployed to each VPS student profile is
-`SkuDTurboStudentEA`. MT5 passwords are currently stored unencrypted in the
+`MaatlaKebsStudentEA`. MT5 passwords are currently stored unencrypted in the
 bridge SQLite database and terminal startup files. Use demo accounts on a
 controlled VPS only.
 
@@ -29,12 +29,12 @@ controlled VPS only.
 `SKUD_TERMINAL_MASTER`, `SKUD_TERMINALS_DIR`, `SKUD_EA_SOURCE`, and
 `SKUD_CHART_TEMPLATE` environment variables override them — but all four EA and
 chart variables are **auto-discovered** when unset (or when they point at a
-missing file): the bridge finds `SkuDTurboStudentEA.ex5` /
-`SkuDTurboMentorEA.ex5` in the master terminal's `MQL5\Experts` and locates the
+missing file): the bridge finds `MaatlaKebsStudentEA.ex5` /
+`MaatlaKebsMentorEA.ex5` in the master terminal's `MQL5\Experts` and locates the
 saved chart profiles by scanning `MQL5\Profiles\Charts` for the chart that has
 each EA attached. It prints what it found at startup. Set the variables only to
 override the discovery. Mentor-hosted terminals use three additional optional
-variables: `SKUD_MENTOR_EA_SOURCE` (compiled `SkuDTurboMentorEA.ex5`) and
+variables: `SKUD_MENTOR_EA_SOURCE` (compiled `MaatlaKebsMentorEA.ex5`) and
 `SKUD_MENTOR_CHART_TEMPLATE` (a chart profile with the Mentor EA attached).
 Managed mentor terminals receive `SKUD_BRIDGE_KEY` in the EA's `BridgeKey`
 input. A manually managed Mentor EA uses the same platform key; there is no
@@ -59,7 +59,7 @@ files on the machine. To move (e.g. old VPS → new VPS):
    Wait for propagation.
 3. **Vercel**: set `SKUD_BRIDGE_URL=https://<hostname>` and `SKUD_BRIDGE_KEY`
    to the new key; redeploy. Nothing else in the app changes.
-4. **EAs**: the new bridge has a new key — recompile `SkuDTurboStudentEA.mq5`
+4. **EAs**: the new bridge has a new key — recompile `MaatlaKebsStudentEA.mq5`
    with the new `EaToken`, and re-register mentors (old tokens are hashed in
    the old database and are invalid here). Optionally copy `data\skud.sqlite3`
    from the old VPS to keep enrolled accounts.
@@ -102,12 +102,12 @@ student slots directory.
    `C:\ProgramData\SkuD` for the current Windows account; keep using that same
    account to run the bridge. This is a one-time setup; normal bridge starts
    reuse the same saved key. Do not put `EaToken` in `.env.example`.
-2. Copy `SkuDTurboStudentEA.mq5` and `SkuDTurboStudentCore.mqh` to
-   `C:\skud\mt5-master\MQL5\Experts`. Open `SkuDTurboStudentEA.mq5` in
+2. Copy `MaatlaKebsStudentEA.mq5` and `MaatlaKebsStudentCore.mqh` to
+   `C:\skud\mt5-master\MQL5\Experts`. Open `MaatlaKebsStudentEA.mq5` in
    MetaEditor, enter the bridge key in its `EaToken` input, and compile with
    **F7**. Confirm
-   `C:\skud\mt5-master\MQL5\Experts\SkuDTurboStudentEA.ex5` exists.
-3. Attach `SkuDTurboStudentEA` to a chart in the master template terminal. Set
+   `C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5` exists.
+3. Attach `MaatlaKebsStudentEA` to a chart in the master template terminal. Set
    `BridgeUrl` to `http://127.0.0.1:8765`, enable Algo Trading, and allow
    WebRequest to `http://127.0.0.1:8765`.
 4. Save the chart profile as `SkuD`, then close the master terminal. Confirm

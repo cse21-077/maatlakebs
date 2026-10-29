@@ -73,10 +73,12 @@ def _resolve_env_path(name: str, discovered: str) -> str:
     return discovered
 
 
-EA_SOURCE = _resolve_env_path("SKUD_EA_SOURCE", _discover_ea("SkuDTurboStudentEA"))
-CHART_TEMPLATE = _resolve_env_path("SKUD_CHART_TEMPLATE", _discover_chart_template("SkuDTurboStudentEA"))
-MENTOR_EA_SOURCE = _resolve_env_path("SKUD_MENTOR_EA_SOURCE", _discover_ea("SkuDTurboMentorEA"))
-MENTOR_CHART_TEMPLATE = _resolve_env_path("SKUD_MENTOR_CHART_TEMPLATE", _discover_chart_template("SkuDTurboMentorEA"))
+# MaatlaKebs EA names are primary; the old SkuD names keep working during
+# the transition (an existing master terminal may still hold the old ex5).
+EA_SOURCE = _resolve_env_path("SKUD_EA_SOURCE", _discover_ea("MaatlaKebsStudentEA") or _discover_ea("SkuDTurboStudentEA"))
+CHART_TEMPLATE = _resolve_env_path("SKUD_CHART_TEMPLATE", _discover_chart_template("MaatlaKebsStudentEA") or _discover_chart_template("SkuDTurboStudentEA"))
+MENTOR_EA_SOURCE = _resolve_env_path("SKUD_MENTOR_EA_SOURCE", _discover_ea("MaatlaKebsMentorEA") or _discover_ea("SkuDTurboMentorEA"))
+MENTOR_CHART_TEMPLATE = _resolve_env_path("SKUD_MENTOR_CHART_TEMPLATE", _discover_chart_template("MaatlaKebsMentorEA") or _discover_chart_template("SkuDTurboMentorEA"))
 
 if EA_SOURCE:
     print(f"SkuD terminal manager: student EA = {EA_SOURCE}")

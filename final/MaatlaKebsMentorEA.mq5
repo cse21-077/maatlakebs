@@ -27,7 +27,7 @@ int OnInit()
       StringLen(BridgeKey) < 32 || RetrySeconds < 1 || ReportSeconds < 1)
       return INIT_PARAMETERS_INCORRECT;
    EventSetTimer(RetrySeconds);
-   Print("SkuD Mentor EA build 1.12 ready for ", MentorName, " (", MentorId, "). MT5 login: ",
+   Print("MaatlaKebs Mentor EA build 1.12 ready for ", MentorName, " (", MentorId, "). MT5 login: ",
          (long)AccountInfoInteger(ACCOUNT_LOGIN));
       Print("Mentor EA uses the platform BridgeKey. Allow WebRequest for ", BridgeUrl,
          " in MT5 Options > Expert Advisors.");
@@ -229,7 +229,7 @@ void ReportPrices()
    if(StringLen(skipped) > 0 && GetTickCount64() - g_last_symbol_warn_ms >= 60000)
    {
       g_last_symbol_warn_ms = GetTickCount64();
-      Print("SkuD Mentor EA symbols unavailable in this terminal: ", skipped);
+      Print("MaatlaKebs Mentor EA symbols unavailable in this terminal: ", skipped);
    }
    if(reported == 0)
       return;
@@ -242,7 +242,7 @@ void ReportPrices()
    if(status != 200 && GetTickCount64() - g_last_report_warn_ms >= 60000)
    {
       g_last_report_warn_ms = GetTickCount64();
-      Print("SkuD Mentor EA price report failed, HTTP ", status, ", response: ", response);
+      Print("MaatlaKebs Mentor EA price report failed, HTTP ", status, ", response: ", response);
    }
 }
 

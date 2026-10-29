@@ -102,9 +102,9 @@ Remaining manual steps (see README.md):
 1. DNS: point the A record for $BridgeHost at THIS VPS public IP.
 2. Master terminal: robocopy MetaTrader 5 into C:\skud\mt5-master, run portable,
    log in to a Deriv demo once to cache the server (README section 1).
-3. MetaEditor: open SkuDTurboStudentEA.mq5, set EaToken to the bridge key
+3. MetaEditor: open MaatlaKebsStudentEA.mq5, set EaToken to the bridge key
    printed above, compile (F7), attach to a chart, save profile as 'SkuD'
-   (README section 2). Repeat compile for SkuDTurboMentorEA.mq5.
+   (README section 2). Repeat compile for MaatlaKebsMentorEA.mq5.
 4. Vercel: set SKUD_BRIDGE_URL=https://$BridgeHost and SKUD_BRIDGE_KEY to the
    key printed above, then redeploy.
 5. Start services:  .\start-all.ps1

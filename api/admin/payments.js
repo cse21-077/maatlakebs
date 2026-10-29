@@ -55,9 +55,41 @@ export default async function handler(req, res) {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // GET — fetch pending mentor payment proofs
+  // GET — signed proof URL (no admin gate, same as the old proof-url route),
+  //       or the pending mentor payment proofs when admin_id is given
   // ══════════════════════════════════════════════════════════════════════════
   if (req.method === 'GET') {
+    // Signed URL for a proof file: /api/admin/payments?url=<storage url>
+    if (req.query.url) {
+      const { url } = req.query;
+      try {
+        const urlObj = new URL(url);
+        const pathSegments = urlObj.pathname.split('/');
+
+        const objectIndex = pathSegments.findIndex(s => s === 'object');
+        if (objectIndex === -1 || objectIndex + 2 >= pathSegments.length) {
+          return res.status(400).json({ error: 'Invalid Supabase storage URL' });
+        }
+
+        const bucket = pathSegments[objectIndex + 2];
+        const filePath = pathSegments.slice(objectIndex + 3).join('/');
+
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(filePath, 3600);
+
+        if (error) {
+          console.error('❌ Failed to create signed URL:', error);
+          return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json({ signedUrl: data.signedUrl });
+      } catch (err) {
+        console.error('❌ Proof URL error:', err);
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
     const { admin_id } = req.query;
 
     if (!admin_id) {

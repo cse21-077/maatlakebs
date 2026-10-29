@@ -1,4 +1,4 @@
-// SkuD student execution EA. Runs only on VPS-managed follower accounts.
+// MaatlaKebs student execution EA. Runs only on VPS-managed follower accounts.
 #property strict
 #property version "8.10"
 
@@ -24,14 +24,14 @@ string g_last_response_headers = "";
 string g_pending_result_id = "";
 string g_pending_result_path = "";
 string g_pending_result_body = "";
-string g_order_comment = "SkuD Turbo";
+string g_order_comment = "MaatlaKebs";
 
 int OnInit()
 {
    if(PollSeconds < 1 || ReportSeconds < 1 || StringLen(EaToken) < 32)
       return INIT_PARAMETERS_INCORRECT;
    EventSetTimer(PollSeconds);
-   Print("SkuD Student EA build 8.10 ready. MT5 login: ", (long)AccountInfoInteger(ACCOUNT_LOGIN));
+   Print("MaatlaKebs Student EA build 8.10 ready. MT5 login: ", (long)AccountInfoInteger(ACCOUNT_LOGIN));
    Print("Allow WebRequest for ", BridgeUrl, " in MT5 Options > Expert Advisors.");
    return INIT_SUCCEEDED;
 }
@@ -84,7 +84,7 @@ bool HttpRequest(const string method, const string url, const string body,
    g_last_response_headers = result_headers;
    if(http_status == -1)
    {
-      Print("SkuD WebRequest failed: ", GetLastError(), " (check MT5 WebRequest allowlist)");
+      Print("MaatlaKebs WebRequest failed: ", GetLastError(), " (check MT5 WebRequest allowlist)");
       response = "";
       return false;
    }
@@ -101,11 +101,11 @@ void PollBridge()
       if(!HttpRequest("POST", BridgeUrl + g_pending_result_path,
                       g_pending_result_body, retry_response, retry_status) || retry_status != 200)
       {
-         Print("SkuD result retry pending for command ", g_pending_result_id,
+         Print("MaatlaKebs result retry pending for command ", g_pending_result_id,
                ", HTTP ", retry_status, ", response: ", retry_response);
          return;
       }
-      Print("SkuD result retry acknowledged for command ", g_pending_result_id);
+      Print("MaatlaKebs result retry acknowledged for command ", g_pending_result_id);
       g_pending_result_id = "";
       g_pending_result_path = "";
       g_pending_result_body = "";
@@ -129,7 +129,7 @@ void PollBridge()
       int count = StringSplit(response, separator, fields);
       if(count != 9 && count != 10)
       {
-         Print("SkuD received malformed command: ", response);
+         Print("MaatlaKebs received malformed command: ", response);
          break;
       }
 
@@ -142,24 +142,24 @@ void PollBridge()
       double tp_distance = StringToDouble(fields[6]);
       bool sl_enabled = fields[7] == "1";
       double sl_distance = StringToDouble(fields[8]);
-      g_order_comment = "SkuD Turbo";
+      g_order_comment = "MaatlaKebs";
       if(count == 10 && StringLen(fields[9]) > 0)
          g_order_comment = StringSubstr(fields[9], 0, 25);
 
-      Print("SkuD processing ", order_type, " ", symbol, " volume ", DoubleToString(volume, 2),
+      Print("MaatlaKebs processing ", order_type, " ", symbol, " volume ", DoubleToString(volume, 2),
          " entry ", DoubleToString(entry_price, 8), " command ", command_id);
       string message;
       ulong ticket = 0;
       bool placed = ExecuteOrder(symbol, order_type, volume, entry_price, tp_enabled, tp_distance,
                                  sl_enabled, sl_distance, ticket, message);
-      Print("SkuD execution ", (placed ? "accepted" : "rejected"), " command ", command_id,
+      Print("MaatlaKebs execution ", (placed ? "accepted" : "rejected"), " command ", command_id,
          ": ", message);
       if(!SendResult(command_id, placed, ticket, message))
          break; // ack will be retried on the next timer tick before claiming more
       processed++;
    }
    if(processed > 0)
-      Print("SkuD command batch complete: ", processed, " order(s) this tick");
+      Print("MaatlaKebs command batch complete: ", processed, " order(s) this tick");
 }
 
 bool ExecuteOrder(const string symbol, const string order_type, const double requested_volume,
@@ -315,7 +315,7 @@ bool SendResult(const string id, const bool placed, const ulong ticket, const st
                            g_pending_result_body, response, status);
    if(!sent || status != 200)
    {
-      Print("SkuD result acknowledgement failed, HTTP ", status, ", response: ", response,
+      Print("MaatlaKebs result acknowledgement failed, HTTP ", status, ", response: ", response,
             ", headers: ", g_last_response_headers);
       return false; // g_pending_result_* stays set; PollBridge retries before claiming more
    }
@@ -340,14 +340,14 @@ void PollCloses()
    ushort separator = StringGetCharacter("|", 0);
    if(StringSplit(response, separator, fields) != 3)
    {
-         Print("SkuD received malformed close request: ", response);
+         Print("MaatlaKebs received malformed close request: ", response);
       return;
    }
 
    string close_id = fields[0];
    ulong ticket = (ulong)StringToInteger(fields[1]);
    string action = fields[2];
-   Print("SkuD processing ", action, " request ", close_id,
+   Print("MaatlaKebs processing ", action, " request ", close_id,
          ticket == 0 ? " (all)" : " (ticket " + (string)ticket + ")");
    string message;
    bool ok = false;
@@ -355,7 +355,7 @@ void PollCloses()
       ok = ExecuteCancel(ticket, message);
    else
       ok = ExecuteClose(ticket, message);
-   Print("SkuD ", action, " ", close_id, ok ? " succeeded" : " failed", ": ", message);
+   Print("MaatlaKebs ", action, " ", close_id, ok ? " succeeded" : " failed", ": ", message);
    SendCloseResult(close_id, ok, message);
 }
 
@@ -485,7 +485,7 @@ bool CloseOnePosition(const ulong pos_ticket, string &message)
    request.type = (pos_type == POSITION_TYPE_BUY) ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
    request.price = (request.type == ORDER_TYPE_SELL) ? tick.bid : tick.ask;
    request.type_filling = GetMarketFilling(symbol);
-   request.comment = "SkuD Turbo close";
+   request.comment = "MaatlaKebs close";
    ResetLastError();
    if(!OrderSend(request, result))
    {
@@ -513,7 +513,7 @@ void SendCloseResult(const string id, const bool closed, const string message)
                            g_pending_result_body, response, status);
    if(!sent || status != 200)
    {
-      Print("SkuD close acknowledgement failed, HTTP ", status, ", response: ", response,
+      Print("MaatlaKebs close acknowledgement failed, HTTP ", status, ", response: ", response,
             ", headers: ", g_last_response_headers);
       return;
    }
@@ -546,7 +546,7 @@ void SendStatus()
    if((!sent || status != 200) && GetTickCount64() - g_last_status_warn_ms >= 30000)
    {
       g_last_status_warn_ms = GetTickCount64();
-      Print("SkuD heartbeat failed: login ", login, ", MT5 server '", server,
+      Print("MaatlaKebs heartbeat failed: login ", login, ", MT5 server '", server,
             "', terminal connected ", (TerminalInfoInteger(TERMINAL_CONNECTED) ? "yes" : "no"),
             ", account trade allowed ", (AccountInfoInteger(ACCOUNT_TRADE_ALLOWED) ? "yes" : "no"),
             ", HTTP ", status, ", response: ", response, ", headers: ", g_last_response_headers);
@@ -612,7 +612,7 @@ void ReportPrices()
    if(StringLen(skipped) > 0 && GetTickCount64() - g_last_symbol_warn_ms >= 60000)
    {
       g_last_symbol_warn_ms = GetTickCount64();
-      Print("SkuD symbols unavailable in this terminal: ", skipped);
+      Print("MaatlaKebs symbols unavailable in this terminal: ", skipped);
    }
    if(reported == 0)
       return;
@@ -627,7 +627,7 @@ void ReportPrices()
    if(status != 200 && GetTickCount64() - g_last_report_warn_ms >= 60000)
    {
       g_last_report_warn_ms = GetTickCount64();
-      Print("SkuD price report failed, HTTP ", status, ", response: ", response,
+      Print("MaatlaKebs price report failed, HTTP ", status, ", response: ", response,
             ", headers: ", g_last_response_headers);
    }
 }

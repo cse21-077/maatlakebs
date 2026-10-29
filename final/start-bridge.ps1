@@ -80,7 +80,7 @@ Write-Host "Using $($pythonVersionText.Trim()) via $($pythonCommand.Name)." -For
 # Override any of them with environment variables before running this script.
 $terminalsDir    = if ($env:SKUD_TERMINALS_DIR)    { $env:SKUD_TERMINALS_DIR }    else { 'C:\skud\terminals' }
 $terminalMaster  = if ($env:SKUD_TERMINAL_MASTER)  { $env:SKUD_TERMINAL_MASTER }  else { 'C:\skud\mt5-master' }
-$eaSource        = if ($env:SKUD_EA_SOURCE)        { $env:SKUD_EA_SOURCE }        else { 'C:\skud\mt5-master\MQL5\Experts\SkuDTurboStudentEA.ex5' }
+$eaSource        = if ($env:SKUD_EA_SOURCE)        { $env:SKUD_EA_SOURCE }        else { 'C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5' }
 $chartTemplate   = if ($env:SKUD_CHART_TEMPLATE)   { $env:SKUD_CHART_TEMPLATE }   else { 'C:\skud\mt5-master\MQL5\Profiles\Charts\SkuD\chart01.chr' }
 
 New-Item -ItemType Directory -Force -Path $terminalsDir | Out-Null
@@ -88,10 +88,10 @@ if (-not (Test-Path (Join-Path $terminalMaster 'terminal64.exe'))) {
     throw "Master terminal not found at $terminalMaster. Copy MT5 there, launch it once with /portable, then rerun after compiling the Student EA and saving its SkuD chart. The persistent bridge key is already initialized."
 }
 if (-not (Test-Path $eaSource)) {
-    throw "Compiled Student EA not found at $eaSource. Copy SkuDTurboStudentEA.mq5 and SkuDTurboStudentCore.mqh into the master terminal's MQL5\Experts, compile SkuDTurboStudentEA.mq5 with F7, attach it, and save the SkuD chart. The persistent bridge key is already initialized."
+    throw "Compiled Student EA not found at $eaSource. Copy MaatlaKebsStudentEA.mq5 and MaatlaKebsStudentCore.mqh into the master terminal's MQL5\Experts, compile MaatlaKebsStudentEA.mq5 with F7, attach it, and save the SkuD chart. The persistent bridge key is already initialized."
 }
 if (-not (Test-Path $chartTemplate)) {
-    throw "Student chart template not found at $chartTemplate. Attach SkuDTurboStudentEA to a master chart and save the profile as SkuD before starting student terminals. The persistent bridge key is already initialized."
+    throw "Student chart template not found at $chartTemplate. Attach MaatlaKebsStudentEA to a master chart and save the profile as SkuD before starting student terminals. The persistent bridge key is already initialized."
 }
 
 $env:SKUD_TERMINALS_DIR   = $terminalsDir

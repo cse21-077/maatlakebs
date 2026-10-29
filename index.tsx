@@ -522,40 +522,37 @@ const App = () => {
   const [booting, setBooting] = useState(true);
 
   // ── Session management ──
-  useEffect(() => {
-    const checkOnboarding = async (s: Session) => {
-      try {
-        // Check if user has completed onboarding
-        const { data: rawData, error } = await supabase
-          .from('users')
-          .select('onboarding_completed')
-          .eq('id', s.user.id)
-          .maybeSingle();
-        
-        const data = rawData as any;
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Onboarding Check Error:', error);
-        }
-        
-        setView(data ? (data.onboarding_completed ? 'APP' : 'ONBOARDING') : 'ONBOARDING');
-      } catch (e) {
-        console.error('CheckOnboarding Catch:', e);
-        // Fallback to onboarding if we can't confirm app state
-        setView('ONBOARDING');
-      }
-    };
+  const checkOnboarding = async (s: Session) => {
+    try {
+      // Returning users with the flag set go straight to the dashboard;
+      // everyone else sees onboarding first
+      const { data: rawData, error } = await supabase
+        .from('users')
+        .select('onboarding_completed')
+        .eq('id', s.user.id)
+        .maybeSingle();
 
+      const data = rawData as any;
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Onboarding Check Error:', error);
+      }
+
+      setView(data ? (data.onboarding_completed ? 'APP' : 'ONBOARDING') : 'ONBOARDING');
+    } catch (e) {
+      console.error('CheckOnboarding Catch:', e);
+      // Fallback to onboarding if we can't confirm app state
+      setView('ONBOARDING');
+    }
+  };
+
+  useEffect(() => {
     const initialize = async () => {
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
-        if (s) {
-          // Startup always begins on login, even if a session already exists.
-          setSession(null);
-          setView('AUTH');
-        } else {
-          setView('AUTH');
-        }
+        // Startup always begins on login, even if a session already exists.
+        setSession(null);
+        setView('AUTH');
       } catch (err) {
         console.error('Session initialization failed:', err);
         // Fallback to auth screen so user isn't stuck on homepage
@@ -568,13 +565,13 @@ const App = () => {
     initialize();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      if (event === 'SIGNED_OUT') { 
-        setSession(null); 
-        setView('AUTH'); 
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setView('AUTH');
       }
-      if (event === 'SIGNED_IN' && s) { 
-        setSession(s); 
-        checkOnboarding(s); 
+      if (event === 'SIGNED_IN' && s) {
+        setSession(s);
+        checkOnboarding(s);
       }
     });
 
@@ -588,8 +585,8 @@ const App = () => {
       {/* Landing page is disabled for both web and PWA. Start at login only. */}
       <>
         {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
-          if (s) { setSession(s); setView('ONBOARDING'); return; }
-          supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); setView('ONBOARDING'); } });
+          if (s) { setSession(s); checkOnboarding(s); return; }
+          supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); checkOnboarding(s); } });
         }} />}
         {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
         {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}

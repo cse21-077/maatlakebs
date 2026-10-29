@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle2, CheckCircle, ShieldAlert } from 'lucide-reac
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { DEFAULT_TRADER_ID } from '../lib/database.types';
-import { Button, parseJson } from './shared';
+import { Button } from './shared';
 
 interface Props { session: Session; onComplete: () => void; }
 
@@ -30,33 +30,7 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
         const isGuest = session.user.id === '00000000-0000-4000-a000-000000000000';
 
         if (!isGuest) {
-            // Risk profile creation is currently disabled during terms acceptance.
-            // The API call is intentionally commented out until backend onboarding
-            // behavior is restored.
-            /*
-            const riskRes = await fetch('/api/upsert-risk-profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: session.user.id,
-                    aggressiveness: 1.0,
-                    max_lot: 50.0,
-                    max_drawdown: 100,
-                    min_balance: 1.0,
-                    pause_copy: false,
-                    advanced_options: { settings_locked: true },
-                }),
-            });
-
-            if (!riskRes.ok) {
-                const riskErr = await parseJson(riskRes).catch((err: Error) => ({ error: err.message }));
-                console.error('Onboarding Error:', riskErr);
-                setError('System error: ' + (riskErr.error || 'Failed to create risk profile'));
-                setLoading(false);
-                return;
-            }
-
-            // Mark onboarding as complete
+            // Persist completion so the next login goes straight to the dashboard
             const { error: updateErr } = await (supabase
                 .from('users') as any)
                 .update({ onboarding_completed: true })
@@ -68,7 +42,6 @@ export const OnboardingScreen = ({ session, onComplete }: Props) => {
                 setLoading(false);
                 return;
             }
-            */
         }
 
         setLoading(false);

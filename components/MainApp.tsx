@@ -106,11 +106,11 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                     advanced_options: r.advanced_options
                 });
             }
-        } catch (e) { 
-            console.error('Load Error:', e); 
+        } catch (e) {
+            console.error('Load Error:', e);
         }
-        // Refresh connection status after any account change
-        await fetchStatus();
+        // Note: the live connection check is NOT triggered here — the [uid]
+        // effect below does it once per mount, and realtime covers updates
     };
 
     const fetchStatus = async () => {
@@ -152,7 +152,22 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
     useEffect(() => {
         if (!uid) return;
 
-        // Immediate fetch on mount / uid change
+        // Paint the last known state instantly from the Supabase mirror,
+        // then verify live against the bridge in the background
+        (async () => {
+            try {
+                const res = await fetch(`/api/connection-status?user_id=${uid}`);
+                const data = await res.json();
+                if (res.ok && data.status) {
+                    setConnectionStatus(data.status);
+                    setConnectionLastChecked(data.last_checked || null);
+                }
+            } catch {
+                // Mirror unavailable — the live check below will populate it
+            }
+        })();
+
+        // Live check on mount / uid change
         fetchStatus();
 
         // Subscribe to real-time updates for instant feedback

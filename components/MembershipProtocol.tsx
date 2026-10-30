@@ -201,8 +201,8 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
           </div>
         </div>
 
-        {/* Instant payment — Whop embedded checkout (card / Apple Pay / Google Pay) */}
-        <WhopPay userId={uid} price={CURRENT_PRICE} onPaid={() => onRefresh()} />
+        {/* Instant payment — redirect to Whop's hosted checkout page */}
+        <WhopPay userId={uid} price={CURRENT_PRICE} />
 
         {/* ⛔ PAYMENT PROOF UPLOAD TEMPORARILY REMOVED — Whop checkout is the only
             payment method for now. Section kept in place: flip `false` back to `true`

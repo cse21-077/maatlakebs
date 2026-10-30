@@ -6,8 +6,8 @@
  *   POST /api/whop-checkout-session  →  /api/whop?route=session
  *   POST /api/whop-webhook           →  /api/whop?route=webhook
  *
- * route=session  — mints a Whop checkout configuration (ch_...) tagged with the
- *                  paying user's id (metadata.userId) for the client embed.
+ * route=session  — creates a Whop checkout link tagged with the paying user's
+ *                  id (metadata.userId) for a full-page redirect.
  * route=webhook  — verifies the Standard Webhooks signature and auto-activates
  *                  the subscription on payment.succeeded.
  *
@@ -51,9 +51,23 @@ async function sessionHandler(req, res) {
     return res.status(500).json({ error: 'Server misconfiguration: missing VITE_WHOP_PLAN_ID' });
   }
 
-  const { user_id } = req.body || {};
+  const { user_id, return_url } = req.body || {};
   if (!user_id) {
     return res.status(400).json({ error: 'Missing required field: user_id' });
+  }
+
+  let redirectUrl;
+  if (return_url) {
+    try {
+      const candidate = new URL(return_url);
+      const requestOrigin = req.headers?.origin;
+      if (!requestOrigin || candidate.origin !== new URL(requestOrigin).origin || candidate.protocol !== 'https:') {
+        return res.status(400).json({ error: 'Invalid checkout return URL' });
+      }
+      redirectUrl = candidate.toString();
+    } catch {
+      return res.status(400).json({ error: 'Invalid checkout return URL' });
+    }
   }
 
   try {
@@ -75,13 +89,12 @@ async function sessionHandler(req, res) {
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        // A retried click must not mint a second checkout
-        'Idempotency-Key': `checkout-${user_id}-${Date.now()}`,
       },
       body: JSON.stringify({
         variant_id: planId,
         mode: 'payment',
         metadata: { userId: user_id },
+        ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
       }),
     });
 
@@ -94,29 +107,24 @@ async function sessionHandler(req, res) {
       });
     }
 
-    // The embed renders a checkout SESSION (chs_...), minted from the
-    // configuration — passing the configuration id (ch_...) makes Whop show
-    // "this checkout is no longer available".
-    const sessionResponse = await fetch(`${base}/checkout_sessions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ checkout_configuration: config.id }),
-    });
-
-    const session = await sessionResponse.json().catch(() => ({}));
-
-    if (!sessionResponse.ok || !session.id) {
-      console.error('❌ Whop checkout session failed:', sessionResponse.status, session);
-      return res.status(502).json({
-        error: session?.error?.message || `Whop rejected the checkout session (${sessionResponse.status})`,
-      });
+    let checkoutUrl;
+    try {
+      checkoutUrl = new URL(config.purchase_url);
+    } catch {
+      checkoutUrl = null;
     }
 
-    console.log(`✅ Whop checkout session ${session.id} for user ${user_id}`);
-    return res.status(200).json({ sessionId: session.id });
+    if (
+      !checkoutUrl ||
+      checkoutUrl.protocol !== 'https:' ||
+      !(checkoutUrl.hostname === 'whop.com' || checkoutUrl.hostname.endsWith('.whop.com'))
+    ) {
+      console.error('❌ Whop checkout configuration returned an invalid purchase URL:', config.purchase_url);
+      return res.status(502).json({ error: 'Whop did not return a valid checkout link. Please try again later.' });
+    }
+
+    console.log('✅ Whop checkout link created for user', user_id);
+    return res.status(200).json({ checkoutUrl: checkoutUrl.toString() });
   } catch (error) {
     console.error('❌ whop-checkout-session error:', error);
     return res.status(500).json({ error: error.message });

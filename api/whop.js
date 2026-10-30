@@ -83,7 +83,7 @@ async function sessionHandler(req, res) {
         'Idempotency-Key': `checkout-${user_id}-${Date.now()}`,
       },
       body: JSON.stringify({
-        plan_id: planId,
+        variant_id: planId,
         mode: 'payment',
         metadata: { userId: user_id },
       }),
@@ -159,7 +159,7 @@ async function webhookHandler(req, res) {
 
   const paymentId = data?.id;
   const userId = data?.metadata?.userId;
-  const planId = data?.plan_id || data?.plan?.id;
+  const planId = data?.plan_id || data?.variant_id || data?.plan?.id || data?.variant?.id;
   const expectedPlan = process.env.VITE_WHOP_PLAN_ID;
 
   if (!paymentId || !paymentId.startsWith('pay_')) {

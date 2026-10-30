@@ -110,7 +110,7 @@ export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
             </p>
             <p className="text-xs text-white/50 leading-relaxed">
               {confirming
-                ? 'Talking to Whop to confirm the payment. Your subscription will switch to Active in a few seconds.'
+                ? 'Confirming your payment — your subscription will switch to Active in a few seconds.'
                 : 'Your payment is confirmed — your subscription is now Active.'}
             </p>
             <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Receipt {receiptId}</p>
@@ -133,7 +133,7 @@ export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
             </div>
 
             <p className="text-xs text-white/60 leading-relaxed">
-              Pay <span className="text-white font-bold">${price}.00/month</span> instantly by card, Apple Pay or Google Pay via Whop — your plan activates automatically as soon as the payment clears, no proof upload needed.
+              Pay <span className="text-white font-bold">${price}.00/month</span> instantly by card, Apple Pay or Google Pay — your plan activates automatically as soon as the payment clears.
             </p>
 
             {payError && (

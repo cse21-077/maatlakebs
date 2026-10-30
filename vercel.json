@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/api/whop-checkout-session", "destination": "/api/whop?route=session" },
+    { "source": "/api/whop-webhook", "destination": "/api/whop?route=webhook" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

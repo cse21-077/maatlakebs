@@ -1,21 +1,112 @@
 /**
- * Whop webhook — auto-activates subscriptions for successful Whop payments, so
- * paying through the embedded checkout never needs the manual admin approve
- * step (that step remains only for uploaded proof-of-payment).
+ * Whop payments — both Whop endpoints live in ONE function to stay within the
+ * Vercel Hobby limit of 12 serverless functions. Public URLs are preserved via
+ * vercel.json rewrites:
  *
- * Endpoint: POST /api/whop-webhook
- * Subscribe (sandbox.whop.com → Developer → Webhooks, API version v1):
- *   payment_succeeded, payment_failed
+ *   POST /api/whop-checkout-session  →  /api/whop?route=session
+ *   POST /api/whop-webhook           →  /api/whop?route=webhook
+ *
+ * route=session  — mints a Whop checkout configuration (ch_...) tagged with the
+ *                  paying user's id (metadata.userId) for the client embed.
+ * route=webhook  — verifies the Standard Webhooks signature and auto-activates
+ *                  the subscription on payment.succeeded.
  *
  * Env:
- *   WHOP_WEBHOOK_SECRET  (ws_..., exactly as Whop shows it)
- *   VITE_WHOP_PLAN_ID    (optional guard — payments for other plans are ignored)
+ *   WHOP_COMPANY_API_KEY  (apik_..., server-only)
+ *   WHOP_WEBHOOK_SECRET   (ws_..., server-only)
+ *   VITE_WHOP_PLAN_ID     (plan_..., shared with the client embed)
+ *   VITE_WHOP_ENV         ("sandbox" default | "production")
  */
 
 const SUBSCRIPTION_PLAN = 'active';
 const ORIGINAL_PRICE = 150;
 const DISCOUNT_AMOUNT = 50;
 
+// ── Route dispatch ────────────────────────────────────────────────────────────
+export default async function handler(req, res) {
+  const url = req.url || '';
+  const route =
+    req.query?.route ||
+    (url.includes('whop-webhook') ? 'webhook' : '') ||
+    (url.includes('whop-checkout-session') ? 'session' : '');
+
+  if (route === 'session') return sessionHandler(req, res);
+  if (route === 'webhook') return webhookHandler(req, res);
+  return res.status(404).json({ error: 'Unknown route. Use /api/whop-checkout-session or /api/whop-webhook' });
+}
+
+// ── route=session ─────────────────────────────────────────────────────────────
+async function sessionHandler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const apiKey = process.env.WHOP_COMPANY_API_KEY;
+  const planId = process.env.VITE_WHOP_PLAN_ID;
+  const base =
+    process.env.VITE_WHOP_ENV === 'production'
+      ? 'https://api.whop.com/api/v1'
+      : 'https://sandbox-api.whop.com/api/v1';
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Server misconfiguration: missing WHOP_COMPANY_API_KEY' });
+  }
+  if (!planId || !planId.startsWith('plan_')) {
+    return res.status(500).json({ error: 'Server misconfiguration: missing VITE_WHOP_PLAN_ID' });
+  }
+
+  const { user_id } = req.body || {};
+  if (!user_id) {
+    return res.status(400).json({ error: 'Missing required field: user_id' });
+  }
+
+  try {
+    // Only mint sessions for real accounts
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', user_id)
+      .maybeSingle();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const response = await fetch(`${base}/checkout_configurations`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        // A retried click must not mint a second checkout
+        'Idempotency-Key': `checkout-${user_id}-${Date.now()}`,
+      },
+      body: JSON.stringify({
+        plan_id: planId,
+        mode: 'payment',
+        metadata: { userId: user_id },
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.id) {
+      console.error('❌ Whop checkout session failed:', response.status, data);
+      return res.status(502).json({
+        error: data?.error?.message || `Whop rejected the checkout session (${response.status})`,
+      });
+    }
+
+    console.log(`✅ Whop checkout session ${data.id} for user ${user_id}`);
+    return res.status(200).json({ sessionId: data.id });
+  } catch (error) {
+    console.error('❌ whop-checkout-session error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+// ── route=webhook ─────────────────────────────────────────────────────────────
 async function readRawBody(req) {
   // Signature covers the exact bytes Whop sent. Read the stream when it is
   // still intact; fall back to re-serializing if the host pre-parsed the body.
@@ -32,7 +123,7 @@ async function readRawBody(req) {
   return JSON.stringify(req.body || {});
 }
 
-export default async function handler(req, res) {
+async function webhookHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

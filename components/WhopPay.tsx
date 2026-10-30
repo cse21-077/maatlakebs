@@ -2,11 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Zap, Lock, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import { WhopCheckoutEmbed } from '@whop/checkout/react';
 
-// Whop embedded checkout. Sandbox while we test — flip VITE_WHOP_ENV=production
-// and use a live plan ID + live keys when going live.
+// Whop embedded checkout uses production only.
 const WHOP_PLAN_ID = (import.meta.env.VITE_WHOP_PLAN_ID as string) || '';
-const BUILD_WHOP_ENV: 'sandbox' | 'production' =
-  import.meta.env.VITE_WHOP_ENV === 'production' ? 'production' : 'sandbox';
 const whopConfigured = WHOP_PLAN_ID.startsWith('plan_');
 
 interface WhopPayProps {
@@ -18,7 +15,6 @@ interface WhopPayProps {
 export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
   const [starting, setStarting] = useState(false);
   const [sessionId, setSessionId] = useState('');
-  const [checkoutEnvironment, setCheckoutEnvironment] = useState(BUILD_WHOP_ENV);
   const [receiptId, setReceiptId] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [payError, setPayError] = useState('');
@@ -57,10 +53,6 @@ export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
       if (!res.ok || !json.sessionId) {
         throw new Error(json.error || `Could not start checkout (${res.status})`);
       }
-      if (json.environment !== 'sandbox' && json.environment !== 'production') {
-        throw new Error('Checkout environment was not provided by the server. Please refresh and try again.');
-      }
-      setCheckoutEnvironment(json.environment);
       setSessionId(json.sessionId);
     } catch (err: any) {
       setPayError(err.message || 'Could not start checkout — please try again.');
@@ -128,9 +120,6 @@ export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
                 <p className="text-xs font-black text-white/50 uppercase tracking-widest">Pay Online</p>
               </div>
               <div className="flex items-center gap-2">
-                {checkoutEnvironment === 'sandbox' && (
-                  <span className="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-[9px] font-black rounded-full uppercase tracking-widest">Sandbox</span>
-                )}
                 <span className="px-2 py-1 bg-white/5 text-white/40 text-[9px] font-black rounded-full uppercase tracking-widest flex items-center gap-1">
                   <Lock size={9} /> Secure
                 </span>
@@ -153,7 +142,7 @@ export const WhopPay: React.FC<WhopPayProps> = ({ userId, price, onPaid }) => {
                 <div className="rounded-2xl overflow-hidden">
                   <WhopCheckoutEmbed
                     sessionId={sessionId}
-                    environment={checkoutEnvironment}
+                    environment="production"
                     skipRedirect
                     theme="dark"
                     themeOptions={{

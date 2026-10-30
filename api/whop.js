@@ -15,7 +15,6 @@
  *   WHOP_COMPANY_API_KEY  (apik_..., server-only)
  *   WHOP_WEBHOOK_SECRET   (ws_..., server-only)
  *   VITE_WHOP_PLAN_ID     (plan_..., shared with the client embed)
- *   VITE_WHOP_ENV         ("sandbox" default | "production")
  */
 
 const SUBSCRIPTION_PLAN = 'active';
@@ -43,11 +42,7 @@ async function sessionHandler(req, res) {
 
   const apiKey = process.env.WHOP_COMPANY_API_KEY;
   const planId = process.env.VITE_WHOP_PLAN_ID;
-  const environment = process.env.VITE_WHOP_ENV === 'production' ? 'production' : 'sandbox';
-  const base =
-    environment === 'production'
-      ? 'https://api.whop.com/api/v1'
-      : 'https://sandbox-api.whop.com/api/v1';
+  const base = 'https://api.whop.com/api/v1';
 
   if (!apiKey) {
     return res.status(500).json({ error: 'Server misconfiguration: missing WHOP_COMPANY_API_KEY' });
@@ -121,7 +116,7 @@ async function sessionHandler(req, res) {
     }
 
     console.log(`✅ Whop checkout session ${session.id} for user ${user_id}`);
-    return res.status(200).json({ sessionId: session.id, environment });
+    return res.status(200).json({ sessionId: session.id });
   } catch (error) {
     console.error('❌ whop-checkout-session error:', error);
     return res.status(500).json({ error: error.message });

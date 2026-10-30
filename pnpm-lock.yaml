@@ -26,6 +26,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.98.0
         version: 2.98.0
+      '@whop/checkout':
+        specifier: ^0.7.0
+        version: 0.7.0(react@19.2.4)
+      '@whop/sdk':
+        specifier: ^2.7.0
+        version: 2.7.0
       axios:
         specifier: ^1.7.7
         version: 1.14.0
@@ -824,6 +830,18 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+
+  '@whop/checkout@0.7.0':
+    resolution: {integrity: sha512-Q7Sr1SuiTPsbUbeTLtYIOO045td9/0Z+JQWyFUC0+yjlQY51CiOudmKOcN5Fq2AzOdXOajsVITsdQFHoL43Pkg==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+
+  '@whop/sdk@2.7.0':
+    resolution: {integrity: sha512-u9ri0clLZYszbeAZO28fof6C1kyZgwtg+26nXhwK+AUtwRXcknKWWeJZraVdeKo/sJLya1GxPDWBk++bcvMd+A==}
+    engines: {node: '>=18.0.0'}
 
   '@xmldom/xmldom@0.9.10':
     resolution: {integrity: sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==}
@@ -2895,6 +2913,14 @@ snapshots:
       vite: 6.4.1(@types/node@22.19.11)(jiti@1.21.7)
     transitivePeerDependencies:
       - supports-color
+
+  '@whop/checkout@0.7.0(react@19.2.4)':
+    optionalDependencies:
+      react: 19.2.4
+
+  '@whop/sdk@2.7.0':
+    dependencies:
+      standardwebhooks: 1.0.0
 
   '@xmldom/xmldom@0.9.10': {}
 

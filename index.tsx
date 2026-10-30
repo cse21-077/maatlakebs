@@ -506,20 +506,27 @@ const SplashScreen = ({ onFinish, duration = 3000 }: { onFinish: () => void; dur
 
 // ── App root ──────────────────────────────────────────────────────────────────
 const App = () => {
-  const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+  // Installed contexts (PWA standalone or native Capacitor shell) go splash → login;
+  // plain web browsers get the promotional landing page first.
+  const isNative = (window as any).Capacitor?.isNativePlatform?.() === true;
+  const isPWA = isNative ||
+    window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as any).standalone || document.referrer.includes('android-app://');
 
-  // Dev bypass for admin testing on desktop web
+  // Dev bypass for admin testing on desktop web (skips the landing)
   const isDev = new URLSearchParams(window.location.search).get('dev') === '1' ||
     localStorage.getItem('mk_dev') === '1';
 
-  const hasAuthParams = window.location.hash.includes('access_token=') || 
+  const startsInApp = isPWA || isDev;
+
+  const hasAuthParams = window.location.hash.includes('access_token=') ||
                         window.location.search.includes('code=') ||
                         window.location.search.includes('type=recovery');
 
-  const [view, setView] = useState<View>('AUTH');
+  const [view, setView] = useState<View>(startsInApp ? 'SPLASH' : 'LANDING');
   const [session, setSession] = useState<Session | null>(null);
   const [booting, setBooting] = useState(true);
+  const [splashDone, setSplashDone] = useState(false);
 
   // ── Session management ──
   const checkOnboarding = async (s: Session) => {
@@ -558,7 +565,7 @@ const App = () => {
           await checkOnboarding(s);
         } else {
           setSession(null);
-          setView('AUTH');
+          setView(startsInApp ? 'AUTH' : 'LANDING');
         }
       } catch (err) {
         console.error('Session initialization failed:', err);
@@ -585,18 +592,31 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (booting) return <SplashScreen onFinish={() => {}} duration={null} />;
+  // Installed app: branded splash while booting/session-checking, then login.
+  // Web: fall straight through to the promotional landing (no splash wait).
+  if (startsInApp && (booting || !splashDone)) {
+    return <SplashScreen onFinish={() => setSplashDone(true)} duration={isNative ? null : 3000} />;
+  }
 
   return (
     <div className="antialiased text-white selection:bg-primary/30">
-      {/* Landing page is disabled for both web and PWA. Start at login only. */}
       <>
+        {view === 'LANDING' && (
+          <LandingPage
+            isPWA={isPWA}
+            hasAuthParams={hasAuthParams}
+            onLaunch={() => {
+              if (session) { checkOnboarding(session); return; }
+              setView('AUTH');
+            }}
+          />
+        )}
         {view === 'AUTH' && <AuthScreen onLogin={(s?: Session) => {
           if (s) { setSession(s); checkOnboarding(s); return; }
           supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) { setSession(s); checkOnboarding(s); } });
         }} />}
         {view === 'ONBOARDING' && session && <OnboardingScreen session={session} onComplete={() => setView('APP')} />}
-        {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView('AUTH'); }} />}
+        {view === 'APP' && session && <MainApp session={session} onDisconnect={() => { setSession(null); setView(startsInApp ? 'AUTH' : 'LANDING'); }} />}
       </>
     </div>
   );

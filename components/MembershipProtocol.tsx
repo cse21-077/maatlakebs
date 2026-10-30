@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { parseJson } from './shared';
+import { WhopPay } from './WhopPay';
 
 const ORIGINAL_PRICE = 150;
 const CURRENT_PRICE = 100;
@@ -200,12 +201,18 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
           </div>
         </div>
 
-        {/* Payment Proof Upload */}
+        {/* Instant payment — Whop embedded checkout (card / Apple Pay / Google Pay) */}
+        <WhopPay userId={uid} price={CURRENT_PRICE} onPaid={() => onRefresh()} />
+
+        {/* ⛔ PAYMENT PROOF UPLOAD TEMPORARILY REMOVED — Whop checkout is the only
+            payment method for now. Section kept in place: flip `false` back to `true`
+            to re-enable. handleProofUpload and the review state above stay wired. */}
+        {false && (
         <div className="space-y-4">
           <div className="flex items-center gap-3 px-2">
             <div className="h-px flex-1 bg-white/10" />
             <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">
-              {isConfirmed ? 'Renew Subscription' : 'Upload Payment Proof'}
+              {isConfirmed ? 'Renew Subscription' : 'Or Submit Proof of Payment'}
             </p>
             <div className="h-px flex-1 bg-white/10" />
           </div>
@@ -305,6 +312,7 @@ export const MembershipProtocol = ({ uid, paymentStatus, onBack, onRefresh }: Me
             )}
           </div>
         </div>
+        )}
 
         <p className="text-center text-[9px] text-white/10 uppercase tracking-[0.5em] font-black pt-6 pb-6">
           Mentor Maatla Kebs Institutional Node

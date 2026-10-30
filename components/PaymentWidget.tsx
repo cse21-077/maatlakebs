@@ -58,11 +58,17 @@ interface PaymentWidgetProps {
   onPaymentSuccess?: () => void;
 }
 
+// ⛔ TEMPORARILY DISABLED — proof-of-payment submission in this widget is
+// superseded by Whop embedded checkout (components/WhopPay.tsx) and the
+// proof-upload flow in components/MembershipProtocol.tsx. The widget is not
+// imported anywhere; the implementation below is kept in place to re-enable
+// later — remove the `return null` below to restore it.
 export const PaymentWidget: React.FC<PaymentWidgetProps> = ({
   userId,
   currentPlan,
   onPaymentSuccess,
 }) => {
+  return null;
   const [selectedPlan, setSelectedPlan] = useState<string>('active');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

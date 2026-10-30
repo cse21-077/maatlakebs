@@ -43,8 +43,9 @@ async function sessionHandler(req, res) {
 
   const apiKey = process.env.WHOP_COMPANY_API_KEY;
   const planId = process.env.VITE_WHOP_PLAN_ID;
+  const environment = process.env.VITE_WHOP_ENV === 'production' ? 'production' : 'sandbox';
   const base =
-    process.env.VITE_WHOP_ENV === 'production'
+    environment === 'production'
       ? 'https://api.whop.com/api/v1'
       : 'https://sandbox-api.whop.com/api/v1';
 
@@ -120,7 +121,7 @@ async function sessionHandler(req, res) {
     }
 
     console.log(`✅ Whop checkout session ${session.id} for user ${user_id}`);
-    return res.status(200).json({ sessionId: session.id });
+    return res.status(200).json({ sessionId: session.id, environment });
   } catch (error) {
     console.error('❌ whop-checkout-session error:', error);
     return res.status(500).json({ error: error.message });

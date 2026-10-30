@@ -89,17 +89,38 @@ async function sessionHandler(req, res) {
       }),
     });
 
-    const data = await response.json().catch(() => ({}));
+    const config = await response.json().catch(() => ({}));
 
-    if (!response.ok || !data.id) {
-      console.error('❌ Whop checkout session failed:', response.status, data);
+    if (!response.ok || !config.id) {
+      console.error('❌ Whop checkout configuration failed:', response.status, config);
       return res.status(502).json({
-        error: data?.error?.message || `Whop rejected the checkout session (${response.status})`,
+        error: config?.error?.message || `Whop rejected the checkout configuration (${response.status})`,
       });
     }
 
-    console.log(`✅ Whop checkout session ${data.id} for user ${user_id}`);
-    return res.status(200).json({ sessionId: data.id });
+    // The embed renders a checkout SESSION (chs_...), minted from the
+    // configuration — passing the configuration id (ch_...) makes Whop show
+    // "this checkout is no longer available".
+    const sessionResponse = await fetch(`${base}/checkout_sessions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ checkout_configuration: config.id }),
+    });
+
+    const session = await sessionResponse.json().catch(() => ({}));
+
+    if (!sessionResponse.ok || !session.id) {
+      console.error('❌ Whop checkout session failed:', sessionResponse.status, session);
+      return res.status(502).json({
+        error: session?.error?.message || `Whop rejected the checkout session (${sessionResponse.status})`,
+      });
+    }
+
+    console.log(`✅ Whop checkout session ${session.id} for user ${user_id}`);
+    return res.status(200).json({ sessionId: session.id });
   } catch (error) {
     console.error('❌ whop-checkout-session error:', error);
     return res.status(500).json({ error: error.message });

@@ -62,10 +62,30 @@ const BrokerSection = ({
     const [editingSavedId, setEditingSavedId] = useState<string | null>(null);
     const [editingActive, setEditingActive] = useState(false);
     const [temp, setTemp] = useState({ login: '', server: '', password: '' });
+    // Live bridge readout for the active account (status + balance proof)
+    const [liveConn, setLiveConn] = useState<any>(null);
 
     const brokerAccounts = userAccounts.filter(a => brokerOf(a.mt5_server) === broker.key);
     const activeAcct = brokerAccounts.find(a => a.is_active);
     const savedAccounts = brokerAccounts.filter(a => !activeAcct || a.mt5_login !== activeAcct.mt5_login);
+
+    useEffect(() => {
+        if (!activeAcct) { setLiveConn(null); return; }
+        let cancelled = false;
+        const check = async () => {
+            try {
+                const r = await fetch(`/api/connection-status?user_id=${uid}&login=${encodeURIComponent(String(activeAcct.mt5_login))}`);
+                if (!r.ok) return;
+                const j = await r.json();
+                if (!cancelled) setLiveConn(j);
+            } catch {
+                // keep the last known readout on transient failures
+            }
+        };
+        check();
+        const t = setInterval(check, 15000);
+        return () => { cancelled = true; clearInterval(t); };
+    }, [activeAcct?.mt5_login, uid]);
 
     const run = async (fn: () => Promise<void>) => {
         setBusy(true);
@@ -230,6 +250,40 @@ const BrokerSection = ({
                         <div>
                             <p className="text-3xl font-black text-white tracking-tighter truncate">{activeAcct.mt5_login}</p>
                             <p className="text-[10px] font-black text-green-400/40 uppercase tracking-[0.2em] mt-1">{activeAcct.mt5_server}</p>
+                        </div>
+                    )}
+
+                    {/* Live bridge readout — connection proof with balance */}
+                    {liveConn && (
+                        <div
+                            title={liveConn.error_message || undefined}
+                            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border ${
+                                liveConn.status === 'CONNECTED'
+                                    ? 'bg-green-500/10 border-green-500/20'
+                                    : liveConn.status === 'DISCONNECTED'
+                                        ? 'bg-red-500/5 border-red-500/20'
+                                        : 'bg-white/5 border-white/10'
+                            }`}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <span className={`w-2 h-2 rounded-full ${
+                                    liveConn.status === 'CONNECTED' ? 'bg-green-400 animate-pulse' : liveConn.status === 'DISCONNECTED' ? 'bg-red-500' : 'bg-white/30 animate-pulse'
+                                }`} />
+                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${
+                                    liveConn.status === 'CONNECTED' ? 'text-green-400' : liveConn.status === 'DISCONNECTED' ? 'text-red-400' : 'text-white/40'
+                                }`}>
+                                    {liveConn.status === 'CONNECTED'
+                                        ? 'Terminal Connected'
+                                        : liveConn.status === 'DISCONNECTED'
+                                            ? 'Terminal Offline'
+                                            : 'Checking Terminal…'}
+                                </span>
+                            </div>
+                            {liveConn.status === 'CONNECTED' && liveConn.balance != null && (
+                                <span className="text-sm font-black text-white tracking-tight">
+                                    ${Number(liveConn.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                            )}
                         </div>
                     )}
 

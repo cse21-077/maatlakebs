@@ -18,9 +18,46 @@ export default async function handler(req, res) {
 
   // ── GET: simple DB read ──────────────────────────────────────
   if (req.method === 'GET') {
-    const { user_id } = req.query;
+    const { user_id, login } = req.query;
     if (!user_id) {
       return res.status(400).json({ error: 'Missing user_id' });
+    }
+
+    // Per-account live check straight from the bridge — powers the
+    // connection + balance readout on the linked account card.
+    if (login) {
+      try {
+        const { bridgeConfig, bridgeFetch } = await import('./_lib/bridge.js');
+        if (!bridgeConfig().configured) {
+          return res.status(503).json({ error: 'MT5 bridge not configured' });
+        }
+        const r = await bridgeFetch(`/v1/status?login=${encodeURIComponent(String(login))}`, { timeoutMs: 8000 });
+        if (!r.ok || !r.data) {
+          return res.status(200).json({
+            status: 'DISCONNECTED',
+            balance: null,
+            error_message: r.data?.error || `Bridge returned ${r.status}`,
+            live: true,
+          });
+        }
+        const live = r.data.terminal_connected === true && r.data.state === 'connected';
+        return res.status(200).json({
+          status: live ? 'CONNECTED' : 'DISCONNECTED',
+          balance: typeof r.data.balance === 'number' ? r.data.balance : null,
+          server: r.data.reported_server || null,
+          error_message: live
+            ? null
+            : (r.data.message ? String(r.data.message).slice(0, 200) : 'Terminal not connected'),
+          live: true,
+        });
+      } catch (err) {
+        return res.status(200).json({
+          status: 'UNKNOWN',
+          balance: null,
+          error_message: `Bridge check failed: ${err.message}`.slice(0, 200),
+          live: true,
+        });
+      }
     }
 
     try {

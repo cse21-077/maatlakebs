@@ -8,14 +8,14 @@
  * Config (server-side env, never exposed to the browser):
  *   MK_BRIDGE_URL  e.g. https://bridge.example.com   (legacy SKUD_BRIDGE_URL)
  *   MK_BRIDGE_KEY  >= 32 chars, same value the bridge was started with
- *                  (legacy SKUD_BRIDGE_KEY)
+ *                  (aliases MK_KEY / SKUD_BRIDGE_KEY also accepted)
  */
 
 const DEFAULT_MENTOR_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 export function bridgeConfig() {
   const base = (process.env.MK_BRIDGE_URL || process.env.SKUD_BRIDGE_URL || '').replace(/\/+$/, '');
-  const key = process.env.MK_BRIDGE_KEY || process.env.SKUD_BRIDGE_KEY || '';
+  const key = process.env.MK_BRIDGE_KEY || process.env.MK_KEY || process.env.SKUD_BRIDGE_KEY || '';
   return { base, key, configured: Boolean(base && key) };
 }
 

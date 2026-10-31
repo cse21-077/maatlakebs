@@ -1,11 +1,11 @@
-# Caddy serves the SkuD bridge over public HTTPS.
-# Hostname is read from the SKUD_BRIDGE_HOST environment variable
-# (fallback: skud.toporapula.dev). Set it before starting Caddy:
-#   setx SKUD_BRIDGE_HOST "skud.toporapula.dev"   (then restart the shell)
-# or prefix the start command:  $env:SKUD_BRIDGE_HOST="..."; .\start-all.ps1
-# DNS: A record <SKUD_BRIDGE_HOST> must point at THIS machine's public IP.
+# Caddy serves the Kebs bridge over public HTTPS.
+# Hostname is read from the MK_BRIDGE_HOST environment variable
+# (fallback: kebs.toporapula.dev). Set it before starting Caddy:
+#   setx MK_BRIDGE_HOST "kebs.toporapula.dev"   (then restart the shell)
+# or prefix the start command:  $env:MK_BRIDGE_HOST="..."; .\start-all.ps1
+# DNS: A record <MK_BRIDGE_HOST> must point at THIS machine's public IP.
 # Firewall: allow 443 (and RDP from your admin IP only). Port 8765 must stay loopback.
 # CAA must allow letsencrypt.org for Caddy's automatic certificate.
-{$SKUD_BRIDGE_HOST:skud.toporapula.dev} {
+{$MK_BRIDGE_HOST:kebs.toporapula.dev} {
     reverse_proxy 127.0.0.1:8765
 }

@@ -1,8 +1,8 @@
-# One-time setup for a fresh SkuD bridge VPS (Windows).
+# One-time setup for a fresh Kebs bridge VPS (Windows).
 # Idempotent — safe to re-run; finished steps are skipped.
 #
-# Run from the uploaded final folder (e.g. C:\skud\final):
-#   powershell -ExecutionPolicy Bypass -File .\setup-new-vps.ps1 -BridgeHost skud.toporapula.dev
+# Run from the uploaded final folder (e.g. C:\kebs\final):
+#   powershell -ExecutionPolicy Bypass -File .\setup-new-vps.ps1 -BridgeHost kebs.toporapula.dev
 #
 # What it does: layout folders, checks Python, downloads Caddy, opens firewall
 # 80/443, persists MK_BRIDGE_HOST (legacy SKUD_BRIDGE_HOST), initializes the bridge key.
@@ -10,15 +10,15 @@
 # MetaEditor EA compile, DNS A record, Vercel env vars.
 
 param(
-    [string]$BridgeHost = "skud.toporapula.dev",
-    [string]$InstallDir = "C:\skud\final"
+    [string]$BridgeHost = "kebs.toporapula.dev",
+    [string]$InstallDir = "C:\kebs\final"
 )
 
 $ErrorActionPreference = 'Stop'
 
 function Write-Step([string]$Message) { Write-Host "`n=== $Message ===" -ForegroundColor Cyan }
 
-# --- 1. Place files at C:\skud\final --------------------------------------
+# --- 1. Place files at C:\kebs\final --------------------------------------
 Write-Step "Installing bridge files to $InstallDir"
 $currentDir = (Get-Location).Path
 if ($currentDir.TrimEnd('\') -ieq $InstallDir.TrimEnd('\')) {
@@ -30,8 +30,8 @@ if ($currentDir.TrimEnd('\') -ieq $InstallDir.TrimEnd('\')) {
     Set-Location $InstallDir
 }
 
-New-Item -ItemType Directory -Force 'C:\skud\terminals' | Out-Null
-New-Item -ItemType Directory -Force 'C:\skud\mt5-master' | Out-Null
+New-Item -ItemType Directory -Force 'C:\kebs\terminals' | Out-Null
+New-Item -ItemType Directory -Force 'C:\kebs\mt5-master' | Out-Null
 
 # --- 2. Python --------------------------------------------------------------
 Write-Step "Checking Python"
@@ -102,10 +102,10 @@ Write-Host @"
 Remaining manual steps (see README.md):
 
 1. DNS: point the A record for $BridgeHost at THIS VPS public IP.
-2. Master terminal: robocopy MetaTrader 5 into C:\skud\mt5-master, run portable,
+2. Master terminal: robocopy MetaTrader 5 into C:\kebs\mt5-master, run portable,
    log in to a Deriv demo once to cache the server (README section 1).
 3. MetaEditor: open MaatlaKebsStudentEA.mq5, set EaToken to the bridge key
-   printed above, compile (F7), attach to a chart, save profile as 'SkuD'
+   printed above, compile (F7), attach to a chart, save profile as 'Kebs'
    (README section 2). Repeat compile for MaatlaKebsMentorEA.mq5.
 4. Vercel: set MK_BRIDGE_URL=https://$BridgeHost and MK_BRIDGE_KEY to the
    key printed above (legacy SKUD_BRIDGE_URL / SKUD_BRIDGE_KEY also work), then redeploy.

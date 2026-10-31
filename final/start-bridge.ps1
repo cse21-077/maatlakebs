@@ -76,7 +76,7 @@ if ($pythonMajor -lt 3 -or ($pythonMajor -eq 3 -and $pythonMinor -lt 10)) {
 Write-Host "Using $($pythonVersionText.Trim()) via $($pythonCommand.Name)." -ForegroundColor Green
 
 # --- MaatlaKebs terminal infrastructure (seed once on the VPS, see README) ---
-# Defaults match the runbook: master terminal at C:\skud\mt5-master.
+# Defaults match the runbook: master terminal at C:\kebs\mt5-master.
 # Override any of them with MK_* environment variables (legacy SKUD_* still work).
 function Get-EnvCompat {
     param([string]$Name, [string]$LegacyName)
@@ -84,10 +84,10 @@ function Get-EnvCompat {
     if (Test-Path "Env:$LegacyName") { return (Get-Item "Env:$LegacyName").Value }
     return $null
 }
-$terminalsDir    = if (Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR')    { Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR' }    else { 'C:\skud\terminals' }
-$terminalMaster  = if (Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER')  { Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER' }  else { 'C:\skud\mt5-master' }
-$eaSource        = if (Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE')              { Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE' }              else { 'C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5' }
-$chartTemplate   = if (Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE')    { Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE' }    else { 'C:\skud\mt5-master\MQL5\Profiles\Charts\SkuD\chart01.chr' }
+$terminalsDir    = if (Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR')    { Get-EnvCompat 'MK_TERMINALS_DIR' 'SKUD_TERMINALS_DIR' }    else { 'C:\kebs\terminals' }
+$terminalMaster  = if (Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER')  { Get-EnvCompat 'MK_TERMINAL_MASTER' 'SKUD_TERMINAL_MASTER' }  else { 'C:\kebs\mt5-master' }
+$eaSource        = if (Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE')              { Get-EnvCompat 'MK_EA_SOURCE' 'SKUD_EA_SOURCE' }              else { 'C:\kebs\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5' }
+$chartTemplate   = if (Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE')    { Get-EnvCompat 'MK_CHART_TEMPLATE' 'SKUD_CHART_TEMPLATE' }    else { 'C:\kebs\mt5-master\MQL5\Profiles\Charts\Kebs\chart01.chr' }
 
 New-Item -ItemType Directory -Force -Path $terminalsDir | Out-Null
 if (-not (Test-Path (Join-Path $terminalMaster 'terminal64.exe'))) {

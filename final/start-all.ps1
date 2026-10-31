@@ -7,7 +7,7 @@ $masterDirectory = if ($env:MK_TERMINAL_MASTER) {
 } elseif ($env:SKUD_TERMINAL_MASTER) {
     $env:SKUD_TERMINAL_MASTER
 } else {
-    'C:\skud\mt5-master'
+    'C:\kebs\mt5-master'
 }
 $masterExecutable = Join-Path $masterDirectory 'terminal64.exe'
 $shellExecutable = (Get-Process -Id $PID).Path

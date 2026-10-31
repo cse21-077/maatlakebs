@@ -24,9 +24,9 @@ def _env(*names, default=""):
     return default
 
 
-TERMINALS_DIR = Path(_env("MK_TERMINALS_DIR", "SKUD_TERMINALS_DIR", default=r"C:\skud\terminals"))
+TERMINALS_DIR = Path(_env("MK_TERMINALS_DIR", "SKUD_TERMINALS_DIR", default=r"C:\kebs\terminals"))
 MENTOR_BRIDGE_KEY = _env("MK_BRIDGE_KEY", "SKUD_BRIDGE_KEY")
-TERMINAL_MASTER = _env("MK_TERMINAL_MASTER", "SKUD_TERMINAL_MASTER", default=r"C:\skud\mt5-master")
+TERMINAL_MASTER = _env("MK_TERMINAL_MASTER", "SKUD_TERMINAL_MASTER", default=r"C:\kebs\mt5-master")
 LAUNCH_STAGGER_SEC = float(_env("MK_LAUNCH_STAGGER_SEC", "SKUD_LAUNCH_STAGGER_SEC", default="5"))
 
 

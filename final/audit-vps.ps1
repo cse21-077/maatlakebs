@@ -1,7 +1,7 @@
 param(
     [string]$FinalDirectory = $PSScriptRoot,
-    [string]$MasterDirectory = $(if ($env:MK_TERMINAL_MASTER) { $env:MK_TERMINAL_MASTER } elseif ($env:SKUD_TERMINAL_MASTER) { $env:SKUD_TERMINAL_MASTER } else { 'C:\skud\mt5-master' }),
-    [string]$TerminalsDirectory = $(if ($env:MK_TERMINALS_DIR) { $env:MK_TERMINALS_DIR } elseif ($env:SKUD_TERMINALS_DIR) { $env:SKUD_TERMINALS_DIR } else { 'C:\skud\terminals' }),
+    [string]$MasterDirectory = $(if ($env:MK_TERMINAL_MASTER) { $env:MK_TERMINAL_MASTER } elseif ($env:SKUD_TERMINAL_MASTER) { $env:SKUD_TERMINAL_MASTER } else { 'C:\kebs\mt5-master' }),
+    [string]$TerminalsDirectory = $(if ($env:MK_TERMINALS_DIR) { $env:MK_TERMINALS_DIR } elseif ($env:SKUD_TERMINALS_DIR) { $env:SKUD_TERMINALS_DIR } else { 'C:\kebs\terminals' }),
     [switch]$NoPause
 )
 
@@ -100,10 +100,10 @@ if ($caddyPath) {
 $caddyFile = Join-Path $FinalDirectory 'Caddyfile'
 if (Test-Path -LiteralPath $caddyFile -PathType Leaf) {
     $caddyText = Get-Content -LiteralPath $caddyFile -Raw
-    if ($caddyText -match '(?m)^\s*skud\.toporapula\.dev\s*\{') {
-        Add-Check 'PASS' 'Caddy hostname' 'Caddyfile contains skud.toporapula.dev.'
+    if ($caddyText -match '(?m)^\s*kebs\.toporapula\.dev\s*\{') {
+        Add-Check 'PASS' 'Caddy hostname' 'Caddyfile contains kebs.toporapula.dev.'
     } else {
-        Add-Check 'FAIL' 'Caddy hostname' 'Caddyfile does not contain the expected skud.toporapula.dev site block.'
+        Add-Check 'FAIL' 'Caddy hostname' 'Caddyfile does not contain the expected kebs.toporapula.dev site block.'
     }
     if ($caddyText -match 'reverse_proxy\s+127\.0\.0\.1:8765') {
         Add-Check 'PASS' 'Caddy upstream' 'Proxies to the loopback-only bridge on port 8765.'
@@ -114,7 +114,7 @@ if (Test-Path -LiteralPath $caddyFile -PathType Leaf) {
 
 $masterExe = Join-Path $MasterDirectory 'terminal64.exe'
 $masterEa = Join-Path $MasterDirectory 'MQL5\Experts\MaatlaKebsStudentEA.ex5'
-$masterChart = Join-Path $MasterDirectory 'MQL5\Profiles\Charts\SkuD\chart01.chr'
+$masterChart = Join-Path $MasterDirectory 'MQL5\Profiles\Charts\Kebs\chart01.chr'
 Test-RequiredFile $masterExe 'MT5 master terminal'
 Test-RequiredFile $masterEa 'Compiled student EA'
 Test-RequiredFile $masterChart 'Saved master chart template'
@@ -151,16 +151,20 @@ if ($localHealth -and $localHealth.status -eq 'ok') {
 }
 
 try {
-    $dns = [System.Net.Dns]::GetHostAddresses('skud.toporapula.dev') |
+    $publicIp = $null
+    try { $publicIp = (Invoke-RestMethod -Uri 'https://api.ipify.org' -TimeoutSec 5) } catch {}
+    $dns = [System.Net.Dns]::GetHostAddresses('kebs.toporapula.dev') |
         ForEach-Object { $_.IPAddressToString } |
         Select-Object -Unique
-    if ($dns -contains '46.224.112.35') {
-        Add-Check 'PASS' 'Bridge DNS' 'skud.toporapula.dev resolves to 46.224.112.35.'
+    if ($publicIp -and $dns -contains $publicIp) {
+        Add-Check 'PASS' 'Bridge DNS' "kebs.toporapula.dev resolves to this machine ($publicIp)."
+    } elseif ($dns) {
+        Add-Check 'WARN' 'Bridge DNS' "kebs.toporapula.dev resolves to $($dns -join ', '); expected this machine's public IP ($publicIp)."
     } else {
-        Add-Check 'WARN' 'Bridge DNS' "Resolves to $($dns -join ', '); expected 46.224.112.35."
+        Add-Check 'WARN' 'Bridge DNS' 'kebs.toporapula.dev has no DNS records yet.'
     }
 } catch {
-    Add-Check 'WARN' 'Bridge DNS' "Could not resolve skud.toporapula.dev: $($_.Exception.Message)"
+    Add-Check 'WARN' 'Bridge DNS' "Could not resolve kebs.toporapula.dev: $($_.Exception.Message)"
 }
 
 foreach ($port in @(80, 443)) {

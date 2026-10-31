@@ -1,4 +1,4 @@
-# SkuD Turbo MT5 Bridge
+# Kebs Turbo MT5 Bridge
 
 This deployment has three distinct parts:
 
@@ -17,12 +17,12 @@ controlled VPS only.
 
 ## VPS layout
 
-- Bridge files and scripts: `C:\skud\final`
-- Master MT5 template: `C:\skud\mt5-master`
-- Student portable terminals: `C:\skud\terminals\SlotNNN`
-- Bridge database: `C:\skud\final\data\skud.sqlite3`
-- Persistent DPAPI bridge key: `C:\ProgramData\SkuD\bridge-key.dpapi`
-- Public bridge URL: `https://<MK_BRIDGE_HOST>` (default `skud.toporapula.dev`)
+- Bridge files and scripts: `C:\kebs\final`
+- Master MT5 template: `C:\kebs\mt5-master`
+- Student portable terminals: `C:\kebs\terminals\SlotNNN`
+- Bridge database: `C:\kebs\final\data\skud.sqlite3`
+- Persistent DPAPI bridge key: `C:\ProgramData\Kebs\bridge-key.dpapi`
+- Public bridge URL: `https://<MK_BRIDGE_HOST>` (default `kebs.toporapula.dev`)
 - Website: `https://skudturbo.vercel.app`
 
 `start-bridge.ps1` and `start-all.ps1` use these paths by default. Optional
@@ -41,7 +41,7 @@ input. A manually managed Mentor EA uses the same platform key; there is no
 separate mentor token.
 
 The public hostname is controlled by the `MK_BRIDGE_HOST` environment
-variable (Caddyfile; falls back to `skud.toporapula.dev`). The app never talks
+variable (Caddyfile; falls back to `kebs.toporapula.dev`). The app never talks
 to an IP directly — it uses `MK_BRIDGE_URL` on Vercel — so moving servers is
 a DNS change, not a code change.
 
@@ -71,17 +71,17 @@ and key are the only variables; the repo needs no edits.
 
 ## 1. Prepare the master MT5 terminal
 
-Copy the installed MT5 terminal into the SkuD master directory once:
+Copy the installed MT5 terminal into the Kebs master directory once:
 
 ```powershell
-New-Item -ItemType Directory -Force C:\skud\mt5-master | Out-Null
-robocopy "C:\Program Files\MetaTrader 5" "C:\skud\mt5-master" /E
+New-Item -ItemType Directory -Force C:\kebs\mt5-master | Out-Null
+robocopy "C:\Program Files\MetaTrader 5" "C:\kebs\mt5-master" /E
 ```
 
 Open it in portable mode:
 
 ```powershell
-& C:\skud\mt5-master\terminal64.exe /portable
+& C:\kebs\mt5-master\terminal64.exe /portable
 ```
 
 Log in to a Deriv demo account to cache the server, then log out. Keep this
@@ -90,7 +90,7 @@ student slots directory.
 
 ## 2. Initialize the key, then prepare the Student EA template
 
-1. From `C:\skud\final`, initialize the persistent key without starting the
+1. From `C:\kebs\final`, initialize the persistent key without starting the
    bridge or requiring a compiled EA:
 
    ```powershell
@@ -99,21 +99,21 @@ student slots directory.
 
    Copy the printed key into Vercel as the server-only `MK_BRIDGE_KEY`. Never
    put it in a `NEXT_PUBLIC_` variable or source control. The key is saved under
-   `C:\ProgramData\SkuD` for the current Windows account; keep using that same
+   `C:\ProgramData\Kebs` for the current Windows account; keep using that same
    account to run the bridge. This is a one-time setup; normal bridge starts
    reuse the same saved key. Do not put `EaToken` in `.env.example`.
 2. Copy `MaatlaKebsStudentEA.mq5` and `MaatlaKebsStudentCore.mqh` to
-   `C:\skud\mt5-master\MQL5\Experts`. Open `MaatlaKebsStudentEA.mq5` in
+   `C:\kebs\mt5-master\MQL5\Experts`. Open `MaatlaKebsStudentEA.mq5` in
    MetaEditor, enter the bridge key in its `EaToken` input, and compile with
    **F7**. Confirm
-   `C:\skud\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5` exists.
+   `C:\kebs\mt5-master\MQL5\Experts\MaatlaKebsStudentEA.ex5` exists.
 3. Attach `MaatlaKebsStudentEA` to a chart in the master template terminal. Set
    `BridgeUrl` to `http://127.0.0.1:8765`, enable Algo Trading, and allow
    WebRequest to `http://127.0.0.1:8765`.
-4. Save the chart profile as `SkuD`, then close the master terminal. Confirm
-   `C:\skud\mt5-master\MQL5\Profiles\Charts\SkuD\chart01.chr` exists.
-5. Start the full bridge with `C:\skud\final\start-bridge.ps1` or start both
-   Caddy and bridge with `C:\skud\final\start-all.ps1`. Normal startup now
+4. Save the chart profile as `Kebs`, then close the master terminal. Confirm
+   `C:\kebs\mt5-master\MQL5\Profiles\Charts\Kebs\chart01.chr` exists.
+5. Start the full bridge with `C:\kebs\final\start-bridge.ps1` or start both
+   Caddy and bridge with `C:\kebs\final\start-all.ps1`. Normal startup now
    requires the compiled Student EA and saved chart to prevent starting empty
    student terminals.
 
@@ -125,7 +125,7 @@ profile.
 Chart profile convention: save the profile on the master terminal **once** with
 all Deriv charts the Student EA should report (the EA covers 30 forex/metal
 symbols plus 19 synthetic indices by their MT5 full names). The bridge copies
-the chart into every slot under its own profile name (`Charts\SkuD` for
+the chart into every slot under its own profile name (`Charts\Kebs` for
 students, `Charts\Mentor` for the mentor account) and launches MT5 with
 `/profile:<name>`, so each terminal deterministically opens the right chart —
 MT5 never restores whatever profile was last active in the master. The bridge
@@ -136,7 +136,7 @@ saved charts, so the next login starts from a fresh template chart.
 
 ## 3. DNS, Caddy, and firewall
 
-The Caddyfile serves `{$MK_BRIDGE_HOST:skud.toporapula.dev}` and proxies to
+The Caddyfile serves `{$MK_BRIDGE_HOST:kebs.toporapula.dev}` and proxies to
 `127.0.0.1:8765`. Its A record must point at the VPS public IP (see section 0
 when moving servers). Keep the existing
 JoeMoney hostname `bridge.toporapula.dev` unchanged. Allow inbound TCP 80 and
@@ -144,12 +144,12 @@ JoeMoney hostname `bridge.toporapula.dev` unchanged. Allow inbound TCP 80 and
 
 The DNS zone must authorize Caddy's certificate issuer. Add
 `CAA 0 issue "letsencrypt.org"` alongside existing CAA records if it is not
-already allowed. Place `caddy.exe` in `C:\skud\final`, `C:\Caddy`, or on PATH.
+already allowed. Place `caddy.exe` in `C:\kebs\final`, `C:\Caddy`, or on PATH.
 
 Check the bridge after startup:
 
 ```powershell
-Invoke-RestMethod https://skud.toporapula.dev/health
+Invoke-RestMethod https://kebs.toporapula.dev/health
 ```
 
 The unauthenticated account endpoint should return `Unauthorized` in a browser;
@@ -161,7 +161,7 @@ Set these **server-only** variables on the `skudturbo.vercel.app` Vercel project
 then redeploy. Keep the bridge key and mentor setup code private.
 
 ```text
-MK_BRIDGE_URL=https://skud.toporapula.dev
+MK_BRIDGE_URL=https://kebs.toporapula.dev
 MK_BRIDGE_KEY=<same key used by bridge and EA>
 MK_DEFAULT_MENTOR_ID=mentor-skud-01
 MK_ALLOW_DEMO_STUDENT_ENROLLMENT=true
@@ -174,20 +174,20 @@ student account submissions are controlled by the enrollment and live-account
 flags above. Add user authentication and per-account approval before opening
 enrollment to the public.
 
-## 5. Start the SkuD services
+## 5. Start the Kebs services
 
 Allow inbound HTTP and HTTPS in Windows Firewall if the VPS firewall does not
 already allow them:
 
 ```powershell
-New-NetFirewallRule -DisplayName "SkuD Caddy HTTP" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow
-New-NetFirewallRule -DisplayName "SkuD Caddy HTTPS" -Direction Inbound -Protocol TCP -LocalPort 443 -Action Allow
+New-NetFirewallRule -DisplayName "Kebs Caddy HTTP" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow
+New-NetFirewallRule -DisplayName "Kebs Caddy HTTPS" -Direction Inbound -Protocol TCP -LocalPort 443 -Action Allow
 ```
 
 Then start both services from the uploaded folder:
 
 ```powershell
-Set-Location C:\skud\final
+Set-Location C:\kebs\final
 .\start-all.ps1
 ```
 
@@ -198,7 +198,7 @@ second time while services are already running.
 Run the read-only audit at any time:
 
 ```powershell
-Set-Location C:\skud\final
+Set-Location C:\kebs\final
 .\audit-vps.ps1
 ```
 
@@ -209,7 +209,7 @@ protected `POST /api/admin/mentors` route using `MK_MENTOR_SETUP_CODE`. The
 The Mentor EA uses the platform `MK_BRIDGE_KEY`; managed terminals receive it
 automatically. For a manually managed terminal, enter the same key in the EA's
 `BridgeKey` input. Compile the Mentor EA and allow WebRequest to
-`https://skud.toporapula.dev` in MT5.
+`https://kebs.toporapula.dev` in MT5.
 
 Enable demo enrollment only after mentor registration and the student EA/chart
 template are ready. Submit a Deriv demo login, trading password, and server from
@@ -230,7 +230,7 @@ mentor's MT5 account in its own provisioned terminal slot. Register (or update)
 the mentor with a trading password:
 
 ```powershell
-Invoke-RestMethod -Method Post https://skud.toporapula.dev/v1/mentors `
+Invoke-RestMethod -Method Post https://kebs.toporapula.dev/v1/mentors `
   -Headers @{ Authorization = "Bearer $key" } -ContentType "application/json" `
   -Body (@{
     mentor_id = "mentor-skud-01"; mentor_name = "SkudTurbo";

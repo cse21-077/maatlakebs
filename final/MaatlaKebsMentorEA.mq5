@@ -2,7 +2,7 @@
 #property strict
 #property version "1.12"
 
-input string BridgeUrl = "https://skud.toporapula.dev";
+input string BridgeUrl = "https://kebs.toporapula.dev";
 input string MentorId = "mentor-skud-01";
 input string MentorName = "SkudTurbo";
 input string BridgeKey = "";

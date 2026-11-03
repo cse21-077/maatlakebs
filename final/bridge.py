@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hmac
 import hashlib
+import csv
 import json
 import math
 import os
@@ -524,6 +525,64 @@ def validate_mentor_event(payload: object) -> dict:
     return result
 
 
+# Symbol catalog (final/symbols.csv) — the platform's authoritative per-broker
+# instrument list. Drives translation of mentor symbol names onto each
+# follower's broker and GET /v1/symbols for the app.
+SYMBOLS_CSV = Path(__file__).resolve().parent / "symbols.csv"
+
+
+def load_symbol_catalog():
+    catalog = {}  # group -> {broker: mt5_symbol}
+    by_name = {}  # mt5_symbol.lower() -> (broker, group)
+    try:
+        with SYMBOLS_CSV.open(newline="", encoding="utf-8-sig") as handle:
+            for row in csv.DictReader(handle):
+                broker = (row.get("broker") or "").strip()
+                group = (row.get("group") or "").strip()
+                symbol = (row.get("mt5_symbol") or "").strip()
+                if not (broker and group and symbol):
+                    continue
+                catalog.setdefault(group, {})[broker] = symbol
+                by_name[symbol.lower()] = (broker, group)
+    except OSError:
+        pass  # no CSV -> exact-name copying only
+    return catalog, by_name
+
+
+SYMBOL_CATALOG, SYMBOL_LOOKUP = load_symbol_catalog()
+
+
+def broker_from_server(server: str) -> str:
+    name = (server or "").strip().lower()
+    if name.startswith("weltrade"):
+        return "Weltrade"
+    if name.startswith("deriv"):
+        return "Deriv"
+    return ""
+
+
+def resolve_follower_symbol(db: sqlite3.Connection, login: str, server: str, symbol: str) -> str:
+    """Translate the mentor's symbol into the name this follower's broker uses.
+    1. Exact match in the follower's reported catalog (the norm: same-broker
+       copies share MT5 symbol names).
+    2. The symbol catalog: if the mentor's instrument belongs to a group the
+       follower's broker offers under a different name, use that name when the
+       follower's terminal reported it.
+    3. Otherwise pass through — the follower's EA reports the execution."""
+    if db.execute("SELECT 1 FROM prices WHERE login=? AND symbol=?", (login, symbol)).fetchone():
+        return symbol
+    entry = SYMBOL_LOOKUP.get(symbol.strip().lower())
+    if not entry:
+        return symbol
+    _source_broker, group = entry
+    target = SYMBOL_CATALOG.get(group, {}).get(broker_from_server(server))
+    if not target or target == symbol:
+        return symbol
+    if db.execute("SELECT 1 FROM prices WHERE login=? AND symbol=?", (login, target)).fetchone():
+        return target
+    return symbol
+
+
 def scale_follower_volume(db: sqlite3.Connection, follower: sqlite3.Row, symbol: str, event_volume: float) -> float:
     """Scale a mentor trade by the follower's volume_multiplier and clamp it to
     the broker volume limits that follower's terminal last reported (falling back
@@ -841,6 +900,14 @@ class BridgeHandler(BaseHTTPRequestHandler):
             if not row:
                 return self._send(404, {"error": "Unknown order."})
             return self._send(200, dict(row))
+        if parsed.path == "/v1/symbols":
+            if not client_authed(self.headers.get("Authorization", "")):
+                return self._send(401, {"error": "Unauthorized"})
+            by_broker = {}
+            for _group, brokers in SYMBOL_CATALOG.items():
+                for broker, symbol in brokers.items():
+                    by_broker.setdefault(broker, []).append(symbol)
+            return self._send(200, {"symbols": by_broker})
         if parsed.path == "/v1/commands/next":
             if not ea_authed(self.headers.get("Authorization", "")):
                 return self._send(401, {"error": "Unauthorized"})
@@ -998,16 +1065,17 @@ class BridgeHandler(BaseHTTPRequestHandler):
                 queued = 0
                 if event["event_type"] == "open":
                     followers = db.execute(
-                        "SELECT login,volume_multiplier FROM accounts WHERE mentor_id=? AND is_active=1 AND login!=?",
+                        "SELECT login,server,volume_multiplier FROM accounts WHERE mentor_id=? AND is_active=1 AND login!=?",
                         (event["mentor_id"], event["login"]),
                     ).fetchall()
                     for follower in followers:
-                        volume = scale_follower_volume(db, follower, event["symbol"], event["volume"])
+                        target_symbol = resolve_follower_symbol(db, follower["login"], follower["server"], event["symbol"])
+                        volume = scale_follower_volume(db, follower, target_symbol, event["volume"])
                         db.execute(
                             "INSERT INTO orders(id,login,symbol,order_type,volume,entry_price,tp_enabled,tp_distance,"
                             "sl_enabled,sl_distance,status,mentor_id,mentor_name,source_event_id,source_position_id,created_at,updated_at) "
                             "VALUES(?,?,?,?,?,0,?,?,?,?,'queued',?,?,?,?,?,?)",
-                            (str(uuid4()), follower["login"], event["symbol"],
+                            (str(uuid4()), follower["login"], target_symbol,
                              "MARKET_BUY" if event["side"] == "buy" else "MARKET_SELL", volume,
                              int(event.get("tp_enabled", False)), float(event.get("tp_distance", 0)),
                              int(event.get("sl_enabled", False)), float(event.get("sl_distance", 0)),

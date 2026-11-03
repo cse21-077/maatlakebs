@@ -556,8 +556,19 @@ void SendStatus()
 void ReportPrices()
 {
    string names[];
+   // Report every symbol the account shows in MarketWatch — covers each
+   // broker's full offering (Weltrade SynthX, Deriv synthetics, forex)
+   // under its own names; the bridge uses this catalog for volume
+   // clamping and per-broker symbol translation.
+   int visible = SymbolsTotal(true);
+   for(int vi = 0; vi < visible; vi++)
+      ArrayInsert(names, SymbolName(vi, true), ArraySize(names));
    ushort separator = StringGetCharacter(",", 0);
-   int count = StringSplit(ReportSymbols, separator, names);
+   string listed[];
+   if(StringSplit(ReportSymbols, separator, listed) > 0)
+      for(int li = 0; li < ArraySize(listed); li++)
+         ArrayInsert(names, listed[li], ArraySize(names));
+   int count = ArraySize(names);
    if(count <= 0)
       return;
 

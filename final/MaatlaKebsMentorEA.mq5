@@ -173,8 +173,16 @@ void SendStatus()
 void ReportPrices()
 {
    string names[];
+   // MarketWatch symbols — the account's full offering under its own names
+   int visible = SymbolsTotal(true);
+   for(int vi = 0; vi < visible; vi++)
+      ArrayInsert(names, SymbolName(vi, true), ArraySize(names));
    ushort separator = StringGetCharacter(",", 0);
-   int count = StringSplit(ReportSymbols, separator, names);
+   string listed[];
+   if(StringSplit(ReportSymbols, separator, listed) > 0)
+      for(int li = 0; li < ArraySize(listed); li++)
+         ArrayInsert(names, listed[li], ArraySize(names));
+   int count = ArraySize(names);
    if(count <= 0)
       return;
 

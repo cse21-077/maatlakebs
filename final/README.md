@@ -15,6 +15,15 @@ There is no separate "Bridge EA." The EA deployed to each VPS student profile is
 bridge SQLite database and terminal startup files. Use demo accounts on a
 controlled VPS only.
 
+## Synthetic symbols
+
+`symbols.csv` is the human-readable instrument catalog for choosing symbols in
+MT5 or the platform. Weltrade SynthX rows include the supplied instrument
+descriptions, floating spread, contract lot size, maximum leverage, and swaps.
+Deriv synthetic rows use their exact MT5 symbol names and distinct display
+labels; cells for broker specifications not supplied here are intentionally
+blank rather than estimated. Both EAs report these synthetic MT5 names.
+
 ## VPS layout
 
 - Bridge files and scripts: `C:\kebs\final`

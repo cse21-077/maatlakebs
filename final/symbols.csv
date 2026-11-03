@@ -1,0 +1,28 @@
+broker,group,mt5_symbol,display_label,description,spread,standard_lot_size_contracts,max_leverage,buy_swap,sell_swap,spec_source
+Weltrade,SynthX FX Vol,FX Vol 20,Weltrade SynthX - FX Vol 20,FX index with fixed volatility 20%,Floating,1,1:5000,2.00% p.a.,2.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX FX Vol,FX Vol 40,Weltrade SynthX - FX Vol 40,FX index with fixed volatility 40%,Floating,1,1:2500,4.00% p.a.,4.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX FX Vol,FX Vol 60,Weltrade SynthX - FX Vol 60,FX index with fixed volatility 60%,Floating,1,1:1667,6.00% p.a.,6.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX FX Vol,FX Vol 80,Weltrade SynthX - FX Vol 80,FX index with fixed volatility 80%,Floating,1,1:1250,8.00% p.a.,8.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX FX Vol,FX Vol 99,Weltrade SynthX - FX Vol 99,FX index with fixed volatility 99%,Floating,1,1:1000,10.00% p.a.,10.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX SFX Vol,SFX Vol 20,Weltrade SynthX - SFX Vol 20,FX index with up or down spikes at 30 min on average and fixed volatility 20%,Floating,1,1:500,6.50% p.a.,6.50% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX SFX Vol,SFX Vol 40,Weltrade SynthX - SFX Vol 40,FX index with up or down spikes at 30 min on average and fixed volatility 40%,Floating,1,1:250,13.00% p.a.,13.00% p.a.,User-provided Weltrade specifications
+Weltrade,SynthX SFX Vol,SFX Vol 60,Weltrade SynthX - SFX Vol 60,FX index with up or down spikes at 30 min on average and fixed volatility 60%,Floating,1,1:167,19.00% p.a.,19.00% p.a.,User-provided Weltrade specifications
+Deriv,Volatility Index,Volatility 10 Index,Deriv Synthetic - Volatility 10 Index,Volatility index,,,
+Deriv,Volatility Index,Volatility 25 Index,Deriv Synthetic - Volatility 25 Index,Volatility index,,,
+Deriv,Volatility Index,Volatility 50 Index,Deriv Synthetic - Volatility 50 Index,Volatility index,,,
+Deriv,Volatility Index,Volatility 75 Index,Deriv Synthetic - Volatility 75 Index,Volatility index,,,
+Deriv,Volatility Index,Volatility 100 Index,Deriv Synthetic - Volatility 100 Index,Volatility index,,,
+Deriv,Volatility 1s Index,Volatility 10 (1s) Index,Deriv Synthetic - Volatility 10 (1s) Index,Volatility index with 1-second ticks,,,
+Deriv,Volatility 1s Index,Volatility 25 (1s) Index,Deriv Synthetic - Volatility 25 (1s) Index,Volatility index with 1-second ticks,,,
+Deriv,Volatility 1s Index,Volatility 50 (1s) Index,Deriv Synthetic - Volatility 50 (1s) Index,Volatility index with 1-second ticks,,,
+Deriv,Volatility 1s Index,Volatility 75 (1s) Index,Deriv Synthetic - Volatility 75 (1s) Index,Volatility index with 1-second ticks,,,
+Deriv,Volatility 1s Index,Volatility 100 (1s) Index,Deriv Synthetic - Volatility 100 (1s) Index,Volatility index with 1-second ticks,,,
+Deriv,Boom/Crash Index,Boom 500 Index,Deriv Synthetic - Boom 500 Index,Boom synthetic index,,,
+Deriv,Boom/Crash Index,Boom 1000 Index,Deriv Synthetic - Boom 1000 Index,Boom synthetic index,,,
+Deriv,Boom/Crash Index,Crash 500 Index,Deriv Synthetic - Crash 500 Index,Crash synthetic index,,,
+Deriv,Boom/Crash Index,Crash 1000 Index,Deriv Synthetic - Crash 1000 Index,Crash synthetic index,,,
+Deriv,Step Index,Step Index 10,Deriv Synthetic - Step Index 10,Step synthetic index,,,
+Deriv,Step Index,Step Index 25,Deriv Synthetic - Step Index 25,Step synthetic index,,,
+Deriv,Step Index,Step Index 50,Deriv Synthetic - Step Index 50,Step synthetic index,,,
+Deriv,Step Index,Step Index 75,Deriv Synthetic - Step Index 75,Step synthetic index,,,
+Deriv,Step Index,Step Index 100,Deriv Synthetic - Step Index 100,Step synthetic index,,,

@@ -122,12 +122,14 @@ provisioned student terminal. Each slot receives its own `startup.ini` with that
 password, and broker server. Do not add student credentials to the master
 profile.
 
-Chart profile convention: save the profile on the master terminal **once** with
-all Deriv charts the Student EA should report (the EA covers 30 forex/metal
-symbols plus 19 synthetic indices by their MT5 full names). The bridge copies
-the chart into every slot under its own profile name (`Charts\Kebs` for
-students, `Charts\Mentor` for the mentor account) and launches MT5 with
-`/profile:<name>`, so each terminal deterministically opens the right chart —
+Chart profile convention: save the student profile on the master terminal
+**once** with all charts the Student EA should report (30 forex/metal symbols,
+19 Deriv synthetic indices, and Weltrade `FX Vol 20/40/60/80/99` plus
+`SFX Vol 20/40/60` symbols).
+The bridge copies the chart into every slot under its fixed profile name
+(`Charts\Kebs` for students, `Charts\Mentor` for the mentor account) and
+launches MT5 with `/profile:Kebs` or `/profile:Mentor`, so each terminal
+deterministically opens the right chart —
 MT5 never restores whatever profile was last active in the master. The bridge
 rewrites `EaToken` / `BridgeKey` inside the copied `.chr` at launch, migrating
 legacy `MentorToken` settings so the chart cannot retain stale credentials. Disconnecting an

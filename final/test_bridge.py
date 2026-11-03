@@ -12,6 +12,7 @@ import bridge
 
 
 BRIDGE_KEY = "test-bridge-key"
+REAL_ENSURE_TERMINAL = bridge.tm.ensure_terminal
 
 
 class BridgeTests(unittest.TestCase):
@@ -256,6 +257,93 @@ class BridgeTests(unittest.TestCase):
                 text = chart.read_text(encoding=encoding)
                 self.assertIn(f"EaToken={token}", text)
                 self.assertIn("Other=keep", text)
+
+    def test_terminal_role_uses_fixed_chart_profiles(self):
+        for role, expected_profile in (("student", "Kebs"), ("mentor", "Mentor")):
+            with self.subTest(role=role):
+                folder = Path(self.temp_dir.name) / f"profile-{role}"
+                folder.mkdir()
+                (folder / "terminal64.exe").write_text("fake")
+                installer = "_install_mentor_files" if role == "mentor" else "_install_student_files"
+                with patch.object(bridge.tm, "running_logins", return_value=set()), \
+                     patch.object(bridge.tm, installer), \
+                     patch.object(bridge.tm.subprocess, "Popen") as launch, \
+                     patch.object(bridge.tm, "LAUNCH_STAGGER_SEC", 0):
+                    launched, _ = REAL_ENSURE_TERMINAL({
+                        "login": "7654321",
+                        "password": "top-secret",
+                        "server": "Weltrade-Demo",
+                        "folder_path": str(folder),
+                        "role": role,
+                    })
+                self.assertTrue(launched)
+                self.assertIn(f"/profile:{expected_profile}", launch.call_args.args[0])
+
+    def test_chart_templates_install_under_fixed_profiles(self):
+        template_root = Path(self.temp_dir.name) / "templates"
+        student_template = template_root / "UnexpectedStudentFolder" / "chart01.chr"
+        mentor_template = template_root / "UnexpectedMentorFolder" / "chart01.chr"
+        student_template.parent.mkdir(parents=True)
+        mentor_template.parent.mkdir(parents=True)
+        student_template.write_text("[Experts]\r\nEaToken=old\r\n")
+        mentor_template.write_text(
+            "[Experts]\r\nBridgeKey=old\r\nMentorId=old-id\r\nMentorName=old-name\r\n"
+        )
+        folder = Path(self.temp_dir.name) / "profile-install"
+        with patch.object(bridge.tm, "CHART_TEMPLATE", str(student_template)), \
+             patch.object(bridge.tm, "MENTOR_CHART_TEMPLATE", str(mentor_template)), \
+             patch.object(bridge.tm, "MENTOR_BRIDGE_KEY", "replacement-bridge-key"), \
+             patch.dict(bridge.os.environ, {"MK_EA_TOKEN": "replacement-ea-token"}):
+            bridge.tm._install_student_files(folder, [])
+            bridge.tm._install_mentor_files(folder, {
+                "mentor_meta": {"mentor_id": "admin-weltrade", "mentor_name": "Admin weltrade"},
+            }, [])
+
+        student_chart = folder / "MQL5" / "Profiles" / "Charts" / "Kebs" / "chart01.chr"
+        mentor_chart = folder / "MQL5" / "Profiles" / "Charts" / "Mentor" / "chart01.chr"
+        self.assertTrue(student_chart.exists())
+        self.assertIn("EaToken=replacement-ea-token", student_chart.read_text())
+        self.assertTrue(mentor_chart.exists())
+        mentor_text = mentor_chart.read_text()
+        self.assertIn("BridgeKey=replacement-bridge-key", mentor_text)
+        self.assertIn("MentorId=admin-weltrade", mentor_text)
+        self.assertIn("MentorName=Admin weltrade", mentor_text)
+
+    def test_eas_include_available_core_and_report_weltrade_syntx(self):
+        repository = Path(__file__).parent
+        student_ea = (repository / "MaatlaKebsStudentEA.mq5").read_text()
+        self.assertIn('#include "MaatlaKebsStudentCore.mqh"', student_ea)
+        self.assertTrue((repository / "MaatlaKebsStudentCore.mqh").is_file())
+        expected_symbols = {
+            "FX Vol 20", "FX Vol 40", "FX Vol 60", "FX Vol 80", "FX Vol 99",
+            "SFX Vol 20", "SFX Vol 40", "SFX Vol 60",
+        }
+        for ea_name in ("MaatlaKebsStudentCore.mqh", "MaatlaKebsMentorEA.mq5"):
+            source = (repository / ea_name).read_text()
+            report_symbols = source.split('string ReportSymbols = "', 1)[1].split('"', 1)[0].split(",")
+            self.assertTrue(expected_symbols.issubset(report_symbols), ea_name)
+
+    def test_mentor_provision_passes_registered_identity_to_terminal(self):
+        self.register_mentor()
+        launched_accounts = []
+        with patch.object(
+            bridge.tm,
+            "ensure_terminal",
+            side_effect=lambda account: launched_accounts.append(account) or (True, "launched"),
+        ):
+            status, body = self.provision(
+                login="987654",
+                server="OtherBroker-Demo",
+                mentor_id="mentor-skud-01",
+                role="mentor",
+            )
+
+        self.assertEqual(status, 200, body)
+        self.assertEqual(launched_accounts[0]["role"], "mentor")
+        self.assertEqual(launched_accounts[0]["mentor_meta"], {
+            "mentor_id": "mentor-skud-01",
+            "mentor_name": "SkudTurbo",
+        })
 
     def test_explicit_ea_heartbeat_marks_matching_login_connected(self):
         self.provision()

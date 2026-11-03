@@ -1049,7 +1049,9 @@ class BridgeHandler(BaseHTTPRequestHandler):
                 credentials_changed = (
                     existing["password"] != account["password"] or existing["server"] != account["server"]
                 )
-                must_restart = credentials_changed or not existing["is_active"]
+                role_changed = role_provided and existing["role"] != account["role"]
+                mentor_changed = bool(account["mentor_id"]) and existing["mentor_id"] != account["mentor_id"]
+                must_restart = credentials_changed or role_changed or mentor_changed or not existing["is_active"]
                 if must_restart:
                     try:
                         tm.stop_account_terminal(existing["folder_path"])

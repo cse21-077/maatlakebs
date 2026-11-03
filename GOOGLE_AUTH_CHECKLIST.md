@@ -5,7 +5,7 @@
 ### 1. Frontend Code is Ready
 - **AuthScreen.tsx** has the Google button
 - **handleSocialLogin()** function calls `supabase.auth.signInWithOAuth()`
-- **Session management** in index.tsx handles OAuth flow correctly
+- **Session managehhment** in index.tsx handles OAuth flow correctly
 - **Supabase client** configured with `detectSessionInUrl: true`
 
 ### 2. Environment Variables Set

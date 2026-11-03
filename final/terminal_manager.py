@@ -28,6 +28,8 @@ TERMINALS_DIR = Path(_env("MK_TERMINALS_DIR", "SKUD_TERMINALS_DIR", default=r"C:
 MENTOR_BRIDGE_KEY = _env("MK_BRIDGE_KEY", "SKUD_BRIDGE_KEY")
 TERMINAL_MASTER = _env("MK_TERMINAL_MASTER", "SKUD_TERMINAL_MASTER", default=r"C:\kebs\mt5-master")
 LAUNCH_STAGGER_SEC = float(_env("MK_LAUNCH_STAGGER_SEC", "SKUD_LAUNCH_STAGGER_SEC", default="5"))
+STUDENT_PROFILE = "Kebs"
+MENTOR_PROFILE = "Mentor"
 
 
 def _read_text_any_encoding(raw: bytes) -> str:
@@ -329,10 +331,10 @@ def ensure_terminal(account: dict) -> tuple[bool, str]:
         )
         if role == "mentor":
             _install_mentor_files(folder, account, warnings)
-            profile = _chart_profile_name(MENTOR_CHART_TEMPLATE)
+            profile = MENTOR_PROFILE
         else:
             _install_student_files(folder, warnings)
-            profile = _chart_profile_name(CHART_TEMPLATE)
+            profile = STUDENT_PROFILE
         launch_args = [str(exe), "/portable", f"/config:{folder / 'startup.ini'}"]
         if profile:
             launch_args.append(f"/profile:{profile}")
@@ -350,7 +352,7 @@ def _install_student_files(folder: Path, warnings: list[str]) -> None:
     else:
         warnings.append("EA source not configured; compile and copy the EA manually")
     if CHART_TEMPLATE and Path(CHART_TEMPLATE).exists():
-        charts = folder / "MQL5" / "Profiles" / "Charts" / _chart_profile_name(CHART_TEMPLATE)
+        charts = folder / "MQL5" / "Profiles" / "Charts" / STUDENT_PROFILE
         charts.mkdir(parents=True, exist_ok=True)
         target_chart = charts / Path(CHART_TEMPLATE).name
         shutil.copy2(CHART_TEMPLATE, target_chart)
@@ -367,7 +369,7 @@ def _install_mentor_files(folder: Path, account: dict, warnings: list[str]) -> N
     else:
         warnings.append("mentor EA source not configured; compile and copy the Mentor EA manually")
     if MENTOR_CHART_TEMPLATE and Path(MENTOR_CHART_TEMPLATE).exists():
-        charts = folder / "MQL5" / "Profiles" / "Charts" / _chart_profile_name(MENTOR_CHART_TEMPLATE)
+        charts = folder / "MQL5" / "Profiles" / "Charts" / MENTOR_PROFILE
         charts.mkdir(parents=True, exist_ok=True)
         target_chart = charts / Path(MENTOR_CHART_TEMPLATE).name
         shutil.copy2(MENTOR_CHART_TEMPLATE, target_chart)

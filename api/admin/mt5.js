@@ -149,6 +149,25 @@ export default async function handler(req, res) {
     }
     const mentorId = mentorIdForBroker(broker);
 
+    let mentor;
+    try {
+      mentor = await bridgeFetch('/v1/mentors', {
+        method: 'POST',
+        body: { mentor_id: mentorId, mentor_name: `Admin ${broker}`, login: String(login), server },
+      });
+    } catch (err) {
+      if (err.code === 'BRIDGE_NOT_CONFIGURED') {
+        return res.status(503).json({ error: err.message });
+      }
+      return res.status(502).json({ error: 'MT5 bridge unreachable', details: err.message });
+    }
+
+    if (!mentor.ok) {
+      return res.status(mentor.status >= 400 && mentor.status < 600 ? mentor.status : 502).json({
+        error: mentor.data?.error || 'Bridge failed to register the mentor account',
+      });
+    }
+
     let bridge;
     try {
       bridge = await bridgeFetch('/v1/accounts', {
@@ -174,12 +193,6 @@ export default async function handler(req, res) {
         error: bridge.data?.error || 'Bridge failed to connect the account',
       });
     }
-
-    // Keep the mentor registered so it shows in the bridge's mentor list
-    bridgeFetch('/v1/mentors', {
-      method: 'POST',
-      body: { mentor_id: mentorId, mentor_name: `Admin ${broker}`, login: String(login), server },
-    }).catch((err) => console.warn('⚠️ Mentor registration best-effort failed:', err.message));
 
     // Persist server-side (replace an existing entry for the same login)
     const accounts = await readMentorAccounts(supabase);

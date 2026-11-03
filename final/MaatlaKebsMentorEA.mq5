@@ -9,11 +9,11 @@ input string BridgeKey = "";
 input int RetrySeconds = 2;
 input int ReportSeconds = 3;
 
-// Same Deriv coverage as the Student EA: forex, metals, and synthetic
-// indices (by their MT5 full names) feed the admin trade UI and
+// Forex, metals, Deriv synthetic indices, and Weltrade SynthX instruments
+// (by their MT5 full names) feed the admin trade UI and
 // the bridge volume_min/max/step clamps. Fixed constant on purpose, so a stale
 // chart profile can never resurrect old symbols.
-string ReportSymbols = "EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,AUDUSD,NZDUSD,EURGBP,EURJPY,GBPJPY,EURCHF,EURCAD,EURAUD,EURNZD,GBPCHF,GBPCAD,GBPAUD,GBPNZD,AUDJPY,AUDCHF,AUDCAD,AUDNZD,CADJPY,CADCHF,CHFJPY,NZDJPY,NZDCHF,NZDCAD,XAUUSD,XAGUSD,Volatility 10 Index,Volatility 25 Index,Volatility 50 Index,Volatility 75 Index,Volatility 100 Index,Volatility 10 (1s) Index,Volatility 25 (1s) Index,Volatility 50 (1s) Index,Volatility 75 (1s) Index,Volatility 100 (1s) Index,Boom 500 Index,Boom 1000 Index,Crash 500 Index,Crash 1000 Index,Step Index 10,Step Index 25,Step Index 50,Step Index 75,Step Index 100";
+string ReportSymbols = "EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,AUDUSD,NZDUSD,EURGBP,EURJPY,GBPJPY,EURCHF,EURCAD,EURAUD,EURNZD,GBPCHF,GBPCAD,GBPAUD,GBPNZD,AUDJPY,AUDCHF,AUDCAD,AUDNZD,CADJPY,CADCHF,CHFJPY,NZDJPY,NZDCHF,NZDCAD,XAUUSD,XAGUSD,Volatility 10 Index,Volatility 25 Index,Volatility 50 Index,Volatility 75 Index,Volatility 100 Index,Volatility 10 (1s) Index,Volatility 25 (1s) Index,Volatility 50 (1s) Index,Volatility 75 (1s) Index,Volatility 100 (1s) Index,Boom 500 Index,Boom 1000 Index,Crash 500 Index,Crash 1000 Index,Step Index 10,Step Index 25,Step Index 50,Step Index 75,Step Index 100,FX Vol 20,FX Vol 40,FX Vol 60,FX Vol 80,FX Vol 99,SFX Vol 20,SFX Vol 40,SFX Vol 60";
 
 string g_pending_events[];
 ulong g_last_status_ms = 0;

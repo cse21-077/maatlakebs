@@ -57,9 +57,11 @@ CLOSE_STATUSES = {"closed", "failed"}
 
 def connect_db(path: Path | None = None) -> sqlite3.Connection:
     path = path or DB_PATH
-    connection = sqlite3.connect(path, timeout=10)
+    connection = sqlite3.connect(path, timeout=30)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA journal_mode=WAL")
+    connection.execute("PRAGMA synchronous=NORMAL")
+    connection.execute("PRAGMA busy_timeout=30000")
     connection.execute(
         """CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY,

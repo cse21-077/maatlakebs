@@ -78,7 +78,14 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
         try {
             // Fetch relevant data in parallel for speed
             const [acctRes, payRes, riskRes, userRes] = await Promise.all([
-                supabase.from('student_accounts').select('mt5_login').eq('user_id', uid).eq('is_active', true).maybeSingle() as any,
+                supabase
+                    .from('student_accounts')
+                    .select('mt5_login')
+                    .eq('user_id', uid)
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .maybeSingle() as any,
                 supabase.from('payment_status').select('subscription_status, next_due').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('risk_profiles').select('*').eq('user_id', uid).maybeSingle() as any,
                 supabase.from('users').select('role').eq('id', uid).maybeSingle() as any,
@@ -88,9 +95,7 @@ export const MainApp = ({ session, onDisconnect }: Props) => {
                 setDbRole(userRes.data.role);
             }
 
-            if (acctRes.data) {
-                setMt5Login(acctRes.data.mt5_login);
-            }
+            setMt5Login(acctRes.data?.mt5_login || '');
 
             if (payRes.data) {
                 setPaymentStatus(isSubscriptionActive(payRes.data) ? 'CONFIRMED' : 'UNPAID');

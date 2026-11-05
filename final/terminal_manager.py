@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import threading
 import time
+import uuid
 from pathlib import Path
 
 def _env(*names, default=""):
@@ -231,6 +232,40 @@ def assign_slot(used_folders: set[str]) -> Path:
     return target
 
 
+def refresh_terminal_from_master(folder_path: str) -> None:
+    """Replace a managed slot with a clean copy of the current master terminal."""
+    root = TERMINALS_DIR.resolve()
+    target = Path(folder_path).resolve()
+    master = Path(TERMINAL_MASTER).resolve()
+    if target.parent != root:
+        raise ValueError(f"Refusing to refresh terminal outside the managed slots directory: {target}")
+    if master == target or root == master or root in master.parents:
+        raise ValueError("The master terminal must be separate from the managed slots directory.")
+    if not (master / "terminal64.exe").is_file():
+        raise RuntimeError(f"Master terminal is missing terminal64.exe: {master}")
+
+    stop_account_terminal(str(target))
+
+    suffix = uuid.uuid4().hex
+    staging = root.parent / f".{target.name}.refresh-{suffix}"
+    backup = root.parent / f".{target.name}.previous-{suffix}"
+    try:
+        shutil.copytree(master, staging, ignore=shutil.ignore_patterns("startup.ini"))
+        if target.exists():
+            target.rename(backup)
+        try:
+            staging.rename(target)
+        except OSError:
+            if backup.exists() and not target.exists():
+                backup.rename(target)
+            raise
+        if backup.exists():
+            shutil.rmtree(backup)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+
+
 def sync_chart_inputs(chart_path: Path, replacements: dict[str, str]) -> None:
     """Rewrite KEY=value lines inside a chart profile, preserving its encoding.
 
@@ -310,6 +345,10 @@ def ensure_terminal(account: dict) -> tuple[bool, str]:
         return True, "already running"
     folder = Path(account["folder_path"])
     exe = folder / "terminal64.exe"
+    try:
+        refresh_terminal_from_master(str(folder))
+    except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
+        return False, f"Could not refresh MT5 terminal from the master template: {exc}"[:200]
     if not exe.exists():
         return False, f"terminal64.exe not found in {folder}"
     role = str(account.get("role", "student") or "student")

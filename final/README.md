@@ -126,10 +126,18 @@ student slots directory.
    requires the compiled Student EA and saved chart to prevent starting empty
    student terminals.
 
-The Python bridge copies the compiled Student EA and chart file into each newly
-provisioned student terminal. Each slot receives its own `startup.ini` with that student's login,
+The Python bridge copies the compiled Student EA and chart file into each
+student terminal. Each slot receives its own `startup.ini` with that student's login,
 password, and broker server. Do not add student credentials to the master
 profile.
+
+Before starting a managed account, the bridge replaces its slot with a clean
+copy of the current master terminal. This refreshes MT5 options and terminal
+files while removing the previous account's local state. Student provisioning
+explicitly sets the account role to `student`, so a login previously provisioned
+as a mentor is relaunched with the student EA and chart. Apply terminal-option
+changes in the master and close it before the next launch/restart of managed
+accounts; slot-specific changes are discarded on each launch.
 
 Chart profile convention: save the student profile on the master terminal
 **once** with all charts the Student EA should report (30 forex/metal symbols,
@@ -142,8 +150,8 @@ deterministically opens the right chart —
 MT5 never restores whatever profile was last active in the master. The bridge
 rewrites `EaToken` / `BridgeKey` inside the copied `.chr` at launch, migrating
 legacy `MentorToken` settings so the chart cannot retain stale credentials. Disconnecting an
-account (bridge `…/deactivate`) stops the terminal **and** wipes the slot's
-saved charts, so the next login starts from a fresh template chart.
+account (bridge `…/deactivate`) stops the terminal and wipes its saved charts.
+The next launch replaces the entire slot from the current master template.
 
 ## 3. DNS, Caddy, and firewall
 

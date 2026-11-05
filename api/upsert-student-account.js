@@ -61,6 +61,60 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Disconnect is an update, not an upsert: omitting the password from an
+    // upsert can attempt to insert a row with a NULL encrypted_password.
+    if (is_active === false) {
+      const { data: account, error: accountError } = await supabase
+        .from('student_accounts')
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('mt5_login', mt5_login)
+        .eq('mt5_server', mt5_server)
+        .maybeSingle();
+
+      if (accountError) {
+        console.error('❌ Failed to find student account to disconnect:', accountError);
+        return res.status(500).json({ error: 'Failed to find account to disconnect' });
+      }
+      if (!account) {
+        return res.status(404).json({ error: 'Student account not found' });
+      }
+
+      const { bridgeFetch } = await import('./_lib/bridge.js');
+      try {
+        const bridge = await bridgeFetch(
+          `/v1/accounts/${encodeURIComponent(String(mt5_login))}/deactivate`,
+          { method: 'POST' }
+        );
+        if (!bridge.ok && bridge.status !== 404) {
+          console.error('❌ Bridge refused to deactivate student terminal:', bridge.data);
+          return res.status(502).json({
+            error: bridge.data?.error || 'Could not stop the MT5 terminal; account remains linked',
+          });
+        }
+      } catch (error) {
+        console.error('❌ Bridge unavailable while disconnecting student account:', error.message);
+        return res.status(error.code === 'BRIDGE_NOT_CONFIGURED' ? 503 : 502).json({
+          error: error.code === 'BRIDGE_NOT_CONFIGURED'
+            ? error.message
+            : 'Could not reach the MT5 bridge; account remains linked',
+        });
+      }
+
+      const { error: updateError } = await supabase
+        .from('student_accounts')
+        .update({ is_active: false })
+        .eq('id', account.id)
+        .eq('user_id', user_id);
+
+      if (updateError) {
+        console.error('❌ Failed to mark student account disconnected:', updateError);
+        return res.status(500).json({ error: 'MT5 terminal stopped, but account status could not be updated' });
+      }
+
+      return res.status(200).json({ success: true, is_active: false, terminal_stopped: true });
+    }
+
     const isValidUuid = (value) => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
     if (trader_id !== undefined && trader_id !== null && !isValidUuid(trader_id)) {
       console.warn('⚠️ Received invalid trader_id:', trader_id);
@@ -132,17 +186,6 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ Student account upserted successfully');
-
-    // Explicit disconnect (is_active:false) also stops the terminal on the
-    // bridge — the account row stays saved so the student can relink easily
-    if (is_active === false) {
-      try {
-        const { bridgeTry } = await import('./_lib/bridge.js');
-        await bridgeTry(`/v1/accounts/${encodeURIComponent(String(mt5_login))}/deactivate`, { method: 'POST' });
-      } catch (err) {
-        console.warn('⚠️ Could not stop bridge terminal on disconnect:', err.message);
-      }
-    }
 
     res.status(200).json({ success: true, data });
 

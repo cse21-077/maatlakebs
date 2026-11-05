@@ -266,6 +266,7 @@ class BridgeTests(unittest.TestCase):
                 (folder / "terminal64.exe").write_text("fake")
                 installer = "_install_mentor_files" if role == "mentor" else "_install_student_files"
                 with patch.object(bridge.tm, "running_logins", return_value=set()), \
+                     patch.object(bridge.tm, "refresh_terminal_from_master"), \
                      patch.object(bridge.tm, installer), \
                      patch.object(bridge.tm.subprocess, "Popen") as launch, \
                      patch.object(bridge.tm, "LAUNCH_STAGGER_SEC", 0):
@@ -278,6 +279,33 @@ class BridgeTests(unittest.TestCase):
                     })
                 self.assertTrue(launched)
                 self.assertIn(f"/profile:{expected_profile}", launch.call_args.args[0])
+
+    def test_terminal_refresh_replaces_slot_with_current_master(self):
+        root = Path(self.temp_dir.name)
+        managed = root / "managed-terminals"
+        master = root / "master-terminal"
+        slot = managed / "Slot001"
+        (master / "config").mkdir(parents=True)
+        (master / "MQL5" / "Profiles" / "Charts" / "Kebs").mkdir(parents=True)
+        (master / "terminal64.exe").write_text("current terminal")
+        (master / "config" / "options.ini").write_text("current options")
+        (master / "MQL5" / "Profiles" / "Charts" / "Kebs" / "chart01.chr").write_text("current chart")
+        slot.mkdir(parents=True)
+        (slot / "terminal64.exe").write_text("old terminal")
+        (slot / "old-account.dat").write_text("stale account data")
+        (slot / "startup.ini").write_text("stale credentials")
+
+        with patch.object(bridge.tm, "TERMINALS_DIR", managed), \
+             patch.object(bridge.tm, "TERMINAL_MASTER", master), \
+             patch.object(bridge.tm, "stop_account_terminal") as stop_terminal:
+            bridge.tm.refresh_terminal_from_master(str(slot))
+
+        stop_terminal.assert_called_once_with(str(slot.resolve()))
+        self.assertEqual((slot / "terminal64.exe").read_text(), "current terminal")
+        self.assertEqual((slot / "config" / "options.ini").read_text(), "current options")
+        self.assertTrue((slot / "MQL5" / "Profiles" / "Charts" / "Kebs" / "chart01.chr").exists())
+        self.assertFalse((slot / "old-account.dat").exists())
+        self.assertFalse((slot / "startup.ini").exists())
 
     def test_chart_templates_install_under_fixed_profiles(self):
         template_root = Path(self.temp_dir.name) / "templates"
@@ -747,6 +775,24 @@ class BridgeTests(unittest.TestCase):
         status, body = self.request("/v1/accounts", token=BRIDGE_KEY)
         accounts = {row["login"]: row for row in json.loads(body)["accounts"]}
         self.assertEqual(accounts["123456"]["role"], "mentor")
+
+    def test_explicit_student_role_replaces_existing_mentor_role(self):
+        self.assertEqual(self.provision(role="mentor")[0], 200)
+        with bridge.db_session() as db:
+            folder_path = db.execute(
+                "SELECT folder_path FROM accounts WHERE login='123456'"
+            ).fetchone()["folder_path"]
+
+        with patch.object(bridge.tm, "stop_account_terminal") as stop_terminal:
+            status, body = self.provision(role="student")
+
+        self.assertEqual(status, 200, body)
+        stop_terminal.assert_called_once_with(folder_path)
+        with bridge.db_session() as db:
+            role = db.execute(
+                "SELECT role FROM accounts WHERE login='123456'"
+            ).fetchone()["role"]
+        self.assertEqual(role, "student")
 
     def test_mentor_register_with_password_creates_mentor_account(self):
         with patch.object(bridge.tm, "ensure_terminal", return_value=(True, "launched")) as ensure:

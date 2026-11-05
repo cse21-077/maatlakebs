@@ -61,6 +61,7 @@ export default async function handler(req, res) {
           login: String(account.mt5_login),
           password: account.encrypted_password,
           server: account.mt5_server,
+          role: 'student',
         },
         timeoutMs: 60000, // slot clone + terminal launch can be slow
       });

@@ -170,18 +170,25 @@ void SendStatus()
    SendRequestTo("/v1/terminal/status", body, response, status);
 }
 
+void AppendSymbolName(string &names[], const string name)
+{
+   int n = ArraySize(names);
+   ArrayResize(names, n + 1);
+   names[n] = name;
+}
+
 void ReportPrices()
 {
    string names[];
    // MarketWatch symbols — the account's full offering under its own names
    int visible = SymbolsTotal(true);
    for(int vi = 0; vi < visible; vi++)
-      ArrayInsert(names, SymbolName(vi, true), ArraySize(names));
+      AppendSymbolName(names, SymbolName(vi, true));
    ushort separator = StringGetCharacter(",", 0);
    string listed[];
    if(StringSplit(ReportSymbols, separator, listed) > 0)
       for(int li = 0; li < ArraySize(listed); li++)
-         ArrayInsert(names, listed[li], ArraySize(names));
+         AppendSymbolName(names, listed[li]);
    int count = ArraySize(names);
    if(count <= 0)
       return;

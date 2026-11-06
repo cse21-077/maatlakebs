@@ -831,6 +831,31 @@ class BridgeTests(unittest.TestCase):
             "login": "555222", "server": "OtherBroker-Demo", "password": "12345",
         })[0], 400)
 
+    def test_legacy_admin_mentor_can_migrate_to_branded_id_for_same_account(self):
+        legacy = self.request("/v1/mentors", "POST", BRIDGE_KEY, {
+            "mentor_id": "admin-weltrade",
+            "mentor_name": "Admin weltrade",
+            "login": "987654",
+            "server": "Weltrade-Demo",
+        })
+        self.assertEqual(legacy[0], 200)
+
+        branded = self.request("/v1/mentors", "POST", BRIDGE_KEY, {
+            "mentor_id": "Maatlakebs-weltrade",
+            "mentor_name": "Maatlakebs-weltrade",
+            "login": "987654",
+            "server": "Weltrade-Demo",
+        })
+        self.assertEqual(branded[0], 200, branded[1])
+
+        unrelated = self.request("/v1/mentors", "POST", BRIDGE_KEY, {
+            "mentor_id": "other-weltrade",
+            "mentor_name": "Other mentor",
+            "login": "987654",
+            "server": "Weltrade-Demo",
+        })
+        self.assertEqual(unrelated[0], 409)
+
     def test_assign_unassign_mentor_endpoint(self):
         self.provision(login="123456")
         self.register_mentor()

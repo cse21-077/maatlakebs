@@ -3,10 +3,10 @@
  *
  * POST /api/provision-terminal  { user_id }
  *
- * The bridge (final/bridge.py on the Windows VPS) clones a terminal slot,
- * installs the Student EA, writes startup.ini and launches MT5. Copying does
- * NOT start here — the account is enrolled without a mentor assignment; an
- * admin approves payment and assigns the mentor separately.
+ * The bridge (final/bridge.py on the Windows VPS) refreshes a terminal slot
+ * from the master, installs the Student EA, writes startup.ini and launches
+ * MT5. Paid students are assigned to the currently configured mentor for the
+ * account's broker.
  */
 
 export default async function handler(req, res) {
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     // The account that should be running: the user's active one
     const { data: accounts, error: queryError } = await supabase
       .from('student_accounts')
-      .select('id, mt5_login, mt5_server, encrypted_password, folder_path')
+      .select('id, user_id, mt5_login, mt5_server, encrypted_password, folder_path, trader_id')
       .eq('user_id', user_id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -51,7 +51,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Account has no password stored; re-enter MT5 credentials' });
     }
 
-    const { bridgeFetch } = await import('./_lib/bridge.js');
+    const {
+      bridgeFetch,
+      defaultMentorId,
+      detectBroker,
+      DEFAULT_MENTOR_ID,
+    } = await import('./_lib/bridge.js');
 
     let bridge;
     try {
@@ -88,6 +93,69 @@ export default async function handler(req, res) {
         .from('student_accounts')
         .update({ folder_path: folderPath })
         .eq('id', account.id);
+    }
+
+    const { data: payment, error: paymentError } = await supabase
+      .from('payment_status')
+      .select('subscription_status')
+      .eq('user_id', account.user_id)
+      .maybeSingle();
+
+    if (paymentError) {
+      console.error('❌ Failed to check payment status before mentor assignment:', paymentError);
+      return res.status(500).json({ error: 'Terminal provisioned, but payment status could not be checked' });
+    }
+
+    if (payment?.subscription_status === 'active') {
+      const { data: mentorConfig, error: mentorConfigError } = await supabase
+        .from('system_flags')
+        .select('value')
+        .eq('key', 'admin_mt5_mentors')
+        .maybeSingle();
+
+      if (mentorConfigError) {
+        console.error('❌ Failed to read configured admin mentors:', mentorConfigError);
+        return res.status(500).json({ error: 'Terminal provisioned, but the active mentor could not be determined' });
+      }
+
+      let configuredMentors = [];
+      try {
+        const parsed = JSON.parse(mentorConfig?.value || '{}');
+        configuredMentors = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+      } catch (error) {
+        console.error('❌ Invalid admin mentor configuration:', error);
+        return res.status(500).json({ error: 'Terminal provisioned, but the admin mentor configuration is invalid' });
+      }
+
+      const broker = detectBroker(account.mt5_server);
+      const configuredMentor = configuredMentors.find((mentor) => mentor.broker === broker);
+      const mentorId = configuredMentor?.mentor_id
+        || (account.trader_id && account.trader_id !== DEFAULT_MENTOR_ID ? account.trader_id : null)
+        || defaultMentorId();
+
+      let assignment;
+      try {
+        assignment = await bridgeFetch(
+          `/v1/accounts/${encodeURIComponent(String(account.mt5_login))}/mentor`,
+          {
+            method: 'POST',
+            body: { mentor_id: mentorId, volume_multiplier: 1 },
+          }
+        );
+      } catch (error) {
+        console.error(`❌ Failed to assign mentor ${mentorId} to student ${account.mt5_login}:`, error.message);
+        return res.status(502).json({
+          error: 'Terminal provisioned, but the mentor assignment failed',
+          details: error.message,
+        });
+      }
+
+      if (!assignment.ok) {
+        console.error(`❌ Bridge rejected mentor assignment for ${account.mt5_login}:`, assignment.data);
+        return res.status(assignment.status >= 400 && assignment.status < 600 ? assignment.status : 502).json({
+          error: assignment.data?.error || 'Terminal provisioned, but the mentor assignment failed',
+        });
+      }
     }
 
     console.log(`✅ Terminal provisioned for login ${account.mt5_login}:`, folderPath);

@@ -996,7 +996,14 @@ class BridgeHandler(BaseHTTPRequestHandler):
                     "SELECT mentor_id FROM mentors WHERE login=? AND server=? AND mentor_id!=?",
                     (mentor["login"], mentor["server"], mentor["mentor_id"]),
                 ).fetchone()
-                if conflict:
+                broker = broker_from_server(mentor["server"]).lower()
+                is_legacy_admin_migration = (
+                    broker in {"weltrade", "deriv"}
+                    and conflict
+                    and conflict["mentor_id"] == f"admin-{broker}"
+                    and mentor["mentor_id"] == f"Maatlakebs-{broker}"
+                )
+                if conflict and not is_legacy_admin_migration:
                     return self._send(409, {"error": "This MT5 login/server is already registered to another mentor."})
                 db.execute(
                     "INSERT INTO mentors(mentor_id,mentor_name,login,server,token_hash,is_active,created_at,updated_at) "

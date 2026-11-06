@@ -3,7 +3,7 @@
  *
  * The admin connects one account per broker (Weltrade + Deriv). Each is
  * registered on the bridge with role "mentor" and its own mentor id
- * (admin-weltrade / admin-deriv); every trade made on the account (from any
+ * (Maatlakebs-weltrade / Maatlakebs-deriv); every trade made on the account (from any
  * MT5 logged into it) is copied to students assigned to that mentor.
  * Students are assigned by broker match when their payment is approved
  * (see api/admin/students.js POST).
@@ -153,7 +153,7 @@ export default async function handler(req, res) {
     try {
       mentor = await bridgeFetch('/v1/mentors', {
         method: 'POST',
-        body: { mentor_id: mentorId, mentor_name: `Admin ${broker}`, login: String(login), server },
+        body: { mentor_id: mentorId, mentor_name: mentorId, login: String(login), server },
       });
     } catch (err) {
       if (err.code === 'BRIDGE_NOT_CONFIGURED') {
@@ -224,12 +224,22 @@ export default async function handler(req, res) {
           .eq('is_active', true)
           .ilike('mt5_server', prefix);
 
-        for (const acct of brokerAccounts || []) {
-          bridgeFetch(`/v1/accounts/${encodeURIComponent(String(acct.mt5_login))}/mentor`, {
-            method: 'POST',
-            body: { mentor_id: mentorId, volume_multiplier: 1 },
-          }).catch((err) => console.warn(`⚠️ Backfill mentor assign failed for ${acct.mt5_login}:`, err.message));
-        }
+        await Promise.all((brokerAccounts || []).map(async (acct) => {
+          try {
+            const assigned = await bridgeFetch(
+              `/v1/accounts/${encodeURIComponent(String(acct.mt5_login))}/mentor`,
+              {
+                method: 'POST',
+                body: { mentor_id: mentorId, volume_multiplier: 1 },
+              }
+            );
+            if (!assigned.ok) {
+              console.warn(`⚠️ Backfill mentor assign failed for ${acct.mt5_login}:`, assigned.data?.error);
+            }
+          } catch (err) {
+            console.warn(`⚠️ Backfill mentor assign failed for ${acct.mt5_login}:`, err.message);
+          }
+        }));
       }
     } catch (err) {
       console.warn('⚠️ Broker mentor backfill failed:', err.message);
